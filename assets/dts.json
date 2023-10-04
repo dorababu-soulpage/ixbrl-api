@@ -1,0 +1,85 @@
+{
+  "DTS": [
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "link",
+      "file, href or role definition": "http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
+      "namespace URI": "http://www.xbrl.org/2003/linkbase"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "dei",
+      "file, href or role definition": "https://xbrl.sec.gov/dei/2023/dei-2023.xsd",
+      "namespace URI": "http://xbrl.sec.gov/dei/2023"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "us-gaap",
+      "file, href or role definition": "https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd",
+      "namespace URI": "http://fasb.org/us-gaap/2023"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "us-types",
+      "file, href or role definition": "https://xbrl.fasb.org/us-gaap/2023/elts/us-types-2023.xsd",
+      "namespace URI": "http://fasb.org/us-types/2023"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "dtr-types",
+      "file, href or role definition": "https://www.xbrl.org/dtr/type/2022-03-31/types.xsd",
+      "namespace URI": "http://www.xbrl.org/dtr/type/2022-03-31"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "country",
+      "file, href or role definition": "https://xbrl.sec.gov/country/2023/country-2023.xsd",
+      "namespace URI": "http://xbrl.sec.gov/country/2023"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "srt",
+      "file, href or role definition": "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd",
+      "namespace URI": "http://fasb.org/srt/2023"
+    },
+    {
+      "specification": "import",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "srt-types",
+      "file, href or role definition": "https://xbrl.fasb.org/srt/2023/elts/srt-types-2023.xsd",
+      "namespace URI": "http://fasb.org/srt-types/2023"
+    },
+    {
+      "specification": "extension",
+      "file type": "schema",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "mays",
+      "file, href or role definition": "mays-20230430.xsd",
+      "namespace URI": "http://mays.com/20230430"
+    },
+    {
+      "specification": "extension",
+      "file type": "linkbase",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "presentation",
+      "file, href or role definition": "mays-20230430_pre.xml"
+    },
+    {
+      "specification": "extension",
+      "file type": "linkbase",
+      "prefix (schema)\ntype (linkbase)\nargument (other)": "label",
+      "file, href or role definition": "mays-20230430_lab.xml"
+    },
+    {
+      "specification": "extension",
+      "file type": "role",
+      "file, href or role definition": "00000001 - Document - Cover",
+      "namespace URI": "http://mays.com/role/Cover"
+    }
+  ]
+}
