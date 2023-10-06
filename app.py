@@ -10,7 +10,7 @@ from utils import (
     extract_html_elements,
     add_html_elements_to_concept,
     generate_concepts_dts_sheet,
-    generate_ix_header
+    generate_ix_header,get_db_record
 )
 from flask import Flask, request, redirect, url_for
 
@@ -136,6 +136,7 @@ def ixbrl_viewer_file_generation():
 def generate_xml_files():
     html = request.args.get("html", None)
     xlsx = request.args.get("xlsx", None)
+    file_id = request.args.get("file_id", None)
 
     filepath = f"{storage_dir}/DTS/{xlsx}"
     out_dir = f"{storage_dir}/{Path(html).stem}"
@@ -162,7 +163,7 @@ def generate_xml_files():
 
             # Create a new div element
             div_element = soup.new_tag('div', style="display: none")
-            ix_header = generate_ix_header()
+            ix_header = generate_ix_header(file_id=file_id)
             div_element.append(BeautifulSoup(ix_header, 'html.parser'))
 
             # Insert the div element as the first child of the body
@@ -178,15 +179,22 @@ def generate_xml_files():
 
 @app.route("/api/html", methods=["GET", "POST"])
 def read_html_tagging_file():
-    html_file = request.json.get("html")
-    url_path = Path(html_file)
-    # Use the name attribute to get the file name
-    file_name = f"{url_path.stem}.xlsx"
-    xlsx_file = f"{storage_dir}/DTS/{file_name}"
-    html_elements = extract_html_elements(html_file)
-    add_html_elements_to_concept(html_elements)
-    generate_concepts_dts_sheet(xlsx_file)
-    return redirect(url_for("generate_xml_files", html=html_file, xlsx=file_name))
+    # html_file = request.json.get("html")
+    file_id = request.json.get("file_id")
+    record = get_db_record(file_id = file_id)
+    extra = record.get("extra", None)
+    if extra is not None:
+        html_file = extra.get("url")
+        url_path = Path(html_file)
+        # Use the name attribute to get the file name
+        file_name = f"{url_path.stem}.xlsx"
+        xlsx_file = f"{storage_dir}/DTS/{file_name}"
+        html_elements = extract_html_elements(html_file)
+        add_html_elements_to_concept(html_elements)
+        generate_concepts_dts_sheet(xlsx_file)
+        return redirect(url_for("generate_xml_files", file_id = file_id, html=html_file, xlsx=file_name))
+    else:
+        return {"error":"html file Not found"}, 400
 
 
 if __name__ == "__main__":
