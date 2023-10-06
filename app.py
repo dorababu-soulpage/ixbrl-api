@@ -5,10 +5,12 @@ import io, os, requests
 from pathlib import Path
 from decouple import config
 from urllib.parse import urlsplit
-from conepts_dts import (
+from bs4 import BeautifulSoup
+from utils import (
     extract_html_elements,
     add_html_elements_to_concept,
     generate_concepts_dts_sheet,
+    generate_ix_header
 )
 from flask import Flask, request, redirect, url_for
 
@@ -154,7 +156,22 @@ def generate_xml_files():
 
         # Write the content to a local file
         with open(file_name, "w") as file:
-            file.write(html_content)
+
+            # Parse the HTML document
+            soup = BeautifulSoup(html_content, 'html.parser')
+
+            # Create a new div element
+            div_element = soup.new_tag('div', style="display: none")
+            ix_header = generate_ix_header()
+            div_element.append(BeautifulSoup(ix_header, 'html.parser'))
+
+            # Insert the div element as the first child of the body
+            body = soup.body
+            body.insert(0, div_element)
+
+            # Convert the modified soup object back to a string
+            modified_html = str(soup.prettify())
+            file.write(modified_html)
 
     return redirect(url_for("ixbrl_viewer_file_generation", file_path=out_dir))
 
