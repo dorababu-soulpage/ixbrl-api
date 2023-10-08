@@ -16,6 +16,25 @@ dts_file = "assets/dts.json"
 concepts_file = "assets/concepts.json"
 taxonomy_file = "assets/GAAP_Taxonomy_2023.xlsx"
 
+
+def get_unique_context_elements(file):
+    # Send an HTTP GET request to the URL
+    response = requests.get(file)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse the HTML content using BeautifulSoup
+        html_content = response.text
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+
+        unique_contexts = {tag for tag in tags if any(element.startswith("c") for element in tag.split("_"))}
+        return unique_contexts
+    
+        
+
 # Read "Concepts" and "DTS" data from JSON files
 DTS = read_json_file(dts_file, "DTS")
 concepts = read_json_file(concepts_file, "Concepts")[0]
@@ -114,6 +133,7 @@ def extract_html_elements(file):
 
         # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        TAXONOMY_IDS = tags
 
         # Extract and print the attribute values
         for element in tags:
@@ -154,10 +174,6 @@ def get_db_record(file_id):
         if connection:
             connection.close()
 
-
-
-
-
 def get_cik(value):
     original_string = "0000000000"  # Original string with 10 zeros
     value_to_insert = value
@@ -179,6 +195,132 @@ def get_cik(value):
     return updated_string
 
 
+def date_formate(input_date):
+    from datetime import datetime
+
+    # Convert the input date to the "YYYY-MM-DD" format
+    formatted_date = datetime.strptime(input_date, "%Y%m%d").strftime("%Y-%m-%d")
+    return formatted_date
+
+def check_first_two_numbers_or_not(filtered_list):
+    # Attempt to convert the first two values to integers
+    try:
+        first_value = int(filtered_list[0].replace("c", ""))
+        second_value = int(filtered_list[1])
+        return True
+    except ValueError:
+        return False
+    
+def duration_xml(resources, from_, to_):
+    # Create the dutation_context element
+    dutation_context = ET.SubElement(resources, "xbrli:context", id=f"From{from_}{to_}")
+    # Create xbrli:entity element and its child elements
+    entity = ET.SubElement(dutation_context, "xbrli:entity")
+    identifier = ET.SubElement(entity, "xbrli:identifier")
+    identifier.set("scheme", "http://www.sec.gov/CIK")
+    identifier.text = "0000012345"
+
+    # Create xbrli:period element and its child elements
+    period = ET.SubElement(dutation_context, "xbrli:period")
+    startdate = ET.SubElement(period, "xbrli:startdate")
+    startdate.text = date_formate(from_)
+    enddate = ET.SubElement(period, "xbrli:enddate")
+    enddate.text = date_formate(to_)
+
+def instance_xml(resources, from_):
+     # Create the instance_context element
+    instance_context = ET.SubElement(resources, "xbrli:context", id=f"AsOf{from_}")
+    # Create xbrli:entity element and its child elements
+    entity = ET.SubElement(instance_context, "xbrli:entity")
+    identifier = ET.SubElement(entity, "xbrli:identifier")
+    identifier.set("scheme", "http://www.sec.gov/CIK")
+    identifier.text = "0000012345"
+
+    # Create xbrli:period element and its child elements
+    period = ET.SubElement(instance_context, "xbrli:period")
+    instant = ET.SubElement(period, "xbrli:instant")
+    instant.text = date_formate(from_)
+
+
+def check_dimension(items):
+    # Use a list comprehension to check if any item ends with "Member"
+    has_member = any(item.endswith("Member") for item in items)
+
+    if has_member:
+        return True
+    else:
+       return False
+
+
+def duration_dimension_xml(resources, from_, to_,items):
+    dimensions = list()
+    members = list()
+    for item in items:
+        if item.startswith("us-gaap") and not item.endswith("Member"):
+            dimensions.append(item)
+        if item.endswith("Member"):
+            members.append(item)
+    context_id = f"From{date_formate(from_)}{date_formate(to_)}"
+    for member in members:
+        context_id+= f"_{member}".replace("--", "_")
+    # Create the root element
+    duration_dimension_context = ET.SubElement(resources, "xbrli:context", id =context_id)
+
+    # Create xbrli:entity element and its child elements
+    entity = ET.SubElement(duration_dimension_context, "xbrli:entity")
+    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier.text = "0000012345"
+
+    # Create xbrli:segment element and its child elements
+    segment = ET.SubElement(entity, "xbrli:segment")
+
+    for dimension, member in zip(dimensions, members):
+        explicit_member1 = ET.SubElement(segment, "xbrldi:explicitMember", dimension=f"{dimension}".replace("--",":"))
+        explicit_member1.text = f"{member}".replace("--", ":")
+
+    # Create xbrli:period element and its child elements
+    period = ET.SubElement(duration_dimension_context, "xbrli:period")
+    start_date = ET.SubElement(period, "xbrli:startDate")
+    start_date.text = date_formate(from_)
+    end_date = ET.SubElement(period, "xbrli:endDate")
+    end_date.text = date_formate(to_)
+
+
+def instance_dimension_xml(resources, from_, items):
+    dimensions = list()
+    members = list()
+    for item in items:
+        if item.startswith("us-gaap") and not item.endswith("Member"):
+            dimensions.append(item)
+        if item.endswith("Member"):
+            members.append(item)
+    context_id = f"AsOf{date_formate(from_)}"
+    for member in members:
+        context_id+= f"{member}".replace("--", ":")
+    # Create the root element
+    instance_dimension_context = ET.SubElement(resources, "xbrli:context", id =context_id)
+
+    # Create xbrli:entity element and its child elements
+    entity = ET.SubElement(instance_dimension_context, "xbrli:entity")
+    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier.text = "0000012345"
+
+    # Create xbrli:segment element and its child elements
+    segment = ET.SubElement(entity, "xbrli:segment")
+
+    explicit_member = ET.SubElement(segment, "xbrldi:explicitmember", dimension="us-gaap:AcceleratedShareRepurchasesDateAxis")
+    explicit_member.text = "us-gaap:AboveMarketLeasesMember"
+
+    for dimension, member in zip(dimensions, members):
+        explicit_member1 = ET.SubElement(segment, "xbrldi:explicitMember", dimension=f"{dimension}".replace("--",":"))
+        explicit_member1.text = f"{member}".replace("--", ":")
+
+    # Create xbrli:period element and its child elements
+    period = ET.SubElement(instance_dimension_context, "xbrli:period")
+    instant = ET.SubElement(period, "xbrli:instant")
+    instant.text = f"{date_formate(from_)}"
+
+
 
 def generate_ix_header(file_id=None):
 
@@ -190,6 +332,7 @@ def generate_ix_header(file_id=None):
     period_to_ = record.get("periodTo", None)
     period_from = period_from_.strftime("%Y-%m-%d")
     period_to = period_to_.strftime("%Y-%m-%d")
+    html_file = record.get("extra").get("url", "")
 
 
     units = record.get("unit", [])
@@ -201,23 +344,9 @@ def generate_ix_header(file_id=None):
 
     schema_ref_xlink_href = "mays-20230430.xsd"
 
-    # context_id=f"From{period_from_}to{period_to}"
-    # identifier_text =get_cik(cik)
-    # start_date_text = "2023-02-01"
-    # end_date_text = "2023-04-30"
-
-    # unit_usd_id = "USD"
-    # measure_usd_text = "iso4217:USD"
-
-    # unit_shares_id = "Shares"
-    # measure_shares_text = "xbrli:shares"
-
-    # unit_usd_p_shares_id = "USDPShares"
-    # measure_usd_numerator_text = "iso4217:USD"
-    # measure_shares_denominator_text = "xbrli:shares"
-
-
-
+    context_id=f"From{period_from_}to{period_to}"
+    identifier_text =get_cik(cik)
+ 
     # Create the root element
     root = ET.Element("ix:header")
 
@@ -239,23 +368,42 @@ def generate_ix_header(file_id=None):
 
     # Create the 'ix:resources' element
     resources = ET.SubElement(root, "ix:resources")
-
-    # todo create context
-
     # Create the 'xbrli:context' element within 'ix:resources'
-    # context = ET.SubElement(resources, "xbrli:context", id=context_id)
+    context = ET.SubElement(resources, "xbrli:context", id=context_id)
+    # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
+    entity = ET.SubElement(context, "xbrli:entity")
+    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier.text = identifier_text
 
-    # # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
-    # entity = ET.SubElement(context, "xbrli:entity")
-    # identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
-    # identifier.text = identifier_text
-
-    # # Create the 'xbrli:period' element within 'xbrli:context'
-    # period = ET.SubElement(context, "xbrli:period")
-    # start_date = ET.SubElement(period, "xbrli:startDate")
-    # start_date.text = start_date_text
-    # end_date = ET.SubElement(period, "xbrli:endDate")
-    # end_date.text = end_date_text
+    # Create the 'xbrli:period' element within 'xbrli:context'
+    period = ET.SubElement(context, "xbrli:period")
+    start_date = ET.SubElement(period, "xbrli:startDate")
+    start_date.text = "start_date_text"
+    end_date = ET.SubElement(period, "xbrli:endDate")
+    end_date.text = "end_date_text"
+    unique_contexts = get_unique_context_elements(html_file)
+    for context in unique_contexts:
+        elements = context.split("_")
+        for element in elements:
+            if element.startswith("c"):
+                req_list = elements[elements.index(element):-1]
+                # Remove empty values (empty strings) from the list
+                filtered_list = [item for item in req_list if item]
+                if len(filtered_list) >= 2:
+                    result = check_first_two_numbers_or_not(filtered_list[:2])
+                    # if True duration else instance
+                    from_ = filtered_list[0].replace("c","")
+                    to_ = filtered_list[1]
+                    if result:
+                        duration_dimension = check_dimension(filtered_list)
+                        if duration_dimension:
+                            duration_dimension_xml(resources, from_, to_,filtered_list)
+                        duration_xml(resources, from_, to_)
+                    else:
+                        instance_dimension = check_dimension(filtered_list)
+                        if instance_dimension:
+                            instance_dimension_xml(resources, from_,filtered_list)
+                        instance_xml(resources, from_)
 
     # create unit tags 
     for unit in units:
@@ -282,7 +430,6 @@ def generate_ix_header(file_id=None):
 
     # Create an ElementTree object and serialize it to a string
     xml_str = ET.tostring(root,encoding="utf-8").decode("utf-8")
-    print(xml_str)
     soup = BeautifulSoup(xml_str, 'html.parser')
     print(soup.prettify())
     # return xml_str
