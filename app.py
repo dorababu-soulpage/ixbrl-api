@@ -10,7 +10,9 @@ from utils import (
     extract_html_elements,
     add_html_elements_to_concept,
     generate_concepts_dts_sheet,
-    generate_ix_header,get_db_record
+    generate_ix_header,get_db_record,
+    initialize_concepts_dts,
+    get_filename
 )
 from flask import Flask, request, redirect, url_for
 
@@ -132,6 +134,8 @@ def ixbrl_viewer_file_generation():
         return {"error": str(e)}, 400
 
 
+
+
 @app.route("/api/xml-files")
 def generate_xml_files():
     html = request.args.get("html", None)
@@ -140,6 +144,7 @@ def generate_xml_files():
 
     filepath = f"{storage_dir}/DTS/{xlsx}"
     out_dir = f"{storage_dir}/{Path(html).stem}"
+    filename = get_filename(html)
 
     xml_gen_cmd = f"python arelleCmdLine.py -f {filepath} --plugins loadFromExcel --save-Excel-DTS-directory={out_dir}"
     subprocess.call(xml_gen_cmd, shell=True)
@@ -163,7 +168,7 @@ def generate_xml_files():
 
             # Create a new div element
             div_element = soup.new_tag('div', style="display: none")
-            ix_header = generate_ix_header(file_id=file_id)
+            ix_header = generate_ix_header(file_id=file_id, filename=filename)
             div_element.append(BeautifulSoup(ix_header, 'html.parser'))
 
             # Insert the div element as the first child of the body
@@ -186,12 +191,14 @@ def read_html_tagging_file():
     if extra is not None:
         html_file = extra.get("url")
         url_path = Path(html_file)
+        filename = get_filename(html_file)
         # Use the name attribute to get the file name
         file_name = f"{url_path.stem}.xlsx"
         xlsx_file = f"{storage_dir}/DTS/{file_name}"
         html_elements = extract_html_elements(html_file)
-        add_html_elements_to_concept(html_elements)
-        generate_concepts_dts_sheet(xlsx_file)
+        DTS, concepts = initialize_concepts_dts(filename)
+        add_html_elements_to_concept(html_elements, concepts)
+        generate_concepts_dts_sheet(xlsx_file, concepts, DTS)
         return redirect(url_for("generate_xml_files", file_id = file_id, html=html_file, xlsx=file_name))
     else:
         return {"error":"html file Not found"}, 400

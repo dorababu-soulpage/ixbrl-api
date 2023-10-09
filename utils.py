@@ -2,19 +2,42 @@ import json
 import openpyxl
 import requests
 import pandas as pd
+from pathlib import Path
 from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ET
 
 
-def read_json_file(file_path, key):
-    with open(file_path, "r") as json_file:
-        data = json.load(json_file)
-        return data.get(key, None)
+def read_json_file(file_path, key, filename=None):
+    if key == "DTS":
+        with open(file_path, "r") as json_file:
+            data = json.load(json_file)
+            # Text replacements
+            text_replacements = {
+                "mays-20230430.xsd": f"{filename}.xsd",
+                "mays-20230430_pre.xml": f"{filename}_pre.xml",
+                "mays-20230430_lab.xml":  f"{filename}_lab.xml",
+            }
 
+            # Iterate through the JSON and perform text replacements
+            for item in data["DTS"]:
+                file_href = item.get("file, href or role definition")
+                if file_href in text_replacements:
+                    item["file, href or role definition"] = text_replacements[file_href]
+            return data.get(key, None)
+    else:
+        with open(file_path, "r") as json_file:
+            data = json.load(json_file)
+            return data.get(key, None)
 
 dts_file = "assets/dts.json"
 concepts_file = "assets/concepts.json"
 taxonomy_file = "assets/GAAP_Taxonomy_2023.xlsx"
+
+def initialize_concepts_dts(filename):
+    # Read "Concepts" and "DTS" data from JSON files
+    DTS = read_json_file(dts_file, "DTS", filename=filename)
+    concepts = read_json_file(concepts_file, "Concepts", )[0]
+    return DTS, concepts
 
 
 def get_unique_context_elements(file):
@@ -29,16 +52,17 @@ def get_unique_context_elements(file):
 
         # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        taxonomy_tags = []
+        # Extract and print the attribute values
+        for element in tags:
+            try:
+                taxonomy_tags.append(element["id"])
+            except Exception as e:
+                print(str(e))
+        unique_contexts = {tag for tag in taxonomy_tags if any(element.startswith("c") for element in tag.split("_"))}
 
-        unique_contexts = {tag for tag in tags if any(element.startswith("c") for element in tag.split("_"))}
-        return unique_contexts
-    
         
-
-# Read "Concepts" and "DTS" data from JSON files
-DTS = read_json_file(dts_file, "DTS")
-concepts = read_json_file(concepts_file, "Concepts")[0]
-
+        return unique_contexts
 
 def get_taxonomy_values(element):
     df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
@@ -71,7 +95,8 @@ def populate_worksheet(worksheet, worksheet_name, data):
             worksheet.append(row_data)
 
 
-def generate_concepts_dts_sheet(xlsx_file):
+def generate_concepts_dts_sheet(xlsx_file, concepts, DTS):
+
     # Create a new workbook
     workbook = openpyxl.Workbook()
 
@@ -92,7 +117,7 @@ def generate_concepts_dts_sheet(xlsx_file):
     print("Excel file generated successfully")
 
 
-def add_html_elements_to_concept(html_elements_data):
+def add_html_elements_to_concept(html_elements_data, concepts):
     for record in html_elements_data:
         record_data = {}
         concept_headers = None
@@ -133,7 +158,6 @@ def extract_html_elements(file):
 
         # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
-        TAXONOMY_IDS = tags
 
         # Extract and print the attribute values
         for element in tags:
@@ -211,14 +235,14 @@ def check_first_two_numbers_or_not(filtered_list):
     except ValueError:
         return False
     
-def duration_xml(resources, from_, to_):
+def duration_xml(resources,cik, from_, to_):
     # Create the dutation_context element
-    dutation_context = ET.SubElement(resources, "xbrli:context", id=f"From{from_}{to_}")
+    dutation_context = ET.SubElement(resources, "xbrli:context", id=f"From{date_formate(from_)}{date_formate(to_)}")
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(dutation_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier")
     identifier.set("scheme", "http://www.sec.gov/CIK")
-    identifier.text = "0000012345"
+    identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:period element and its child elements
     period = ET.SubElement(dutation_context, "xbrli:period")
@@ -227,14 +251,14 @@ def duration_xml(resources, from_, to_):
     enddate = ET.SubElement(period, "xbrli:enddate")
     enddate.text = date_formate(to_)
 
-def instance_xml(resources, from_):
+def instance_xml(resources,cik, from_):
      # Create the instance_context element
-    instance_context = ET.SubElement(resources, "xbrli:context", id=f"AsOf{from_}")
+    instance_context = ET.SubElement(resources, "xbrli:context", id=f"AsOf{date_formate(from_)}")
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(instance_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier")
     identifier.set("scheme", "http://www.sec.gov/CIK")
-    identifier.text = "0000012345"
+    identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:period element and its child elements
     period = ET.SubElement(instance_context, "xbrli:period")
@@ -252,7 +276,7 @@ def check_dimension(items):
        return False
 
 
-def duration_dimension_xml(resources, from_, to_,items):
+def duration_dimension_xml(resources,cik, from_, to_,items):
     dimensions = list()
     members = list()
     for item in items:
@@ -269,7 +293,7 @@ def duration_dimension_xml(resources, from_, to_,items):
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(duration_dimension_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
-    identifier.text = "0000012345"
+    identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
     segment = ET.SubElement(entity, "xbrli:segment")
@@ -286,7 +310,7 @@ def duration_dimension_xml(resources, from_, to_,items):
     end_date.text = date_formate(to_)
 
 
-def instance_dimension_xml(resources, from_, items):
+def instance_dimension_xml(resources,cik, from_, items):
     dimensions = list()
     members = list()
     for item in items:
@@ -303,7 +327,7 @@ def instance_dimension_xml(resources, from_, items):
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(instance_dimension_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
-    identifier.text = "0000012345"
+    identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
     segment = ET.SubElement(entity, "xbrli:segment")
@@ -322,9 +346,10 @@ def instance_dimension_xml(resources, from_, items):
 
 
 
-def generate_ix_header(file_id=None):
+def generate_ix_header(file_id=None, filename=None):
+    filename = filename
+    record = get_db_record(file_id=file_id)
 
-    record = get_db_record(file_id=2)
 
     cik = record.get("cik", None)
     period = record.get('period', None)
@@ -342,10 +367,12 @@ def generate_ix_header(file_id=None):
 
     non_numeric_2_contextRef = f"From{period_from}to{period_to}"
 
-    schema_ref_xlink_href = "mays-20230430.xsd"
+    schema_ref_xlink_href = f"{filename}.xsd"
 
-    context_id=f"From{period_from_}to{period_to}"
+    context_id=f"From{period_from}to{period_to}"
     identifier_text =get_cik(cik)
+    start_date_text = period_from
+    end_date_text = period_to
  
     # Create the root element
     root = ET.Element("ix:header")
@@ -375,12 +402,13 @@ def generate_ix_header(file_id=None):
     identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
     identifier.text = identifier_text
 
+    # create the context tags
     # Create the 'xbrli:period' element within 'xbrli:context'
     period = ET.SubElement(context, "xbrli:period")
     start_date = ET.SubElement(period, "xbrli:startDate")
-    start_date.text = "start_date_text"
+    start_date.text = start_date_text
     end_date = ET.SubElement(period, "xbrli:endDate")
-    end_date.text = "end_date_text"
+    end_date.text = end_date_text
     unique_contexts = get_unique_context_elements(html_file)
     for context in unique_contexts:
         elements = context.split("_")
@@ -397,13 +425,13 @@ def generate_ix_header(file_id=None):
                     if result:
                         duration_dimension = check_dimension(filtered_list)
                         if duration_dimension:
-                            duration_dimension_xml(resources, from_, to_,filtered_list)
-                        duration_xml(resources, from_, to_)
+                            duration_dimension_xml(resources,cik, from_, to_,filtered_list)
+                        duration_xml(resources,cik, from_, to_)
                     else:
                         instance_dimension = check_dimension(filtered_list)
                         if instance_dimension:
-                            instance_dimension_xml(resources, from_,filtered_list)
-                        instance_xml(resources, from_)
+                            instance_dimension_xml(resources,cik, from_,filtered_list)
+                        instance_xml(resources,cik, from_)
 
     # create unit tags 
     for unit in units:
@@ -430,11 +458,15 @@ def generate_ix_header(file_id=None):
 
     # Create an ElementTree object and serialize it to a string
     xml_str = ET.tostring(root,encoding="utf-8").decode("utf-8")
-    soup = BeautifulSoup(xml_str, 'html.parser')
-    print(soup.prettify())
-    # return xml_str
+    return xml_str
 
 
-generate_ix_header()
 
-
+def get_filename(html):
+    original_filename = Path(html).stem
+    if "-" in original_filename:
+        split_string = original_filename.split("-")
+        filename = split_string[0]
+    else:
+        filename = original_filename
+    return filename
