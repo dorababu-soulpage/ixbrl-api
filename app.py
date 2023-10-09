@@ -99,6 +99,9 @@ def validation():
     # validation process
     file = file
     plugin = f"{base_dir}/EdgarRenderer"
+
+    print("\n===============[validation started]===============\n")
+
     validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r out"
     subprocess.call(validation_cmd, shell=True)
     # get logs
@@ -118,6 +121,8 @@ def ixbrl_viewer_file_generation():
     output_html = f"{file}/viewer/{Path(file).name}-ixbrl-report-viewer.html"
     viewer_url = "https://cdn.jsdelivr.net/npm/ixbrl-viewer/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
 
+    print("\n===============[ixbrl viewer file generation started]===============\n")
+
     ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url}"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
     try:
@@ -131,7 +136,7 @@ def ixbrl_viewer_file_generation():
             url = s3_uploader(name=filename, body=body)
             return {"ixbrl_file": url}
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": "ixbrl file is not generated"}, 400
 
 
 
@@ -145,6 +150,8 @@ def generate_xml_files():
     filepath = f"{storage_dir}/DTS/{xlsx}"
     out_dir = f"{storage_dir}/{Path(html).stem}"
     filename = get_filename(html)
+
+    print("\n===============[loadFromExcel started]===============\n")
 
     xml_gen_cmd = f"python arelleCmdLine.py -f {filepath} --plugins loadFromExcel --save-Excel-DTS-directory={out_dir}"
     subprocess.call(xml_gen_cmd, shell=True)
@@ -163,16 +170,14 @@ def generate_xml_files():
         # Write the content to a local file
         with open(file_name, "w") as file:
 
-            # Parse the HTML document
             soup = BeautifulSoup(html_content, 'html.parser')
-
-            # Create a new div element
+            # Create a temp div element
             div_element = soup.new_tag('div', style="display: none")
             ix_header = generate_ix_header(file_id=file_id, filename=filename)
             div_element.append(BeautifulSoup(ix_header, 'html.parser'))
 
-            # Insert the div element as the first child of the body
             body = soup.body
+            # Insert the div element as the first child of the body
             body.insert(0, div_element)
 
             # Convert the modified soup object back to a string
