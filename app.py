@@ -10,8 +10,13 @@ from utils import (
     extract_html_elements,
     add_html_elements_to_concept,
     generate_concepts_dts_sheet,
-    generate_ix_header
+    generate_ix_header,get_db_record,
+    update_db_record,
+    initialize_concepts_dts,
+    get_filename
 )
+from threading import Thread
+from auto_tagging.tagging import auto_tagging
 from flask import Flask, request, redirect, url_for
 
 
@@ -97,6 +102,9 @@ def validation():
     # validation process
     file = file
     plugin = f"{base_dir}/EdgarRenderer"
+
+    print("\n===============[validation started]===============\n")
+
     validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r out"
     subprocess.call(validation_cmd, shell=True)
     # get logs
@@ -116,6 +124,8 @@ def ixbrl_viewer_file_generation():
     output_html = f"{file}/viewer/{Path(file).name}-ixbrl-report-viewer.html"
     viewer_url = "https://cdn.jsdelivr.net/npm/ixbrl-viewer/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
 
+    print("\n===============[ixbrl viewer file generation started]===============\n")
+
     ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url}"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
     try:
@@ -129,16 +139,22 @@ def ixbrl_viewer_file_generation():
             url = s3_uploader(name=filename, body=body)
             return {"ixbrl_file": url}
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": "ixbrl file is not generated"}, 400
+
+
 
 
 @app.route("/api/xml-files")
 def generate_xml_files():
     html = request.args.get("html", None)
     xlsx = request.args.get("xlsx", None)
+    file_id = request.args.get("file_id", None)
 
     filepath = f"{storage_dir}/DTS/{xlsx}"
     out_dir = f"{storage_dir}/{Path(html).stem}"
+    filename = get_filename(html)
+
+    print("\n===============[loadFromExcel started]===============\n")
 
     xml_gen_cmd = f"python arelleCmdLine.py -f {filepath} --plugins loadFromExcel --save-Excel-DTS-directory={out_dir}"
     subprocess.call(xml_gen_cmd, shell=True)
@@ -157,16 +173,14 @@ def generate_xml_files():
         # Write the content to a local file
         with open(file_name, "w") as file:
 
-            # Parse the HTML document
             soup = BeautifulSoup(html_content, 'html.parser')
-
-            # Create a new div element
+            # Create a temp div element
             div_element = soup.new_tag('div', style="display: none")
-            ix_header = generate_ix_header()
+            ix_header = generate_ix_header(file_id=file_id, filename=filename)
             div_element.append(BeautifulSoup(ix_header, 'html.parser'))
 
-            # Insert the div element as the first child of the body
             body = soup.body
+            # Insert the div element as the first child of the body
             body.insert(0, div_element)
 
             # Convert the modified soup object back to a string
@@ -178,15 +192,69 @@ def generate_xml_files():
 
 @app.route("/api/html", methods=["GET", "POST"])
 def read_html_tagging_file():
-    html_file = request.json.get("html")
-    url_path = Path(html_file)
-    # Use the name attribute to get the file name
-    file_name = f"{url_path.stem}.xlsx"
-    xlsx_file = f"{storage_dir}/DTS/{file_name}"
-    html_elements = extract_html_elements(html_file)
-    add_html_elements_to_concept(html_elements)
-    generate_concepts_dts_sheet(xlsx_file)
-    return redirect(url_for("generate_xml_files", html=html_file, xlsx=file_name))
+
+    file_id = request.json.get("file_id")
+    record = get_db_record(file_id = file_id)
+    extra = record.get("extra", None)
+    if extra is not None:
+        html_file = extra.get("url")
+        url_path = Path(html_file)
+        filename = get_filename(html_file)
+        # Use the name attribute to get the file name
+        file_name = f"{url_path.stem}.xlsx"
+        xlsx_file = f"{storage_dir}/DTS/{file_name}"
+        html_elements = extract_html_elements(html_file)
+        DTS, concepts = initialize_concepts_dts(filename)
+        add_html_elements_to_concept(html_elements, concepts)
+        generate_concepts_dts_sheet(xlsx_file, concepts, DTS)
+        return redirect(url_for("generate_xml_files", file_id = file_id, html=html_file, xlsx=file_name))
+    else:
+        return {"error":"html file Not found"}, 400
+    
+
+def auto_tagging_thread(file_id:int):
+    record = get_db_record(file_id = file_id)
+    html = record.get("extra").get("url", "")
+    output_dir = f"{storage_dir}/html/{Path(html).stem}".replace("_","-")
+    # create viewer folder
+    Path(f"{output_dir}").mkdir(parents=True, exist_ok=True)
+    filename = f"{output_dir}/{Path(html).stem}.html"
+        # Send an HTTP GET request to the URL
+    response = requests.get(html)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Get the content from the response
+        html_content = response.text
+
+        # Write the content to a local file
+        with open(filename, "w") as file:
+            file.write(html_content)
+    
+        output_html = auto_tagging(filename)
+        try:
+            with open(output_html, "rb") as file:
+                body = io.BytesIO(file.read())
+                # Parse the URL to extract the path
+                parsed_url = urlsplit(output_html)
+                # Get the filename from the path using pathlib
+                path = Path(parsed_url.path)
+                filename = path.name
+                url = s3_uploader(name=filename, body=body)
+                update_db_record(file_id, {"auto_tagging_url":url})
+        except Exception as e:
+            return {"error": "auto_tagging_html file is not generated"}, 400
+    
+
+@app.route("/api/auto-tagging", methods=["POST"])
+def auto_tagging_view():
+    
+    file_id = request.json.get("file_id", None)
+    # run process in background
+    thread = Thread(target=auto_tagging_thread, args=(file_id,))
+    thread.start()
+    return {"message":"We will notify you once auto tagging is done."} , 200
+
 
 
 if __name__ == "__main__":

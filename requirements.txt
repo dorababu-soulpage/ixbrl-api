@@ -34,6 +34,15 @@ boto3==1.28.59
 requests==2.31.0
 python-decouple==3.8
 Flask==3.0.0
-pandas==2.1.1
 bs4==0.0.1
 openpyxl==3.1.2
+psycopg2-binary==2.9.9
+# auto-tagging
+beautifulsoup4==4.12.2
+nltk==3.8.1
+pandas==2.0.1
+torch==2.0.1 #installs +cpu version locally
+numpy
+transformers==4.29.2
+lightning==2.0.4 # if error, then use 2.0.1
+torchmetrics==0.11.4
