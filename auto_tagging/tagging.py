@@ -101,7 +101,7 @@ def auto_tagging(html_file):
     print(len(final_result))
     final_result = BeautifulSoup(final_result)
 
-    dest_path = os.path.join(parent_dir, "os.path.basename(html_file)")
+    dest_path = os.path.join(parent_dir, os.path.basename(html_file))
     with open(dest_path, "wb") as file:
         file.write(final_result.encode("utf-8"))
 
