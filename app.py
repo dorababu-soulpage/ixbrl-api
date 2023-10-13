@@ -43,8 +43,21 @@ def download_files(url):
     # unzip is done remove .zip file
     file_to_remove = Path(f"{storage_dir}/{zipfile}/")
     file_to_remove.unlink()
+    os.chdir(base_dir)
 
     return file
+
+def download_html_file(url):
+    dirname = os.path.basename(url).replace("-","").replace(".","")
+    path = Path(f"{storage_dir}/validation/{dirname}").mkdir(parents=True, exist_ok=True)
+    # download zip file
+    os.chdir(f"{storage_dir}/validation/{dirname}")
+    download_url = f"wget {url}"
+    subprocess.call(download_url, shell=True)
+    os.chdir(base_dir)
+
+
+    return dirname
 
 
 def get_validation_logs(file):
@@ -57,6 +70,16 @@ def get_validation_logs(file):
         except:
             return {"message": "logs not found"}
 
+def get_html_validation_logs(file):
+    logs_html = f"{file}/out/RenderingLogs.htm"
+
+    if Path(logs_html).is_file():
+        with open(logs_html, "r", encoding="utf-8") as file:
+            html_content = file.read()
+            logs_df = pd.read_html(html_content)[0]
+            return logs_df.to_dict()
+    else:
+        return {"message": "validated successfully"}
 
 def s3_uploader(name, body):
     # name is s3 file name
@@ -89,6 +112,29 @@ def s3_uploader(name, body):
 def index():
     return {"message": "welcome to ixbrl viewer"}
 
+
+@app.route("/api/html-validation")
+def html_validation():
+    query_params = request.args
+    url = query_params.get("q", None)
+    if url is None:
+        return {"message": "query params required."}
+
+    file = download_html_file(url)
+
+    # validation process
+    file =  f"{base_dir}/data/validation/{file}"
+    plugin = f"{base_dir}/EdgarRenderer"
+
+    print("\n===============[html validation started]===============\n")
+
+    validation_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --disclosureSystem efm-pragmatic --validate -r {file}/out"
+    print(validation_cmd, "===================[validation command]================")
+
+    subprocess.call(validation_cmd, shell=True)
+    # get logs
+    response = get_html_validation_logs(file)
+    return response
 
 @app.route("/api/validation")
 def validation():
