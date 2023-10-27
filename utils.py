@@ -14,9 +14,11 @@ def read_json_file(file_path, key, filename=None):
             data = json.load(json_file)
             # Text replacements
             text_replacements = {
-                "mays-20230430.xsd": f"{filename}.xsd",
-                "mays-20230430_pre.xml": f"{filename}_pre.xml",
-                "mays-20230430_lab.xml":  f"{filename}_lab.xml",
+                "widget-2019-12-31.xsd": f"{filename}.xsd",
+                "widget-2019-12-31_def.xml": f"{filename}_def.xml",
+                "widget-2019-12-31_cal.xml": f"{filename}_cal.xml",
+                "widget-2019-12-31_pre.xml": f"{filename}_pre.xml",
+                "widget-2019-12-31_lab.xml": f"{filename}_lab.xml",
             }
 
             # Iterate through the JSON and perform text replacements
@@ -37,7 +39,7 @@ taxonomy_file = "assets/GAAP_Taxonomy_2023.xlsx"
 def initialize_concepts_dts(filename):
     # Read "Concepts" and "DTS" data from JSON files
     DTS = read_json_file(dts_file, "DTS", filename=filename)
-    concepts = read_json_file(concepts_file, "Concepts", )[0]
+    concepts = read_json_file(concepts_file, "Concepts")[0]
     return DTS, concepts
 
 
@@ -66,9 +68,12 @@ def get_unique_context_elements(file):
         return unique_contexts
 
 def get_taxonomy_values(element):
-    df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
-    filtered_record = df[df["name"] == element].to_dict(orient="records")
-    return filtered_record[0]
+    presentation_df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
+    filtered_record = presentation_df[presentation_df["name"] == element].to_dict(orient="records")[0]
+    element_df = pd.read_excel(taxonomy_file, sheet_name="Elements")
+    filtered_df = element_df[element_df['name'] == filtered_record.get("name", None)].to_dict(orient="records")[0]
+    filtered_record.update(filtered_df)
+    return filtered_record
 
 
 def populate_worksheet(worksheet, worksheet_name, data):
@@ -118,26 +123,55 @@ def generate_concepts_dts_sheet(xlsx_file, concepts, DTS):
     print("Excel file generated successfully")
 
 
-def add_html_elements_to_concept(html_elements_data, concepts):
+def add_html_elements_to_concept(html_elements_data, concepts:dict, DTS:list):
+    concept_headers = [
+        "label",
+        "prefix",
+        "name",
+        "type",
+        "substitutionGroup",
+        "periodType",
+        "balance",
+        "abstract",
+        "nillable",
+        "depth",
+        "preferred label",
+        "calculation parent",
+        "calculation weight",
+        "dimension default",
+        "baseTypePrefix",
+        "baseType",
+        "minInclusive"
+    ]
     for record in html_elements_data:
         record_data = {}
-        concept_headers = None
 
         # make definition as key in output dict
+        name = record.get("name")
         definition = record.get("definition")
 
-        # get concept headers
-        for category, records in concepts.items():
-            concept_headers = records[0]
-            break
 
-        for header in concept_headers.keys():
+        # concept_keys = 
+        # # get concept headers
+        # for category, records in concepts.items():
+        #     concept_headers = records[0]
+        #     break
+
+        for header in concept_headers:
             record_data[header] = record.get(header, None)
 
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
             concepts[definition].append(record_data)
+            # add definition into DTS sheet also
+            new_definition = {
+                "specification": "extension",
+                "file type": "role",
+                "file, href or role definition": definition,
+                "namespace URI": f"http://xbrl.us/widgetexample/role/{name}"
+            }
+            DTS.append(new_definition)
         else:
             concepts[definition].append(record_data)
 
@@ -221,9 +255,9 @@ def duration_xml(resources,cik, from_, to_):
 
     # Create xbrli:period element and its child elements
     period = ET.SubElement(dutation_context, "xbrli:period")
-    startdate = ET.SubElement(period, "xbrli:startdate")
+    startdate = ET.SubElement(period, "xbrli:startDate")
     startdate.text = date_formate(from_)
-    enddate = ET.SubElement(period, "xbrli:enddate")
+    enddate = ET.SubElement(period, "xbrli:endDate")
     enddate.text = date_formate(to_)
 
 def instance_xml(resources,cik, from_):

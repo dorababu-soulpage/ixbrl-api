@@ -223,15 +223,18 @@ def generate_xml_files():
             # Create a temp div element
             div_element = soup.new_tag('div', style="display: none")
             ix_header = generate_ix_header(file_id=file_id, filename=filename)
-            div_element.append(BeautifulSoup(ix_header, 'html.parser'))
+            div_element.append(BeautifulSoup(ix_header, 'lxml-xml'))
 
-            body = soup.body
-            # Insert the div element as the first child of the body
-            body.insert(0, div_element)
+            try:
+                body = soup.body
+                # Insert the div element as the first child of the body
+                body.insert(0, div_element)
 
-            # Convert the modified soup object back to a string
-            modified_html = str(soup.prettify())
-            file.write(modified_html)
+                # Convert the modified soup object back to a string
+                modified_html = str(soup.prettify())
+                file.write(modified_html)
+            except Exception as e:
+                print("Body Element Not fount")
 
     return redirect(url_for("ixbrl_viewer_file_generation", file_path=out_dir))
 
@@ -251,7 +254,7 @@ def read_html_tagging_file():
         xlsx_file = f"{storage_dir}/DTS/{file_name}"
         html_elements = extract_html_elements(html_file)
         DTS, concepts = initialize_concepts_dts(filename)
-        add_html_elements_to_concept(html_elements, concepts)
+        add_html_elements_to_concept(html_elements, concepts, DTS)
         generate_concepts_dts_sheet(xlsx_file, concepts, DTS)
         return redirect(url_for("generate_xml_files", file_id = file_id, html=html_file, xlsx=file_name))
     else:
