@@ -1,24 +1,27 @@
-import boto3
+import os, shutil
 import subprocess
-import pandas as pd
-import io, os, requests
 from pathlib import Path
-from decouple import config
-from urllib.parse import urlsplit
-from bs4 import BeautifulSoup
-from utils import (
-    extract_html_elements,
-    add_html_elements_to_concept,
-    generate_concepts_dts_sheet,
-    generate_ix_header,get_db_record,
-    update_db_record,
-    initialize_concepts_dts,
-    get_filename
-)
-from threading import Thread
-# from auto_tagging.tagging import auto_tagging
-from flask import Flask, request, redirect, url_for
+from urllib.parse import urlparse
 
+import boto3
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from decouple import config
+
+# from auto_tagging.tagging import auto_tagging
+from flask import Flask, redirect, request, url_for
+
+from utils import (
+    add_html_elements_to_concept,
+    extract_html_elements,
+    generate_concepts_dts_sheet,
+    generate_ix_header,
+    get_db_record,
+    get_filename,
+    initialize_concepts_dts,
+    update_db_record,
+)
 
 app = Flask(__name__)
 
@@ -47,28 +50,31 @@ def download_files(url):
 
     return file
 
+
 def download_html_file(url):
-    dirname = os.path.basename(url).replace("-","").replace(".","")
-    path = Path(f"{storage_dir}/validation/{dirname}").mkdir(parents=True, exist_ok=True)
+    dirname = os.path.basename(url).replace("-", "").replace(".", "")
+    path = Path(f"{storage_dir}/validation/{dirname}").mkdir(
+        parents=True, exist_ok=True
+    )
     # download zip file
     os.chdir(f"{storage_dir}/validation/{dirname}")
     download_url = f"wget {url}"
     subprocess.call(download_url, shell=True)
     os.chdir(base_dir)
 
-
     return dirname
 
 
 def get_validation_logs(file):
     logs_html = f"{storage_dir}/{file}/out/RenderingLogs.htm"
-    with open(logs_html, "r", encoding="utf-8") as file:
-        html_content = file.read()
-        try:
+    try:
+        with open(logs_html, "r", encoding="utf-8") as file:
+            html_content = file.read()
             logs_df = pd.read_html(html_content)[0]
             return logs_df.to_dict()
-        except:
-            return {"message": "logs not found"}
+    except:
+        return {"message": "logs not found"}
+
 
 def get_html_validation_logs(file):
     logs_html = f"{file}/out/RenderingLogs.htm"
@@ -81,7 +87,9 @@ def get_html_validation_logs(file):
     else:
         return {"message": "validated successfully"}
 
+
 def s3_uploader(name, body):
+    """this function is used to upload the files to the s3 server and return the url"""
     # name is s3 file name
     # boyd is io.BytesIO()
     access_key = config("AWS_S3_ACCESS_KEY_ID")
@@ -123,7 +131,7 @@ def html_validation():
     file = download_html_file(url)
 
     # validation process
-    file =  f"{base_dir}/data/validation/{file}"
+    file = f"{base_dir}/data/validation/{file}"
     plugin = f"{base_dir}/EdgarRenderer"
 
     print("\n===============[html validation started]===============\n")
@@ -136,26 +144,65 @@ def html_validation():
     response = get_html_validation_logs(file)
     return response
 
-@app.route("/api/validation")
-def validation():
-    query_params = request.args
-    url = query_params.get("q", None)
-    if url is None:
-        return {"message": "query params required."}
 
-    file = download_files(url)
-
+def validation(file_path):
     # validation process
-    file = file
+    file = file_path
     plugin = f"{base_dir}/EdgarRenderer"
 
     print("\n===============[validation started]===============\n")
 
-    validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r out"
+    validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r {file}/out"
     subprocess.call(validation_cmd, shell=True)
     # get logs
     response = get_validation_logs(file)
     return response
+
+
+def upload_zip_to_s3(name, zip_file):
+    """this function is used to upload the files to the s3 server and return the url"""
+    # name is s3 file name
+    access_key = config("AWS_S3_ACCESS_KEY_ID")
+    secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
+    region = config("AWS_S3_REGION")
+    bucket = config("AWS_S3_BUCKET_NAME")
+
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
+    )
+    s3 = session.resource("s3")
+    try:
+        # Read the contents of the local zip file
+        with open(zip_file, "rb") as file:
+            zip_contents = file.read()
+
+        # Use put_object to upload the zip file
+        s3.Bucket(bucket).put_object(
+            Key=name,
+            Body=zip_contents,
+            ACL="public-read",
+            ContentType="application/zip",  # Adjust content type as needed
+        )
+
+        # Determine the region for building the S3 URL
+        location = (
+            session.client("s3")
+            .get_bucket_location(Bucket=bucket)
+            .get("LocationConstraint", "")
+        )
+        if location:
+            s3_url = f"https://s3-{location}.amazonaws.com/{bucket}/{name}"
+        else:
+            # Handle the case where the location is None (e.g., us-east-1)
+            s3_url = f"https://s3.amazonaws.com/{bucket}/{name}"
+
+        return s3_url
+
+    except Exception as e:
+        print(f"Error uploading to S3: {e}")
+        return None
 
 
 @app.route("/api/ixbrl-viewer")
@@ -174,20 +221,31 @@ def ixbrl_viewer_file_generation():
 
     ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url}"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
-    try:
-        with open(output_html, "rb") as file:
-            body = io.BytesIO(file.read())
-            # Parse the URL to extract the path
-            parsed_url = urlsplit(output_html)
-            # Get the filename from the path using pathlib
-            path = Path(parsed_url.path)
-            filename = path.name
-            url = s3_uploader(name=filename, body=body)
-            return {"ixbrl_file": url}
-    except Exception as e:
-        return {"error": "ixbrl file is not generated"}, 400
 
+    validation_logs = validation(file)
 
+    # Zip the folder
+
+    shutil.make_archive(file, "zip", file)
+
+    # Upload the zip file to S3
+    zip_file_path = f"{file}.zip"
+
+    # Parse the URL
+    parsed_url = urlparse(zip_file_path)
+
+    # Extract the path component and create a Path object
+    path = Path(parsed_url.path)
+
+    # Get the filename
+    filename = path.name
+    s3_url = upload_zip_to_s3(filename, zip_file_path)
+
+    # Remove the file, zip directory
+    shutil.rmtree(file)
+    os.remove(zip_file_path)
+
+    return {"url": s3_url}
 
 
 @app.route("/api/xml-files")
@@ -196,9 +254,9 @@ def generate_xml_files():
     xlsx = request.args.get("xlsx", None)
     file_id = request.args.get("file_id", None)
 
-    filepath = f"{storage_dir}/DTS/{xlsx}"
-    out_dir = f"{storage_dir}/{Path(html).stem}"
     filename = get_filename(html)
+    out_dir = f"{storage_dir}/{Path(html).stem}"
+    filepath = f"{storage_dir}/{Path(html).stem}/DTS/{xlsx}"
 
     print("\n===============[loadFromExcel started]===============\n")
 
@@ -218,12 +276,11 @@ def generate_xml_files():
 
         # Write the content to a local file
         with open(file_name, "w") as file:
-
-            soup = BeautifulSoup(html_content, 'html.parser')
+            soup = BeautifulSoup(html_content, "html.parser")
             # Create a temp div element
-            div_element = soup.new_tag('div', style="display: none")
+            div_element = soup.new_tag("div", style="display: none")
             ix_header = generate_ix_header(file_id=file_id, filename=filename)
-            div_element.append(BeautifulSoup(ix_header, 'lxml-xml'))
+            div_element.append(BeautifulSoup(ix_header, "lxml-xml"))
 
             try:
                 body = soup.body
@@ -241,9 +298,8 @@ def generate_xml_files():
 
 @app.route("/api/html", methods=["GET", "POST"])
 def read_html_tagging_file():
-
     file_id = request.json.get("file_id")
-    record = get_db_record(file_id = file_id)
+    record = get_db_record(file_id=file_id)
     extra = record.get("extra", None)
     if extra is not None:
         html_file = extra.get("url")
@@ -251,21 +307,23 @@ def read_html_tagging_file():
         filename = get_filename(html_file)
         # Use the name attribute to get the file name
         file_name = f"{url_path.stem}.xlsx"
-        xlsx_file = f"{storage_dir}/DTS/{file_name}"
+        xlsx_file = f"{storage_dir}/{Path(html_file).stem}/DTS/{file_name}"
+        xlsx_file_store_loc = f"{storage_dir}/{Path(html_file).stem}/DTS/"
         html_elements = extract_html_elements(html_file)
         DTS, concepts = initialize_concepts_dts(filename)
         add_html_elements_to_concept(html_elements, concepts, DTS)
-        generate_concepts_dts_sheet(xlsx_file, concepts, DTS)
-        return redirect(url_for("generate_xml_files", file_id = file_id, html=html_file, xlsx=file_name))
+        generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
+
+        {}
+
+        return redirect(
+            url_for(
+                "generate_xml_files", file_id=file_id, html=html_file, xlsx=file_name
+            )
+        )
     else:
-        return {"error":"html file Not found"}, 400
-    
-@app.route("/api/auto-tagging", methods=["POST"])
-def auto_tagging_view():
-    file_id = request.json.get("file_id", None)
-    url = config("AUTO_TAGGING_URL")
-    response = requests.post(url, json={'file_id': file_id})
-    return response.json() , response.status_code
+        return {"error": "html file Not found"}, 400
+
 
 if __name__ == "__main__":
     port = config("PORT")
