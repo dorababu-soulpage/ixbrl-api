@@ -313,9 +313,6 @@ def read_html_tagging_file():
         DTS, concepts = initialize_concepts_dts(filename)
         add_html_elements_to_concept(html_elements, concepts, DTS)
         generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
-
-        {}
-
         return redirect(
             url_for(
                 "generate_xml_files", file_id=file_id, html=html_file, xlsx=file_name
