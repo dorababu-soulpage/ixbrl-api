@@ -14,9 +14,11 @@ def read_json_file(file_path, key, filename=None):
             data = json.load(json_file)
             # Text replacements
             text_replacements = {
-                "mays-20230430.xsd": f"{filename}.xsd",
-                "mays-20230430_pre.xml": f"{filename}_pre.xml",
-                "mays-20230430_lab.xml":  f"{filename}_lab.xml",
+                "widget-2019-12-31.xsd": f"{filename}.xsd",
+                "widget-2019-12-31_def.xml": f"{filename}_def.xml",
+                "widget-2019-12-31_cal.xml": f"{filename}_cal.xml",
+                "widget-2019-12-31_pre.xml": f"{filename}_pre.xml",
+                "widget-2019-12-31_lab.xml": f"{filename}_lab.xml",
             }
 
             # Iterate through the JSON and perform text replacements
@@ -30,14 +32,16 @@ def read_json_file(file_path, key, filename=None):
             data = json.load(json_file)
             return data.get(key, None)
 
+
 dts_file = "assets/dts.json"
 concepts_file = "assets/concepts.json"
 taxonomy_file = "assets/GAAP_Taxonomy_2023.xlsx"
 
+
 def initialize_concepts_dts(filename):
     # Read "Concepts" and "DTS" data from JSON files
     DTS = read_json_file(dts_file, "DTS", filename=filename)
-    concepts = read_json_file(concepts_file, "Concepts", )[0]
+    concepts = read_json_file(concepts_file, "Concepts")[0]
     return DTS, concepts
 
 
@@ -60,15 +64,26 @@ def get_unique_context_elements(file):
                 taxonomy_tags.append(element["id"])
             except Exception as e:
                 print(str(e))
-        unique_contexts = {tag for tag in taxonomy_tags if any(element.startswith("c") for element in tag.split("_"))}
+        unique_contexts = {
+            tag
+            for tag in taxonomy_tags
+            if any(element.startswith("c") for element in tag.split("_"))
+        }
 
-        
         return unique_contexts
 
+
 def get_taxonomy_values(element):
-    df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
-    filtered_record = df[df["name"] == element].to_dict(orient="records")
-    return filtered_record[0]
+    presentation_df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
+    filtered_record = presentation_df[presentation_df["name"] == element].to_dict(
+        orient="records"
+    )[0]
+    element_df = pd.read_excel(taxonomy_file, sheet_name="Elements")
+    filtered_df = element_df[
+        element_df["name"] == filtered_record.get("name", None)
+    ].to_dict(orient="records")[0]
+    filtered_record.update(filtered_df)
+    return filtered_record
 
 
 def populate_worksheet(worksheet, worksheet_name, data):
@@ -96,8 +111,7 @@ def populate_worksheet(worksheet, worksheet_name, data):
             worksheet.append(row_data)
 
 
-def generate_concepts_dts_sheet(xlsx_file, concepts, DTS):
-
+def generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS):
     # Create a new workbook
     workbook = openpyxl.Workbook()
 
@@ -113,31 +127,62 @@ def generate_concepts_dts_sheet(xlsx_file, concepts, DTS):
     worksheet_dts = workbook.create_sheet(title=dts_worksheet_name)
     populate_worksheet(worksheet_dts, dts_worksheet_name, DTS)
 
+    # create viewer folder
+    Path(xlsx_file_store_loc).mkdir(parents=True, exist_ok=True)
+
     # Save the workbook to a file
     workbook.save(xlsx_file)
     print("Excel file generated successfully")
 
 
-def add_html_elements_to_concept(html_elements_data, concepts):
+def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
+    concept_headers = [
+        "label",
+        "prefix",
+        "name",
+        "type",
+        "substitutionGroup",
+        "periodType",
+        "balance",
+        "abstract",
+        "nillable",
+        "depth",
+        "preferred label",
+        "calculation parent",
+        "calculation weight",
+        "dimension default",
+        "baseTypePrefix",
+        "baseType",
+        "minInclusive",
+    ]
     for record in html_elements_data:
         record_data = {}
-        concept_headers = None
 
         # make definition as key in output dict
+        name = record.get("name")
         definition = record.get("definition")
 
-        # get concept headers
-        for category, records in concepts.items():
-            concept_headers = records[0]
-            break
+        # concept_keys =
+        # # get concept headers
+        # for category, records in concepts.items():
+        #     concept_headers = records[0]
+        #     break
 
-        for header in concept_headers.keys():
+        for header in concept_headers:
             record_data[header] = record.get(header, None)
 
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
             concepts[definition].append(record_data)
+            # add definition into DTS sheet also
+            new_definition = {
+                "specification": "extension",
+                "file type": "role",
+                "file, href or role definition": definition,
+                "namespace URI": f"http://xbrl.us/widgetexample/role/{name}",
+            }
+            DTS.append(new_definition)
         else:
             concepts[definition].append(record_data)
 
@@ -172,7 +217,6 @@ def extract_html_elements(file):
     return html_elements_data
 
 
-
 def get_cik(value):
     original_string = "0000000000"  # Original string with 10 zeros
     value_to_insert = value
@@ -201,6 +245,7 @@ def date_formate(input_date):
     formatted_date = datetime.strptime(input_date, "%Y%m%d").strftime("%Y-%m-%d")
     return formatted_date
 
+
 def check_first_two_numbers_or_not(filtered_list):
     # Attempt to convert the first two values to integers
     try:
@@ -209,10 +254,13 @@ def check_first_two_numbers_or_not(filtered_list):
         return True
     except ValueError:
         return False
-    
-def duration_xml(resources,cik, from_, to_):
+
+
+def duration_xml(resources, cik, from_, to_):
     # Create the dutation_context element
-    dutation_context = ET.SubElement(resources, "xbrli:context", id=f"From{date_formate(from_)}{date_formate(to_)}")
+    dutation_context = ET.SubElement(
+        resources, "xbrli:context", id=f"From{date_formate(from_)}{date_formate(to_)}"
+    )
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(dutation_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier")
@@ -221,14 +269,17 @@ def duration_xml(resources,cik, from_, to_):
 
     # Create xbrli:period element and its child elements
     period = ET.SubElement(dutation_context, "xbrli:period")
-    startdate = ET.SubElement(period, "xbrli:startdate")
+    startdate = ET.SubElement(period, "xbrli:startDate")
     startdate.text = date_formate(from_)
-    enddate = ET.SubElement(period, "xbrli:enddate")
+    enddate = ET.SubElement(period, "xbrli:endDate")
     enddate.text = date_formate(to_)
 
-def instance_xml(resources,cik, from_):
-     # Create the instance_context element
-    instance_context = ET.SubElement(resources, "xbrli:context", id=f"AsOf{date_formate(from_)}")
+
+def instance_xml(resources, cik, from_):
+    # Create the instance_context element
+    instance_context = ET.SubElement(
+        resources, "xbrli:context", id=f"AsOf{date_formate(from_)}"
+    )
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(instance_context, "xbrli:entity")
     identifier = ET.SubElement(entity, "xbrli:identifier")
@@ -248,10 +299,10 @@ def check_dimension(items):
     if has_member:
         return True
     else:
-       return False
+        return False
 
 
-def duration_dimension_xml(resources,cik, from_, to_,items):
+def duration_dimension_xml(resources, cik, from_, to_, items):
     dimensions = list()
     members = list()
     for item in items:
@@ -261,20 +312,28 @@ def duration_dimension_xml(resources,cik, from_, to_,items):
             members.append(item)
     context_id = f"From{date_formate(from_)}{date_formate(to_)}"
     for member in members:
-        context_id+= f"_{member}".replace("--", "_")
+        context_id += f"_{member}".replace("--", "_")
     # Create the root element
-    duration_dimension_context = ET.SubElement(resources, "xbrli:context", id =context_id)
+    duration_dimension_context = ET.SubElement(
+        resources, "xbrli:context", id=context_id
+    )
 
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(duration_dimension_context, "xbrli:entity")
-    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier = ET.SubElement(
+        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    )
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
     segment = ET.SubElement(entity, "xbrli:segment")
 
     for dimension, member in zip(dimensions, members):
-        explicit_member1 = ET.SubElement(segment, "xbrldi:explicitMember", dimension=f"{dimension}".replace("--",":"))
+        explicit_member1 = ET.SubElement(
+            segment,
+            "xbrldi:explicitMember",
+            dimension=f"{dimension}".replace("--", ":"),
+        )
         explicit_member1.text = f"{member}".replace("--", ":")
 
     # Create xbrli:period element and its child elements
@@ -285,7 +344,7 @@ def duration_dimension_xml(resources,cik, from_, to_,items):
     end_date.text = date_formate(to_)
 
 
-def instance_dimension_xml(resources,cik, from_, items):
+def instance_dimension_xml(resources, cik, from_, items):
     dimensions = list()
     members = list()
     for item in items:
@@ -295,23 +354,35 @@ def instance_dimension_xml(resources,cik, from_, items):
             members.append(item)
     context_id = f"AsOf{date_formate(from_)}"
     for member in members:
-        context_id+= f"{member}".replace("--", ":")
+        context_id += f"{member}".replace("--", ":")
     # Create the root element
-    instance_dimension_context = ET.SubElement(resources, "xbrli:context", id =context_id)
+    instance_dimension_context = ET.SubElement(
+        resources, "xbrli:context", id=context_id
+    )
 
     # Create xbrli:entity element and its child elements
     entity = ET.SubElement(instance_dimension_context, "xbrli:entity")
-    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier = ET.SubElement(
+        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    )
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
     segment = ET.SubElement(entity, "xbrli:segment")
 
-    explicit_member = ET.SubElement(segment, "xbrldi:explicitmember", dimension="us-gaap:AcceleratedShareRepurchasesDateAxis")
+    explicit_member = ET.SubElement(
+        segment,
+        "xbrldi:explicitmember",
+        dimension="us-gaap:AcceleratedShareRepurchasesDateAxis",
+    )
     explicit_member.text = "us-gaap:AboveMarketLeasesMember"
 
     for dimension, member in zip(dimensions, members):
-        explicit_member1 = ET.SubElement(segment, "xbrldi:explicitMember", dimension=f"{dimension}".replace("--",":"))
+        explicit_member1 = ET.SubElement(
+            segment,
+            "xbrldi:explicitMember",
+            dimension=f"{dimension}".replace("--", ":"),
+        )
         explicit_member1.text = f"{member}".replace("--", ":")
 
     # Create xbrli:period element and its child elements
@@ -320,35 +391,32 @@ def instance_dimension_xml(resources,cik, from_, items):
     instant.text = f"{date_formate(from_)}"
 
 
-
 def generate_ix_header(file_id=None, filename=None):
     filename = filename
     record = get_db_record(file_id=file_id)
 
-
     cik = record.get("cik", None)
-    period = record.get('period', None)
+    period = record.get("period", None)
     period_from_ = record.get("periodFrom", None)
     period_to_ = record.get("periodTo", None)
     period_from = period_from_.strftime("%Y-%m-%d")
     period_to = period_to_.strftime("%Y-%m-%d")
     html_file = record.get("extra").get("url", "")
 
-
     units = record.get("unit", [])
 
     non_numeric_1_contextRef = f"From{period_from}to{period_to}"
-    non_numeric_1_text =get_cik(cik)
+    non_numeric_1_text = get_cik(cik)
 
     non_numeric_2_contextRef = f"From{period_from}to{period_to}"
 
     schema_ref_xlink_href = f"{filename}.xsd"
 
-    context_id=f"From{period_from}to{period_to}"
-    identifier_text =get_cik(cik)
+    context_id = f"From{period_from}to{period_to}"
+    identifier_text = get_cik(cik)
     start_date_text = period_from
     end_date_text = period_to
- 
+
     # Create the root element
     root = ET.Element("ix:header")
 
@@ -356,17 +424,31 @@ def generate_ix_header(file_id=None, filename=None):
     hidden = ET.SubElement(root, "ix:hidden")
 
     # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-    non_numeric_1 = ET.SubElement(hidden, "ix:nonNumeric", contextRef=non_numeric_1_contextRef, name= "dei:EntityCentralIndexKey")
+    non_numeric_1 = ET.SubElement(
+        hidden,
+        "ix:nonNumeric",
+        contextRef=non_numeric_1_contextRef,
+        name="dei:EntityCentralIndexKey",
+    )
     non_numeric_1.text = non_numeric_1_text
 
-    non_numeric_2 = ET.SubElement(hidden, "ix:nonNumeric", contextRef=non_numeric_2_contextRef, name="dei:AmendmentFlag")
+    non_numeric_2 = ET.SubElement(
+        hidden,
+        "ix:nonNumeric",
+        contextRef=non_numeric_2_contextRef,
+        name="dei:AmendmentFlag",
+    )
     non_numeric_2.text = "false"
 
     # Create the 'ix:references' element
     references = ET.SubElement(root, "ix:references")
 
     # Create the 'link:schemaRef' element within 'ix:references'
-    schema_ref = ET.SubElement(references, "link:schemaRef", {"xlink:href":schema_ref_xlink_href , "xlink:type": "simple"})
+    schema_ref = ET.SubElement(
+        references,
+        "link:schemaRef",
+        {"xlink:href": schema_ref_xlink_href, "xlink:type": "simple"},
+    )
 
     # Create the 'ix:resources' element
     resources = ET.SubElement(root, "ix:resources")
@@ -374,7 +456,9 @@ def generate_ix_header(file_id=None, filename=None):
     context = ET.SubElement(resources, "xbrli:context", id=context_id)
     # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
     entity = ET.SubElement(context, "xbrli:entity")
-    identifier = ET.SubElement(entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK")
+    identifier = ET.SubElement(
+        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    )
     identifier.text = identifier_text
 
     # create the context tags
@@ -389,26 +473,28 @@ def generate_ix_header(file_id=None, filename=None):
         elements = context.split("_")
         for element in elements:
             if element.startswith("c"):
-                req_list = elements[elements.index(element):-1]
+                req_list = elements[elements.index(element) : -1]
                 # Remove empty values (empty strings) from the list
                 filtered_list = [item for item in req_list if item]
                 if len(filtered_list) >= 2:
                     result = check_first_two_numbers_or_not(filtered_list[:2])
                     # if True duration else instance
-                    from_ = filtered_list[0].replace("c","")
+                    from_ = filtered_list[0].replace("c", "")
                     to_ = filtered_list[1]
                     if result:
                         duration_dimension = check_dimension(filtered_list)
                         if duration_dimension:
-                            duration_dimension_xml(resources,cik, from_, to_,filtered_list)
-                        duration_xml(resources,cik, from_, to_)
+                            duration_dimension_xml(
+                                resources, cik, from_, to_, filtered_list
+                            )
+                        duration_xml(resources, cik, from_, to_)
                     else:
                         instance_dimension = check_dimension(filtered_list)
                         if instance_dimension:
-                            instance_dimension_xml(resources,cik, from_,filtered_list)
-                        instance_xml(resources,cik, from_)
+                            instance_dimension_xml(resources, cik, from_, filtered_list)
+                        instance_xml(resources, cik, from_)
 
-    # create unit tags 
+    # create unit tags
     for unit in units:
         if "denominator" not in unit.keys():
             # Create the 'xbrli:unit' elements within 'ix:resources'
@@ -420,21 +506,20 @@ def generate_ix_header(file_id=None, filename=None):
             # Create the 'xbrli:unit' elements within 'ix:resources'
             unit_usd = ET.SubElement(resources, "xbrli:unit", id=unit.get("name", None))
             divide = ET.SubElement(unit_usd, "xbrli:divide")
-            # 
-            unit_numerator =  ET.SubElement(divide, "xbrli:unitNumerator")
+            #
+            unit_numerator = ET.SubElement(divide, "xbrli:unitNumerator")
             measure_usd = ET.SubElement(unit_numerator, "xbrli:measure")
             numerator = unit.get("numerator", None)
             measure_usd.text = f"iso4217:{numerator}"
 
-            unit_denominator =  ET.SubElement(divide, "xbrli:unitDenominator")
+            unit_denominator = ET.SubElement(divide, "xbrli:unitDenominator")
             measure_usd = ET.SubElement(unit_denominator, "xbrli:measure")
             denominator = unit.get("denominator", None)
             measure_usd.text = f"iso4217:{denominator}"
 
     # Create an ElementTree object and serialize it to a string
-    xml_str = ET.tostring(root,encoding="utf-8").decode("utf-8")
+    xml_str = ET.tostring(root, encoding="utf-8").decode("utf-8")
     return xml_str
-
 
 
 def get_filename(html):
@@ -447,12 +532,11 @@ def get_filename(html):
     return filename
 
 
-
-
 db = config("DATABASE_NAME")
 host = config("DATABASE_HOST")
 username = config("DATABASE_USERNAME")
 password = config("DATABASE_PASSWORD")
+
 
 def get_db_record(file_id):
     import psycopg2
@@ -475,6 +559,7 @@ def get_db_record(file_id):
         if connection:
             connection.close()
 
+
 def update_db_record(file_id, data):
     import psycopg2
 
@@ -487,7 +572,7 @@ def update_db_record(file_id, data):
         new_json_data = json.dumps(data)
 
         # SQL query to update the JSON field
-       # SQL query to update the JSON field using -> operator
+        # SQL query to update the JSON field using -> operator
         update_sql = f"""
             UPDATE files
             SET extra = extra || %s::jsonb
