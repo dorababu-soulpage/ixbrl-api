@@ -149,10 +149,11 @@ def validation(file_path):
     # validation process
     file = file_path
     plugin = f"{base_dir}/EdgarRenderer"
+    logs_path = f"{file}/logs"
 
     print("\n===============[validation started]===============\n")
 
-    validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r {file}/out"
+    validation_cmd = f"python arelleCmdLine.py -f {file} --plugins {plugin} --disclosureSystem efm-pragmatic --validate -r {file}/out --logFile={logs_path}/validation.logs"
     subprocess.call(validation_cmd, shell=True)
     # get logs
     response = get_validation_logs(file)
@@ -211,6 +212,7 @@ def ixbrl_viewer_file_generation():
 
     # create viewer folder
     Path(f"{file}/viewer").mkdir(parents=True, exist_ok=True)
+    logs_path = f"{file}/logs"
 
     # ixbrl-file-generation
     plugin = f"{base_dir}/ixbrl-viewer/iXBRLViewerPlugin"
@@ -219,7 +221,7 @@ def ixbrl_viewer_file_generation():
 
     print("\n===============[ixbrl viewer file generation started]===============\n")
 
-    ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url}"
+    ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_path}/iXBRLViewer.logs"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
 
     validation_logs = validation(file)
@@ -257,10 +259,14 @@ def generate_xml_files():
     filename = get_filename(html)
     out_dir = f"{storage_dir}/{Path(html).stem}"
     filepath = f"{storage_dir}/{Path(html).stem}/DTS/{xlsx}"
+    logs_path = f"{storage_dir}/{Path(html).stem}/logs"
+
+    # create logs folder
+    Path(logs_path).mkdir(parents=True, exist_ok=True)
 
     print("\n===============[loadFromExcel started]===============\n")
 
-    xml_gen_cmd = f"python arelleCmdLine.py -f {filepath} --plugins loadFromExcel --save-Excel-DTS-directory={out_dir}"
+    xml_gen_cmd = f"python arelleCmdLine.py -f {filepath} --plugins loadFromExcel --save-Excel-DTS-directory={out_dir} --logFile={logs_path}/loadFromExcel.logs"
     subprocess.call(xml_gen_cmd, shell=True)
 
     # Send an HTTP GET request to the URL
@@ -271,8 +277,13 @@ def generate_xml_files():
         # Get the content from the response
         html_content = response.text
 
+        input_file = f"{out_dir}/input.htm"
         # Specify the name of the file where you want to save the content
         file_name = f"{out_dir}/{Path(html).stem}.htm"
+
+        # Write the content to a local file
+        with open(input_file, "w") as file:
+            file.write(html_content)
 
         # Write the content to a local file
         with open(file_name, "w") as file:
