@@ -22,6 +22,7 @@ from utils import (
     initialize_concepts_dts,
     update_db_record,
 )
+from rule_based_tagging import add_tag_to_keyword
 
 app = Flask(__name__)
 
@@ -86,34 +87,6 @@ def get_html_validation_logs(file):
             return logs_df.to_dict()
     else:
         return {"message": "validated successfully"}
-
-
-def s3_uploader(name, body):
-    """this function is used to upload the files to the s3 server and return the url"""
-    # name is s3 file name
-    # boyd is io.BytesIO()
-    access_key = config("AWS_S3_ACCESS_KEY_ID")
-    secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
-    region = config("AWS_S3_REGION")
-    bucket = config("AWS_S3_BUCKET_NAME")
-
-    session = boto3.Session(
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        region_name=region,
-    )
-    s3 = session.resource("s3")
-    s3.Bucket(bucket).put_object(
-        Key=name,
-        Body=body.getvalue(),
-        ACL="public-read",
-        ContentType="application/octet-stream",
-    )
-    location = session.client("s3").get_bucket_location(Bucket=bucket)[
-        "LocationConstraint"
-    ]
-    uploaded_url = f"https://s3-{location}.amazonaws.com/{bucket}/{name}"
-    return uploaded_url
 
 
 @app.route("/")
@@ -331,6 +304,20 @@ def read_html_tagging_file():
         )
     else:
         return {"error": "html file Not found"}, 400
+
+
+@app.route("/api/rule-based-tagging", methods=["POST"])
+def rule_based_tagging_view():
+    html_file = request.files["html_file"]
+    xlsx_file = request.files["xlsx_file"]
+
+    if html_file.filename == "" or xlsx_file.filename == "":
+        return {"error": "No selected file"}
+
+    # Read the contents of the file without saving it
+    url = add_tag_to_keyword(html_file, xlsx_file)
+
+    return {"message": url}, 200
 
 
 if __name__ == "__main__":
