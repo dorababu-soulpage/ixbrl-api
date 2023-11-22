@@ -1,7 +1,9 @@
+import os
+import requests
 import re, io, uuid
 import pandas as pd
 from bs4 import BeautifulSoup
-from utils import s3_uploader
+from utils import s3_uploader, update_db_record
 
 
 def read_excel_sheet(file_path, sheet_name):
@@ -18,10 +20,15 @@ def clean_cell_text(cell):
     return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
 
-def add_tag_to_keyword(html_file, xlsx_file):
-    # Read the content of the HTML file
-    html_content = html_file.read()
-    soup = BeautifulSoup(html_content, "html.parser")
+def add_tag_to_keyword(file_id, html_file, xlsx_file):
+    response = requests.get(html_file)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        html_content = response.content
+        soup = BeautifulSoup(html_content, "html.parser")
+    else:
+        print(f"Failed to retrieve HTML. Status code: {response.status_code}")
 
     # read excel
     mappings = read_excel_sheet(xlsx_file, "Mapping")
@@ -68,13 +75,19 @@ def add_tag_to_keyword(html_file, xlsx_file):
     # Convert the soup to a string and encode it to bytes
     html_bytes.write(str(soup).encode("utf-8"))
 
-    # Use uuid to create a unique filename
-    filename = f"{uuid.uuid4().hex}.html"
+    # Extract the filename from the URL
+    file_name = os.path.basename(html_file)
 
+    # Add "_1" to the filename before the extension
+    new_file_name = (
+        os.path.splitext(file_name)[0] + "_1" + os.path.splitext(file_name)[1]
+    )
     # Assuming s3_uploader is a function to upload the file to S3
     # Replace this with your actual S3 upload implementation
-    url = s3_uploader(filename, html_bytes)
-    return url
+    url = s3_uploader(new_file_name, html_bytes)
+    update_db_record(file_id, {"url": url})
+
+    return
 
 
 # if __name__ == "__main__":

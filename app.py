@@ -1,6 +1,7 @@
 import os, shutil
 import subprocess
 from pathlib import Path
+from threading import Thread
 from urllib.parse import urlparse
 
 import boto3
@@ -308,16 +309,23 @@ def read_html_tagging_file():
 
 @app.route("/api/rule-based-tagging", methods=["POST"])
 def rule_based_tagging_view():
-    html_file = request.files["html_file"]
-    xlsx_file = request.files["xlsx_file"]
+    file_id = request.json.get("file_id", None)
+    xlsx_file = request.json.get("xlsx_file", None)
+    record = get_db_record(file_id=file_id)
+    html_file = record.get("url", None)
 
-    if html_file.filename == "" or xlsx_file.filename == "":
-        return {"error": "No selected file"}
+    if file_id is None or xlsx_file is None:
+        return {"error": "invalid input file id, xlsx_file is required"}
+    if html_file is None:
+        return {"error": "This file id done not have any html files"}
 
-    # Read the contents of the file without saving it
-    url = add_tag_to_keyword(html_file, xlsx_file)
+    # # Read the contents of the file without saving it
+    # add_tag_to_keyword(file_id, html_file, xlsx_file)
 
-    return {"message": url}, 200
+    thread = Thread(target=add_tag_to_keyword, args=(file_id, html_file, xlsx_file))
+    thread.start()
+
+    return {"message": "rule based tagging is started "}, 200
 
 
 if __name__ == "__main__":
