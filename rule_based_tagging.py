@@ -54,8 +54,13 @@ def add_tag_to_keyword(html_file, xlsx_file):
                 for cell, modified_text in zip(cells, row_data):
                     if modified_text == keyword:
                         if cell.string is not None:
-                            tag = f'<FONT ID="xdx_90F" tag={tag} type={element_type} custom={is_custom}>{keyword}</FONT>'
-                            cell.string.replace_with(BeautifulSoup(tag, "html.parser"))
+                            # keyword is not not table row
+                            # tag = f'<font id="xdx_40N_e{tag}_{uuid.uuid4().hex}">{keyword}</font>'
+                            # cell.string.replace_with(BeautifulSoup(tag, "html.parser"))
+
+                            # keyword is table row
+                            # Find the <tr> tag and add the id attribute
+                            row["id"] = f"xdx_40N_e{tag}_{uuid.uuid4().hex}"
 
     # Create a BytesIO object to store the modified HTML content
     html_bytes = io.BytesIO()
