@@ -1,4 +1,5 @@
 import json
+import boto3
 import openpyxl
 import requests
 import pandas as pd
@@ -591,3 +592,31 @@ def update_db_record(file_id, data):
             cursor.close()
         if connection:
             connection.close()
+
+
+def s3_uploader(name, body):
+    """this function is used to upload the files to the s3 server and return the url"""
+    # name is s3 file name
+    # boyd is io.BytesIO()
+    access_key = config("AWS_S3_ACCESS_KEY_ID")
+    secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
+    region = config("AWS_S3_REGION")
+    bucket = config("AWS_S3_BUCKET_NAME")
+
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
+    )
+    s3 = session.resource("s3")
+    s3.Bucket(bucket).put_object(
+        Key=name,
+        Body=body.getvalue(),
+        ACL="public-read",
+        ContentType="application/octet-stream",
+    )
+    location = session.client("s3").get_bucket_location(Bucket=bucket)[
+        "LocationConstraint"
+    ]
+    uploaded_url = f"https://s3-{location}.amazonaws.com/{bucket}/{name}"
+    return uploaded_url
