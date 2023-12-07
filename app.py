@@ -22,6 +22,8 @@ from utils import (
     get_filename,
     initialize_concepts_dts,
     update_db_record,
+    generate_xml_comments,
+    add_attributes_html_tag,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -258,6 +260,8 @@ def generate_xml_files():
         # Write the content to a local file
         with open(input_file, "w") as file:
             file.write(html_content)
+        # add comments to generated xml files
+        generate_xml_comments(out_dir)
 
         # Write the content to a local file
         with open(file_name, "w") as file:
@@ -265,15 +269,16 @@ def generate_xml_files():
             # Create a temp div element
             div_element = soup.new_tag("div", style="display: none")
             ix_header = generate_ix_header(file_id=file_id, filename=filename)
-            div_element.append(BeautifulSoup(ix_header, "lxml-xml"))
-
+            div_element.append(BeautifulSoup(ix_header, "xml"))
             try:
                 body = soup.body
                 # Insert the div element as the first child of the body
                 body.insert(0, div_element)
 
                 # Convert the modified soup object back to a string
-                modified_html = str(soup.prettify())
+                modified_html = soup.prettify()
+                # add html version to the modified
+                file.write('<?xml version="1.0" encoding="utf-8"?>\n')
                 file.write(modified_html)
             except Exception as e:
                 print("Body Element Not fount")

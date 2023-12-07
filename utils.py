@@ -1,12 +1,15 @@
+import os
 import json
 import boto3
 import openpyxl
 import requests
 import pandas as pd
+from lxml import html
 from pathlib import Path
 from decouple import config
 from bs4 import BeautifulSoup
-import xml.etree.ElementTree as ET
+from lxml import etree
+from constants import namespace
 
 
 def read_json_file(file_path, key, filename=None):
@@ -137,25 +140,25 @@ def generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS):
 
 
 def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
-    concept_headers = [
-        "label",
-        "prefix",
-        "name",
-        "type",
-        "substitutionGroup",
-        "periodType",
-        "balance",
-        "abstract",
-        "nillable",
-        "depth",
-        "preferred label",
-        "calculation parent",
-        "calculation weight",
-        "dimension default",
-        "baseTypePrefix",
-        "baseType",
-        "minInclusive",
-    ]
+    concept_headers = {
+        "label": "label",
+        "prefix": "prefix",
+        "name": "name",
+        "type": "type",
+        "substitutionGroup": "substitutionGroup",
+        "periodType": "periodType",
+        "balance": "balance",
+        "abstract": "abstract",
+        "nillable": "nillable",
+        "depth": "depth",
+        "preferred label": "preferredLabel",
+        "calculation parent": "parent",
+        "calculation weight": "calculationWeight",
+        "dimension default": "dimensionDefault",
+        # "baseTypePrefix": "baseTypePrefix",
+        # "baseType": "baseType",
+        # "minInclusive": "minInclusive",
+    }
     for record in html_elements_data:
         record_data = {}
 
@@ -169,8 +172,13 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
         #     concept_headers = records[0]
         #     break
 
-        for header in concept_headers:
-            record_data[header] = record.get(header, None)
+        for header, value in concept_headers.items():
+            if record.get(value, None) == "credit":
+                record.update({"calculationWeight": 1})
+            if record.get(value, None) == "debit":
+                record.update({"calculationWeight": -1})
+
+            record_data[header] = record.get(value, None)
 
         # add definition matched records into category list
         if definition not in concepts.keys():
@@ -259,37 +267,75 @@ def check_first_two_numbers_or_not(filtered_list):
 
 def duration_xml(resources, cik, from_, to_):
     # Create the dutation_context element
-    dutation_context = ET.SubElement(
-        resources, "xbrli:context", id=f"From{date_formate(from_)}{date_formate(to_)}"
+    dutation_context = etree.SubElement(
+        resources,
+        "{http://www.xbrl.org/2003/instance}context",
+        id=f"From{date_formate(from_)}{date_formate(to_)}",
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
     # Create xbrli:entity element and its child elements
-    entity = ET.SubElement(dutation_context, "xbrli:entity")
-    identifier = ET.SubElement(entity, "xbrli:identifier")
+    entity = etree.SubElement(
+        dutation_context, "{http://www.xbrl.org/2003/instance}entity"
+    )
+    identifier = etree.SubElement(
+        entity, "{http://www.xbrl.org/2003/instance}identifier"
+    )
     identifier.set("scheme", "http://www.sec.gov/CIK")
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:period element and its child elements
-    period = ET.SubElement(dutation_context, "xbrli:period")
-    startdate = ET.SubElement(period, "xbrli:startDate")
+    period = etree.SubElement(
+        dutation_context,
+        "{http://www.xbrl.org/2003/instance}period",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    startdate = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}startDate",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     startdate.text = date_formate(from_)
-    enddate = ET.SubElement(period, "xbrli:endDate")
+    enddate = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}endDate",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     enddate.text = date_formate(to_)
 
 
 def instance_xml(resources, cik, from_):
     # Create the instance_context element
-    instance_context = ET.SubElement(
-        resources, "xbrli:context", id=f"AsOf{date_formate(from_)}"
+    instance_context = etree.SubElement(
+        resources,
+        "{http://www.xbrl.org/2003/instance}context",
+        id=f"AsOf{date_formate(from_)}",
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
     # Create xbrli:entity element and its child elements
-    entity = ET.SubElement(instance_context, "xbrli:entity")
-    identifier = ET.SubElement(entity, "xbrli:identifier")
+    entity = etree.SubElement(
+        instance_context,
+        "{http://www.xbrl.org/2003/instance}entity",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    identifier = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}identifier",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     identifier.set("scheme", "http://www.sec.gov/CIK")
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:period element and its child elements
-    period = ET.SubElement(instance_context, "xbrli:period")
-    instant = ET.SubElement(period, "xbrli:instant")
+    period = etree.SubElement(
+        instance_context,
+        "{http://www.xbrl.org/2003/instance}period",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    instant = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}instant",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     instant.text = date_formate(from_)
 
 
@@ -315,33 +361,60 @@ def duration_dimension_xml(resources, cik, from_, to_, items):
     for member in members:
         context_id += f"_{member}".replace("--", "_")
     # Create the root element
-    duration_dimension_context = ET.SubElement(
-        resources, "xbrli:context", id=context_id
+    duration_dimension_context = etree.SubElement(
+        resources,
+        "{http://www.xbrl.org/2003/instance}context",
+        id=context_id,
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
 
     # Create xbrli:entity element and its child elements
-    entity = ET.SubElement(duration_dimension_context, "xbrli:entity")
-    identifier = ET.SubElement(
-        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    entity = etree.SubElement(
+        duration_dimension_context,
+        "{http://www.xbrl.org/2003/instance}entity",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    identifier = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}identifier",
+        scheme="http://www.sec.gov/CIK",
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
-    segment = ET.SubElement(entity, "xbrli:segment")
+    segment = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}segment",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
 
     for dimension, member in zip(dimensions, members):
-        explicit_member1 = ET.SubElement(
+        explicit_member1 = etree.SubElement(
             segment,
-            "xbrldi:explicitMember",
+            "{http://www.xbrl.org/2003/instance}explicitMember",
             dimension=f"{dimension}".replace("--", ":"),
+            nsmap={"xbrli": namespace.get("xbrli")},
         )
         explicit_member1.text = f"{member}".replace("--", ":")
 
     # Create xbrli:period element and its child elements
-    period = ET.SubElement(duration_dimension_context, "xbrli:period")
-    start_date = ET.SubElement(period, "xbrli:startDate")
+    period = etree.SubElement(
+        duration_dimension_context,
+        "{http://www.xbrl.org/2003/instance}period",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    start_date = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}startDate",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     start_date.text = date_formate(from_)
-    end_date = ET.SubElement(period, "xbrli:endDate")
+    end_date = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}endDate",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     end_date.text = date_formate(to_)
 
 
@@ -357,38 +430,62 @@ def instance_dimension_xml(resources, cik, from_, items):
     for member in members:
         context_id += f"{member}".replace("--", ":")
     # Create the root element
-    instance_dimension_context = ET.SubElement(
-        resources, "xbrli:context", id=context_id
+    instance_dimension_context = etree.SubElement(
+        resources,
+        "{http://www.xbrl.org/2003/instance}context",
+        id=context_id,
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
 
     # Create xbrli:entity element and its child elements
-    entity = ET.SubElement(instance_dimension_context, "xbrli:entity")
-    identifier = ET.SubElement(
-        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    entity = etree.SubElement(
+        instance_dimension_context,
+        "{http://www.xbrl.org/2003/instance}entity",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    identifier = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}identifier",
+        scheme="http://www.sec.gov/CIK",
+        nsmap={"xbrli": namespace.get("xbrli")},
     )
     identifier.text = f"{get_cik(cik)}"
 
     # Create xbrli:segment element and its child elements
-    segment = ET.SubElement(entity, "xbrli:segment")
+    segment = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}segment",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
 
-    explicit_member = ET.SubElement(
+    explicit_member = etree.SubElement(
         segment,
-        "xbrldi:explicitmember",
+        "{http://xbrl.org/2006/xbrldi}explicitmember",
         dimension="us-gaap:AcceleratedShareRepurchasesDateAxis",
+        nsmap={"xbrldi": namespace.get("xbrldi")},
     )
     explicit_member.text = "us-gaap:AboveMarketLeasesMember"
 
     for dimension, member in zip(dimensions, members):
-        explicit_member1 = ET.SubElement(
+        explicit_member1 = etree.SubElement(
             segment,
-            "xbrldi:explicitMember",
+            "{http://xbrl.org/2006/xbrldi}:explicitMember",
             dimension=f"{dimension}".replace("--", ":"),
+            nsmap={"xbrldi": namespace.get("xbrldi")},
         )
         explicit_member1.text = f"{member}".replace("--", ":")
 
     # Create xbrli:period element and its child elements
-    period = ET.SubElement(instance_dimension_context, "xbrli:period")
-    instant = ET.SubElement(period, "xbrli:instant")
+    period = etree.SubElement(
+        instance_dimension_context,
+        "{http://www.xbrl.org/2003/instance}period",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    instant = etree.SubElement(
+        period,
+        "{http://www.xbrl.org/2003/instance}instant",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     instant.text = f"{date_formate(from_)}"
 
 
@@ -419,55 +516,81 @@ def generate_ix_header(file_id=None, filename=None):
     end_date_text = period_to
 
     # Create the root element
-    root = ET.Element("ix:header")
+    root = etree.Element(
+        "{http://www.xbrl.org/2013/inlineXBRL}header", nsmap={"ix": namespace.get("ix")}
+    )
 
     # Create the 'ix:hidden' element
-    hidden = ET.SubElement(root, "ix:hidden")
+    hidden = etree.SubElement(root, "{http://www.xbrl.org/2013/inlineXBRL}hidden")
 
     # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-    non_numeric_1 = ET.SubElement(
+    non_numeric_1 = etree.SubElement(
         hidden,
-        "ix:nonNumeric",
+        "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
         contextRef=non_numeric_1_contextRef,
         name="dei:EntityCentralIndexKey",
     )
     non_numeric_1.text = non_numeric_1_text
 
-    non_numeric_2 = ET.SubElement(
+    non_numeric_2 = etree.SubElement(
         hidden,
-        "ix:nonNumeric",
+        "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
         contextRef=non_numeric_2_contextRef,
         name="dei:AmendmentFlag",
     )
     non_numeric_2.text = "false"
 
     # Create the 'ix:references' element
-    references = ET.SubElement(root, "ix:references")
+    references = etree.SubElement(
+        root, "{http://www.xbrl.org/2013/inlineXBRL}references"
+    )
 
     # Create the 'link:schemaRef' element within 'ix:references'
-    schema_ref = ET.SubElement(
+    schema_ref = etree.SubElement(
         references,
-        "link:schemaRef",
-        {"xlink:href": schema_ref_xlink_href, "xlink:type": "simple"},
+        "{http://www.xbrl.org/2003/linkbase}schemaRef",
+        {
+            "{http://www.w3.org/1999/xlink}href": schema_ref_xlink_href,
+            "{http://www.w3.org/1999/xlink}type": "simple",
+        },
+        nsmap={"link": namespace.get("link"), "xlink": namespace.get("xlink")},
     )
 
     # Create the 'ix:resources' element
-    resources = ET.SubElement(root, "ix:resources")
+    resources = etree.SubElement(
+        root,
+        "{http://www.xbrl.org/2013/inlineXBRL}resources",
+        nsmap={"ix": namespace.get("ix")},
+    )
+
     # Create the 'xbrli:context' element within 'ix:resources'
-    context = ET.SubElement(resources, "xbrli:context", id=context_id)
+    context = etree.SubElement(
+        resources,
+        "{http://www.xbrl.org/2003/instance}context",
+        id=context_id,
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
     # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
-    entity = ET.SubElement(context, "xbrli:entity")
-    identifier = ET.SubElement(
-        entity, "xbrli:identifier", scheme="http://www.sec.gov/CIK"
+    entity = etree.SubElement(context, "{http://www.xbrl.org/2003/instance}entity")
+    identifier = etree.SubElement(
+        entity,
+        "{http://www.xbrl.org/2003/instance}identifier",
+        scheme="http://www.sec.gov/CIK",
     )
     identifier.text = identifier_text
 
     # create the context tags
     # Create the 'xbrli:period' element within 'xbrli:context'
-    period = ET.SubElement(context, "xbrli:period")
-    start_date = ET.SubElement(period, "xbrli:startDate")
+    period = etree.SubElement(
+        context,
+        "{http://www.xbrl.org/2003/instance}period",
+        nsmap={"xbrli": namespace.get("xbrli")},
+    )
+    start_date = etree.SubElement(
+        period, "{http://www.xbrl.org/2003/instance}startDate"
+    )
     start_date.text = start_date_text
-    end_date = ET.SubElement(period, "xbrli:endDate")
+    end_date = etree.SubElement(period, "{http://www.xbrl.org/2003/instance}endDate")
     end_date.text = end_date_text
     unique_contexts = get_unique_context_elements(html_file)
     for context in unique_contexts:
@@ -499,27 +622,61 @@ def generate_ix_header(file_id=None, filename=None):
     for unit in units:
         if "denominator" not in unit.keys():
             # Create the 'xbrli:unit' elements within 'ix:resources'
-            unit_usd = ET.SubElement(resources, "xbrli:unit", id=unit.get("name", None))
-            measure_usd = ET.SubElement(unit_usd, "xbrli:measure")
+            unit_usd = etree.SubElement(
+                resources,
+                "{http://www.xbrl.org/2003/instance}unit",
+                id=unit.get("name", None),
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            measure_usd = etree.SubElement(
+                unit_usd,
+                "{http://www.xbrl.org/2003/instance}measure",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
             numerator = unit.get("numerator", None)
             measure_usd.text = f"iso4217:{unit.get(numerator, None)}"
         else:
             # Create the 'xbrli:unit' elements within 'ix:resources'
-            unit_usd = ET.SubElement(resources, "xbrli:unit", id=unit.get("name", None))
-            divide = ET.SubElement(unit_usd, "xbrli:divide")
+            unit_usd = etree.SubElement(
+                resources,
+                "{http://www.xbrl.org/2003/instance}unit",
+                id=unit.get("name", None),
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            divide = etree.SubElement(
+                unit_usd,
+                "{http://www.xbrl.org/2003/instance}divide",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
             #
-            unit_numerator = ET.SubElement(divide, "xbrli:unitNumerator")
-            measure_usd = ET.SubElement(unit_numerator, "xbrli:measure")
+            unit_numerator = etree.SubElement(
+                divide,
+                "{http://www.xbrl.org/2003/instance}unitNumerator",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            measure_usd = etree.SubElement(
+                unit_numerator,
+                "{http://www.xbrl.org/2003/instance}measure",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
             numerator = unit.get("numerator", None)
             measure_usd.text = f"iso4217:{numerator}"
 
-            unit_denominator = ET.SubElement(divide, "xbrli:unitDenominator")
-            measure_usd = ET.SubElement(unit_denominator, "xbrli:measure")
+            unit_denominator = etree.SubElement(
+                divide,
+                "{http://www.xbrl.org/2003/instance}unitDenominator",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            measure_usd = etree.SubElement(
+                unit_denominator,
+                "{http://www.xbrl.org/2003/instance}measure",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
             denominator = unit.get("denominator", None)
             measure_usd.text = f"iso4217:{denominator}"
 
-    # Create an ElementTree object and serialize it to a string
-    xml_str = ET.tostring(root, encoding="utf-8").decode("utf-8")
+    # # Create an ElementTree object and serialize it to a string
+    xml_str = etree.tostring(root, pretty_print=True, encoding="utf-8").decode("utf-8")
     return xml_str
 
 
@@ -620,3 +777,73 @@ def s3_uploader(name, body):
     ]
     uploaded_url = f"https://s3-{location}.amazonaws.com/{bucket}/{name}"
     return uploaded_url
+
+
+def generate_xml_comments(filepath=None):
+    # Specify the directory containing the XML files
+    directory_path = filepath
+
+    # Lines to add
+    lines_to_add = [
+        "<!-- Field: Doc-Info; Name: Generator; Value: Apex; Version: 1.0 -->",
+        "<!-- Field: Doc-Info; Name: VendorURI; Value: https://ixbrl-tagging-tool-cyan.vercel.app -->",
+        "<!-- Field: Doc-Info; Name: Status; Value: 0x00000000 -->",
+    ]
+
+    # Iterate through each file in the directory
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".xml"):
+            file_path = os.path.join(directory_path, filename)
+
+            # Open the XML file and read its content
+            with open(file_path, "r", encoding="utf-8") as file:
+                xml_content = file.read()
+
+            # Parse the XML content with BeautifulSoup
+            soup = BeautifulSoup(xml_content, "xml")
+
+            # Get the root element
+            root = soup.find(name=True)
+
+            # Insert the lines before the root element
+            for line in reversed(lines_to_add):
+                root.insert_before(BeautifulSoup(line, "html.parser"))
+
+            # Write the modified content back to the file
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write(str(soup.prettify()))
+
+
+def add_attributes_html_tag(existing_html_code):
+    # Parse the existing HTML code
+    existing_html_tree = html.fromstring(existing_html_code)
+
+    # Add the specified namespaces to the root HTML element
+    existing_html_tree.attrib.update(
+        {
+            "xmlns": "http://www.w3.org/1999/xhtml",
+            "xmlns:xs": "http://www.w3.org/2001/XMLSchema-instance",
+            "xmlns:xlink": "http://www.w3.org/1999/xlink",
+            "xmlns:xbrli": "http://www.xbrl.org/2003/instance",
+            "xmlns:xbrldi": "http://xbrl.org/2006/xbrldi",
+            "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
+            "xmlns:iso4217": "http://www.xbrl.org/2003/iso4217",
+            "xmlns:ix": "http://www.xbrl.org/2013/inlineXBRL",
+            "xmlns:ixt": "http://www.xbrl.org/inlineXBRL/transformation/2015-02-26",
+            "xmlns:ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31",
+            "xmlns:link": "http://www.xbrl.org/2003/linkbase",
+            "xmlns:dei": "http://xbrl.sec.gov/dei/2023",
+            "xmlns:ref": "http://www.xbrl.org/2006/ref",
+            "xmlns:us-gaap": "http://fasb.org/us-gaap/2023",
+            "xmlns:us-roles": "http://fasb.org/us-roles/2023",
+            "xmlns:country": "http://xbrl.sec.gov/country/2023",
+            "xmlns:srt": "http://fasb.org/srt/2023",
+            "xmlns:fult": "http://fult.com/20230516",
+        }
+    )
+
+    # Save the modified HTML to a file or use it as needed
+    modified_html_code = html.tostring(
+        existing_html_tree, pretty_print=True, encoding="utf-8"
+    ).decode("utf-8")
+    return modified_html_code
