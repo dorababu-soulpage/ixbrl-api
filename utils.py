@@ -77,19 +77,6 @@ def get_unique_context_elements(file):
         return unique_contexts
 
 
-def get_taxonomy_values(element):
-    presentation_df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
-    filtered_record = presentation_df[presentation_df["name"] == element].to_dict(
-        orient="records"
-    )[0]
-    element_df = pd.read_excel(taxonomy_file, sheet_name="Elements")
-    filtered_df = element_df[
-        element_df["name"] == filtered_record.get("name", None)
-    ].to_dict(orient="records")[0]
-    filtered_record.update(filtered_df)
-    return filtered_record
-
-
 def populate_worksheet(worksheet, worksheet_name, data):
     if worksheet_name == "Concepts":
         # Insert data into the "Concepts" worksheet
@@ -196,10 +183,23 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
             concepts[definition].append(record_data)
 
 
-def extract_html_elements(file):
-    # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
+def get_taxonomy_values(element):
+    presentation_df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
+    filtered_record = presentation_df[presentation_df["name"] == element].to_dict(
+        orient="records"
+    )[0]
+    element_df = pd.read_excel(taxonomy_file, sheet_name="Elements")
+    filtered_df = element_df[
+        element_df["name"] == filtered_record.get("name", None)
+    ].to_dict(orient="records")[0]
+    filtered_record.update(filtered_df)
+    return filtered_record
 
-    # read tags from html and add into the exists concepts
+
+def extract_html_elements(file):
+    # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
+
+    # # read tags from html and add into the exists concepts
     html_elements_data = []
 
     # Send an HTTP GET request to the URL
@@ -847,3 +847,45 @@ def add_attributes_html_tag(existing_html_code):
         existing_html_tree, pretty_print=True, encoding="utf-8"
     ).decode("utf-8")
     return modified_html_code
+
+
+def get_element_type(html_elements, name):
+    for html_element in html_elements:
+        if html_element.get("name") == name:
+            return html_element.get("type", None)
+
+
+def add_datatype_tags(html_content, html_elements, output_file):
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    # Find all FONT tags with ID starting with "xdx"
+    filtered_fonts_tags = soup.find_all(
+        "font", id=lambda value: value and value.startswith("xdx")
+    )
+
+    for tag in filtered_fonts_tags:
+        try:
+            name = tag["id"].split("--")[1].split("_")[0]
+            data_type = get_element_type(html_elements, name)
+            if data_type:
+                # read elements.json
+                with open("assets/elements.json", "r") as json_file:
+                    data = json.load(json_file)
+                    for record in data:
+                        if record.get("datatype") == data_type:
+                            new_tag = soup.new_tag(record.get("element"))
+                            for attr in record.get("attributes"):
+                                # Adding attributes to the new tag
+                                new_tag[attr] = "attribute_value"
+                            # Append the text to the new tag
+                            new_tag.append(tag.text)
+                            tag.string = ""
+                            # Replace the original tag with the new_tag
+                            tag.append(new_tag)
+        except Exception as e:
+            print(str(e))
+
+    with open(output_file, "w") as output_file:
+        output_file.write(str(soup))

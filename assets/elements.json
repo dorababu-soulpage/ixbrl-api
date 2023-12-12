@@ -1,0 +1,758 @@
+[
+    {
+        "datatype": "dtr-types:domainItemType",
+        "element": "NA",
+        "attributes": []
+    },
+    {
+        "datatype": "xbrli:monetaryItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:textBlockItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:stringItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:percentItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:dateItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:gYearMonthItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:sharesItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:integerItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:perShareItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "srt-types:perUnitItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:decimalItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:MalpracticeInsurance-OccurrenceOrClaims-madeItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:yesNoItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:volumeItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:booleanItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:areaItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:durationItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:pureItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:energyItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:massItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:investmentPledgedItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:interestRateItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:flowItemType",
+        "element": "ix:nonFraction",
+        "attributes": [
+            "format",
+            "contextRef",
+            "unitRef",
+            "decimals",
+            "name",
+            "scale",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:authorizedUnlimitedItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "enum2:enumerationSetItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:forfeitureMethod",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:distributionsReceivedApproach",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:gYearListItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:giltiPolicyType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:combinedComponentType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:advertisingExpenseMethodItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:financialDesignationType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:contractApplicationItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:accruedInterestWriteOffMethodItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:zoneStatusItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:nineDigitItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:fundedStatusItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:threeDigitItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:surchargeItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:surchargeMethodGSIB",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:fundingImprovementAndRehabilitationPlanItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:includedExcludedItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:capitalizationPolicyType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:controlOfRightsItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dtr-types:guidanceItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "us-types:costBearerItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "srt-types:financialInstrumentGlobalIdentifierItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:submissionTypeItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:yesNoItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:sequenceNumberItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:accountingStandardItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:otherReportingStandardItemNumberItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:fileNumberItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:gYearItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:fiscalPeriodItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:normalizedStringItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:centralIndexKeyItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:sicNumberItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:employerIdItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:edgarStateCountryItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:gMonthDayItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:filerCategoryItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:invCompanyType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:legalEntityIdentifierItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:countryCodeItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:currencyItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:dateOrAsapItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:stateOrProvinceItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:securityTitleItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:trueItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:tradingSymbolItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:edgarExchangeCodeItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "format",
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:securityReportingObligationItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "xbrli:anyURIItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:nineDigitItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:internationalNameItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    },
+    {
+        "datatype": "dei:nonemptySequenceNumberItemType",
+        "element": "ix:nonNumeric",
+        "attributes": [
+            "contextRef",
+            "name",
+            "id"
+        ]
+    }
+]

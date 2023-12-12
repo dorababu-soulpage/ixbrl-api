@@ -24,6 +24,7 @@ from utils import (
     update_db_record,
     generate_xml_comments,
     add_attributes_html_tag,
+    add_datatype_tags,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -220,7 +221,7 @@ def ixbrl_viewer_file_generation():
     s3_url = upload_zip_to_s3(filename, zip_file_path)
 
     # Remove the file, zip directory
-    shutil.rmtree(file)
+    # shutil.rmtree(file)
     os.remove(zip_file_path)
 
     return {"url": s3_url}
@@ -231,6 +232,7 @@ def generate_xml_files():
     html = request.args.get("html", None)
     xlsx = request.args.get("xlsx", None)
     file_id = request.args.get("file_id", None)
+    html_elements = extract_html_elements(html)
 
     filename = get_filename(html)
     out_dir = f"{storage_dir}/{Path(html).stem}"
@@ -254,18 +256,23 @@ def generate_xml_files():
         html_content = response.text
 
         input_file = f"{out_dir}/input.htm"
+
         # Specify the name of the file where you want to save the content
-        file_name = f"{out_dir}/{Path(html).stem}.htm"
+        output_file = f"{out_dir}/{Path(html).stem}.htm"
 
         # Write the content to a local file
         with open(input_file, "w") as file:
             file.write(html_content)
+
+        # add DataTypes tags to tagged elements
+        add_datatype_tags(html_content, html_elements, output_file)
+
         # add comments to generated xml files
         generate_xml_comments(out_dir)
 
         # Write the content to a local file
-        with open(file_name, "w") as file:
-            soup = BeautifulSoup(html_content, "html.parser")
+        with open(output_file, "r") as file:
+            soup = BeautifulSoup(file.read(), "html.parser")
             # Create a temp div element
             div_element = soup.new_tag("div", style="display: none")
             ix_header = generate_ix_header(file_id=file_id, filename=filename)
@@ -280,6 +287,7 @@ def generate_xml_files():
                 # add html version to the modified
                 file.write('<?xml version="1.0" encoding="utf-8"?>\n')
                 file.write(modified_html)
+                # add inline xblrl element types
             except Exception as e:
                 print("Body Element Not fount")
 
@@ -305,7 +313,10 @@ def read_html_tagging_file():
         generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
         return redirect(
             url_for(
-                "generate_xml_files", file_id=file_id, html=html_file, xlsx=file_name
+                "generate_xml_files",
+                file_id=file_id,
+                html=html_file,
+                xlsx=file_name,
             )
         )
     else:
