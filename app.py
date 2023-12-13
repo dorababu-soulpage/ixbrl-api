@@ -265,31 +265,23 @@ def generate_xml_files():
             file.write(html_content)
 
         # add DataTypes tags to tagged elements
-        add_datatype_tags(html_content, html_elements, output_file)
+        soup = add_datatype_tags(html_content, html_elements, output_file)
+
+        div_element = soup.new_tag("div", style="display: none")
+        ix_header = generate_ix_header(file_id=file_id, filename=filename)
+        div_element.append(BeautifulSoup(ix_header, "xml"))
+        try:
+            body = soup.body
+            # Insert the div element as the first child of the body
+            body.insert(0, div_element)
+        except Exception as e:
+            print("Body Element Not fount")
+
+        with open(output_file, "w") as output_file:
+            output_file.write(str(soup))
 
         # add comments to generated xml files
         generate_xml_comments(out_dir)
-
-        # Write the content to a local file
-        with open(output_file, "r") as file:
-            soup = BeautifulSoup(file.read(), "html.parser")
-            # Create a temp div element
-            div_element = soup.new_tag("div", style="display: none")
-            ix_header = generate_ix_header(file_id=file_id, filename=filename)
-            div_element.append(BeautifulSoup(ix_header, "xml"))
-            try:
-                body = soup.body
-                # Insert the div element as the first child of the body
-                body.insert(0, div_element)
-
-                # Convert the modified soup object back to a string
-                modified_html = soup.prettify()
-                # add html version to the modified
-                file.write('<?xml version="1.0" encoding="utf-8"?>\n')
-                file.write(modified_html)
-                # add inline xblrl element types
-            except Exception as e:
-                print("Body Element Not fount")
 
     return redirect(url_for("ixbrl_viewer_file_generation", file_path=out_dir))
 

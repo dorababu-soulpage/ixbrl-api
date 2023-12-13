@@ -10,6 +10,7 @@ from decouple import config
 from bs4 import BeautifulSoup
 from lxml import etree
 from constants import namespace
+from datetime import datetime
 
 
 def read_json_file(file_path, key, filename=None):
@@ -869,6 +870,25 @@ def add_datatype_tags(html_content, html_elements, output_file):
         try:
             name = tag["id"].split("--")[1].split("_")[0]
             data_type = get_element_type(html_elements, name)
+            # get tagged elements
+            tag_names = tag["id"].split("--")
+            elements = [
+                tag_names.replace("__us-gaap", "") for tag_names in tag_names[1:]
+            ]
+            if len(elements) > 1:
+                context = elements[0].split("_c")[1].split("__")[0]
+                parsed_date = datetime.strptime(context, "%Y%m%d")
+                formatted_date = parsed_date.strftime("%Y-%m-%d")
+                # From2023-05-162023-05-16_us-gaap_CommonStockMember
+                val = elements[-1].split("_")[0]
+                contextRef = f"From{formatted_date}{formatted_date}_us-gaap_{val}"
+
+            else:
+                context = elements[0].split("_c")[1].split("__")[0]
+                parsed_date = datetime.strptime(context, "%Y%m%d")
+                formatted_date = parsed_date.strftime("%Y-%m-%d")
+                # AsOf2023-05-16
+                contextRef = f"Asof{formatted_date}"
             if data_type:
                 # read elements.json
                 with open("assets/elements.json", "r") as json_file:
@@ -878,7 +898,12 @@ def add_datatype_tags(html_content, html_elements, output_file):
                             new_tag = soup.new_tag(record.get("element"))
                             for attr in record.get("attributes"):
                                 # Adding attributes to the new tag
-                                new_tag[attr] = "attribute_value"
+                                if attr == "contextRef":
+                                    new_tag[attr] = contextRef
+                                elif attr == "name":
+                                    new_tag[attr] = record.get("datatype")
+                                else:
+                                    new_tag[attr] = "attribute_value"
                             # Append the text to the new tag
                             new_tag.append(tag.text)
                             tag.string = ""
@@ -886,6 +911,7 @@ def add_datatype_tags(html_content, html_elements, output_file):
                             tag.append(new_tag)
         except Exception as e:
             print(str(e))
+    return soup
 
-    with open(output_file, "w") as output_file:
-        output_file.write(str(soup))
+    # with open(output_file, "w") as output_file:
+    #     output_file.write(str(soup))
