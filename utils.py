@@ -1601,7 +1601,6 @@ def get_element_name_type(html_elements, name):
 
 
 def get_format_value(data_type, input_text):
-    print(data_type, input_text)
     with open("assets/format.json", "r") as json_file:
         data = json.load(json_file)
         for record in data:
