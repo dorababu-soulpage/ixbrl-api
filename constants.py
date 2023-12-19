@@ -15,5 +15,7 @@ namespace = {
     "us-roles": "http://fasb.org/us-roles/2023",
     "country": "http://xbrl.sec.gov/country/2023",
     "srt": "http://fasb.org/srt/2023",
+    "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+    "ecd": "http://xbrl.sec.gov/ecd/2023",
     "fult": "http://fult.com/20230516",
 }

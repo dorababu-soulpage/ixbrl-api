@@ -23,7 +23,6 @@ from utils import (
     initialize_concepts_dts,
     update_db_record,
     generate_xml_comments,
-    add_attributes_html_tag,
     add_datatype_tags,
 )
 from rule_based_tagging import add_tag_to_keyword
@@ -272,13 +271,56 @@ def generate_xml_files():
         div_element.append(BeautifulSoup(ix_header, "xml"))
         try:
             body = soup.body
+            html_tag = soup.html
+
+            # Find the head tag
+            head_tag = soup.head
+
+            # Create a new meta tag
+            meta_tag = soup.new_tag("meta")
+            meta_tag.attrs["http-equiv"] = "Content-Type"
+            meta_tag.attrs["content"] = "text/html"
+
+            # Insert the meta tag into the head tag
+            head_tag.insert(0, meta_tag)
+
+            # add attributes to html tag
+            html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
+            html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+            html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+            html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
+            html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
+            html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
+            html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+            html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
+            html_tag[
+                "xmlns:ixt"
+            ] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+
+            html_tag[
+                "xmlns:ixt-sec"
+            ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+
+            html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
+            html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
+            html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
+            html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
+            html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
+            html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
+            html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
+            html_tag["xmlns:fult"] = "http://fult.com/20230516"
+            html_tag["xml:lang"] = "en-US"
+            html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+            html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+
             # Insert the div element as the first child of the body
             body.insert(0, div_element)
         except Exception as e:
             print("Body Element Not fount")
 
         with open(output_file, "w") as output_file:
-            output_file.write(str(soup))
+            output_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
+            output_file.write(soup.prettify())
 
         # add comments to generated xml files
         generate_xml_comments(out_dir)

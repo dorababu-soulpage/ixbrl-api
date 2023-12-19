@@ -69,13 +69,20 @@ def get_unique_context_elements(file):
                 taxonomy_tags.append(element["id"])
             except Exception as e:
                 print(str(e))
-        unique_contexts = {
-            tag
-            for tag in taxonomy_tags
-            if any(element.startswith("c") for element in tag.split("_"))
-        }
 
-        return unique_contexts
+        html_tags = [element.split("_c")[1] for element in taxonomy_tags]
+        unique_contexts = []
+        for tag in html_tags:
+            unique_content = tag.split("_")[:-1]
+            if unique_content not in unique_contexts:
+                unique_contexts.append(unique_content)
+
+        # Remove empty string values from each inner list
+        cleaned_data = [
+            [value for value in inner_list if value != ""]
+            for inner_list in unique_contexts
+        ]
+        return cleaned_data
 
 
 def populate_worksheet(worksheet, worksheet_name, data):
@@ -198,31 +205,705 @@ def get_taxonomy_values(element):
 
 
 def extract_html_elements(file):
-    # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
+    # # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
 
-    # # read tags from html and add into the exists concepts
-    html_elements_data = []
+    # # # read tags from html and add into the exists concepts
+    # html_elements_data = []
 
-    # Send an HTTP GET request to the URL
-    response = requests.get(file)
+    # # Send an HTTP GET request to the URL
+    # response = requests.get(file)
 
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        # Parse the HTML content using BeautifulSoup
-        html_content = response.text
-        soup = BeautifulSoup(html_content, "html.parser")
+    # # Check if the request was successful (status code 200)
+    # if response.status_code == 200:
+    #     # Parse the HTML content using BeautifulSoup
+    #     html_content = response.text
+    #     soup = BeautifulSoup(html_content, "html.parser")
 
-        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+    #     # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
+    #     tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
 
-        # Extract and print the attribute values
-        for element in tags:
-            try:
-                name = element["id"].split("--")[1].split("_")[0]
-                taxonomy_data = get_taxonomy_values(name)
-                html_elements_data.append(taxonomy_data)
-            except Exception as e:
-                print(str(e))
+    #     # Extract and print the attribute values
+    #     for element in tags:
+    #         try:
+    #             name = element["id"].split("--")[1].split("_")[0]
+    #             taxonomy_data = get_taxonomy_values(name)
+    #             html_elements_data.append(taxonomy_data)
+    #         except Exception as e:
+    #             print(str(e))
+    html_elements_data = [
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "DocumentType",
+            "label": "Document Type",
+            "depth": 3,
+            "order": 1.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:submissionTypeItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "The type of document being provided (such as 10-K, 10-Q, 485BPOS, etc). The document type is limited to the same value as the supporting SEC submission type, or the word 'Other'.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "DocumentPeriodEndDate",
+            "label": "Document Period End Date",
+            "depth": 3,
+            "order": 51.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:dateItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "For the EDGAR submission types of Form 8-K: the date of the report, the date of the earliest event reported; for the EDGAR submission types of Form N-1A: the filing date; for all other submission types: the end of the reporting or transition period.  The format of the date is YYYY-MM-DD.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityRegistrantName",
+            "label": "Entity Registrant Name",
+            "depth": 3,
+            "order": 1.0,
+            "priority": 0.0,
+            "parent": "dei:EntityInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "The exact name of the entity filing the report as specified in its charter, which is required by forms filed with the SEC.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityIncorporationStateCountryCode",
+            "label": "Entity Incorporation, State or Country Code",
+            "depth": 3,
+            "order": 8.0,
+            "priority": 0.0,
+            "parent": "dei:EntityInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:edgarStateCountryItemType",
+            "enumerations": "(AL) (AK) (AZ) (AR) (CA) (CO) (CT) (DE) (DC) (FL) (GA) (HI) (ID) (IL) (IN) (IA) (KS) (KY) (LA) (ME) (MD) (MA) (MI) (MN) (MS) (MO) (MT) (NE) (NV) (NH) (NJ) (NM) (NY) (NC) (ND) (OH) (OK) (OR) (PA) (RI) (SC) (SD) (TN) (TX) (UT) (VT) (VA) (WA) (WV) (WI) (WY) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9) (B0) (B2) (Y6) (B3) (B4) (B5) (B6) (B7) (1A) (B8) (B9) (C1) (1B) (1C) (C3) (C4) (1D) (C5) (C6) (C7) (C8) (1F) (C9) (D1) (G6) (D0) (D2) (D3) (1E) (B1) (D4) (D5) (D6) (D9) (E0) (X2) (E2) (E3) (E4) (Z4) (E8) (E9) (F0) (F2) (F3) (F4) (F6) (F7) (F8) (F9) (G0) (Y3) (G1) (G2) (L7) (1M) (G3) (G4) (2N) (G7) (1G) (G9) (G8) (H1) (H2) (H3) (H4) (1J) (1H) (H5) (H7) (H6) (H8) (H9) (I0) (I3) (I4) (2C) (I5) (I6) (2Q) (2M) (J0) (J1) (J3) (J4) (J5) (J6) (GU) (J8) (Y7) (J9) (S0) (K0) (K1) (K4) (X4) (K2) (K3) (K5) (K6) (K7) (K8) (K9) (L0) (L2) (Y8) (L3) (L6) (L8) (M0) (Y9) (M2) (1P) (M3) (J2) (M4) (M5) (M6) (1N) (M7) (1R) (M8) (M9) (N0) (N1) (N2) (1Q) (N4) (N5) (1U) (N6) (N7) (N8) (N9) (O0) (O1) (1T) (O2) (O3) (O4) (2P) (O5) (1K) (1S) (O9) (P0) (Z5) (P1) (P2) (P3) (E1) (T6) (P5) (P6) (P7) (P8) (1W) (Q2) (Q3) (Q4) (Q5) (Q6) (Q7) (1V) (Q8) (P4) (R0) (1Y) (1X) (R1) (R2) (R4) (R5) (R6) (R8) (R9) (S1) (PR) (S3) (S4) (S5) (1Z) (S6) (Z0) (U8) (U7) (U9) (Z1) (V0) (V1) (Y0) (S8) (S9) (T0) (T1) (Z2) (T2) (T8) (U0) (2B) (2A) (D7) (U1) (T3) (1L) (U3) (F1) (V2) (V3) (L9) (V6) (V7) (V8) (V9) (F5) (2D) (W0) (W1) (Z3) (W2) (W3) (W4) (W5) (W6) (W8) (2E) (W7) (2G) (W9) (2H) (C0) (X0) (X1) (2J) (X3) (2K) (2L) (X5) (Q1) (D8) (VI) (X8) (U5) (T7) (Y4) (Y5) (XX) ",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Two-character EDGAR code representing the state or country of incorporation.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityFileNumber",
+            "label": "Entity File Number",
+            "depth": 3,
+            "order": 3.0,
+            "priority": 0.0,
+            "parent": "dei:EntityInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:fileNumberItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Commission file number. The field allows up to 17 characters. The prefix may contain 1-3 digits, the sequence number may contain 1-8 digits, the optional suffix may contain 1-4 characters, and the fields are separated with a hyphen.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityTaxIdentificationNumber",
+            "label": "Entity Tax Identification Number",
+            "depth": 3,
+            "order": 6.0,
+            "priority": 0.0,
+            "parent": "dei:EntityInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:employerIdItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "The Tax Identification Number (TIN), also known as an Employer Identification Number (EIN), is a unique 9-digit value assigned by the IRS.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityAddressAddressLine1",
+            "label": "Entity Address, Address Line One",
+            "depth": 3,
+            "order": 3.0,
+            "priority": 0.0,
+            "parent": "dei:EntityAddressesLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Address Line 1 such as Attn, Building Name, Street Name",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityAddressAddressLine2",
+            "label": "Entity Address, Address Line Two",
+            "depth": 3,
+            "order": 4.0,
+            "priority": 0.0,
+            "parent": "dei:EntityAddressesLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Address Line 2 such as Street or Suite number",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityAddressCityOrTown",
+            "label": "Entity Address, City or Town",
+            "depth": 3,
+            "order": 6.0,
+            "priority": 0.0,
+            "parent": "dei:EntityAddressesLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Name of the City or Town",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityAddressStateOrProvince",
+            "label": "Entity Address, State or Province",
+            "depth": 3,
+            "order": 7.0,
+            "priority": 0.0,
+            "parent": "dei:EntityAddressesLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:stateOrProvinceItemType",
+            "enumerations": "(AL) (AK) (AZ) (AR) (CA) (CO) (CT) (DE) (DC) (FL) (GA) (HI) (ID) (IL) (IN) (IA) (KS) (KY) (LA) (ME) (MD) (MA) (MI) (MN) (MS) (MO) (MT) (NE) (NV) (NH) (NJ) (NM) (NY) (NC) (ND) (OH) (OK) (OR) (PA) (RI) (SC) (SD) (TN) (TX) (UT) (VT) (VA) (WA) (WV) (WI) (WY) (AB) (BC) (MB) (NB) (NL) (NS) (ON) (NT) (NU) (PE) (QC) (SK) (YK) ",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Name of the state or province.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityAddressPostalZipCode",
+            "label": "Entity Address, Postal Zip Code",
+            "depth": 3,
+            "order": 9.0,
+            "priority": 0.0,
+            "parent": "dei:EntityAddressesLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Code for the postal or zip code",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "CityAreaCode",
+            "label": "City Area Code",
+            "depth": 4,
+            "order": 3.0,
+            "priority": 0.0,
+            "parent": "dei:EntityPhoneFaxNumbersLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Area code of city",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "LocalPhoneNumber",
+            "label": "Local Phone Number",
+            "depth": 4,
+            "order": 4.0,
+            "priority": 0.0,
+            "parent": "dei:EntityPhoneFaxNumbersLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:normalizedStringItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Local phone number for entity.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "WrittenCommunications",
+            "label": "Written Communications",
+            "depth": 3,
+            "order": 40.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:booleanItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Boolean flag that is true when the Form 8-K filing is intended to satisfy the filing obligation of the registrant as written communications pursuant to Rule 425 under the Securities Act.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "SolicitingMaterial",
+            "label": "Soliciting Material",
+            "depth": 3,
+            "order": 41.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:booleanItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Boolean flag that is true when the Form 8-K filing is intended to satisfy the filing obligation of the registrant as soliciting material pursuant to Rule 14a-12 under the Exchange Act.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "PreCommencementTenderOffer",
+            "label": "Pre-commencement Tender Offer",
+            "depth": 3,
+            "order": 42.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:booleanItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Boolean flag that is true when the Form 8-K filing is intended to satisfy the filing obligation of the registrant as pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "PreCommencementIssuerTenderOffer",
+            "label": "Pre-commencement Issuer Tender Offer",
+            "depth": 3,
+            "order": 43.0,
+            "priority": 0.0,
+            "parent": "dei:DocumentInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:booleanItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Boolean flag that is true when the Form 8-K filing is intended to satisfy the filing obligation of the registrant as pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "Security12bTitle",
+            "label": "Title of 12(b) Security",
+            "depth": 3,
+            "order": 1.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:securityTitleItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Title of a 12(b) registered security.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "TradingSymbol",
+            "label": "Trading Symbol",
+            "depth": 3,
+            "order": 3.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:tradingSymbolItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Trading symbol of an instrument as listed on an exchange.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "SecurityExchangeName",
+            "label": "Security Exchange Name",
+            "depth": 3,
+            "order": 4.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:edgarExchangeCodeItemType",
+            "enumerations": "(NONE) (NYSE) (NASDAQ) (CHX) (BOX) (BX) (C2) (CBOE) (CboeBYX) (CboeBZX) (CboeEDGA) (CboeEDGX) (GEMX) (IEX) (ISE) (MIAX) (MRX) (NYSEAMER) (NYSEArca) (NYSENAT) (PEARL) (Phlx) ",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Name of the Exchange on which a security is registered.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "Security12bTitle",
+            "label": "Title of 12(b) Security",
+            "depth": 3,
+            "order": 1.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:securityTitleItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Title of a 12(b) registered security.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "TradingSymbol",
+            "label": "Trading Symbol",
+            "depth": 3,
+            "order": 3.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:tradingSymbolItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Trading symbol of an instrument as listed on an exchange.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "SecurityExchangeName",
+            "label": "Security Exchange Name",
+            "depth": 3,
+            "order": 4.0,
+            "priority": 0.0,
+            "parent": "dei:EntityListingsLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "dei:edgarExchangeCodeItemType",
+            "enumerations": "(NONE) (NYSE) (NASDAQ) (CHX) (BOX) (BX) (C2) (CBOE) (CboeBYX) (CboeBZX) (CboeEDGA) (CboeEDGX) (GEMX) (IEX) (ISE) (MIAX) (MRX) (NYSEAMER) (NYSEArca) (NYSENAT) (PEARL) (Phlx) ",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Name of the Exchange on which a security is registered.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+        {
+            "extended link role": "http://xbrl.sec.gov/dei/role/document/Cover",
+            "definition": "995100 - Document - Cover",
+            "prefix": "dei",
+            "name": "EntityEmergingGrowthCompany",
+            "label": "Entity Emerging Growth Company",
+            "depth": 3,
+            "order": 18.0,
+            "priority": 0.0,
+            "parent": "dei:EntityInformationLineItems",
+            "arcrole": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "preferredLabel": "",
+            "systemid": "dei-2023_pre.xsd",
+            "type": "xbrli:booleanItemType",
+            "enumerations": "",
+            "substitutionGroup": "xbrli:item",
+            "balance": "",
+            "periodType": "duration",
+            "abstract": "",
+            "typedDomainRef": "",
+            "ext. enum domain": "",
+            "ext. enum linkrole": "",
+            "documentation": "Indicate if registrant meets the emerging growth company criteria.",
+            "ext. enum linkrole": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+            "deprecatedDate": "",
+        },
+    ]
 
     return html_elements_data
 
@@ -504,10 +1185,10 @@ def generate_ix_header(file_id=None, filename=None):
 
     units = record.get("unit", [])
 
-    non_numeric_1_contextRef = f"From{period_from}to{period_to}"
+    non_numeric_1_contextRef = f"From{period_from}{period_to}"
     non_numeric_1_text = get_cik(cik)
 
-    non_numeric_2_contextRef = f"From{period_from}to{period_to}"
+    non_numeric_2_contextRef = f"From{period_from}{period_to}"
 
     schema_ref_xlink_href = f"{filename}.xsd"
 
@@ -564,60 +1245,155 @@ def generate_ix_header(file_id=None, filename=None):
         nsmap={"ix": namespace.get("ix")},
     )
 
-    # Create the 'xbrli:context' element within 'ix:resources'
-    context = etree.SubElement(
-        resources,
-        "{http://www.xbrl.org/2003/instance}context",
-        id=context_id,
-        nsmap={"xbrli": namespace.get("xbrli")},
-    )
-    # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
-    entity = etree.SubElement(context, "{http://www.xbrl.org/2003/instance}entity")
-    identifier = etree.SubElement(
-        entity,
-        "{http://www.xbrl.org/2003/instance}identifier",
-        scheme="http://www.sec.gov/CIK",
-    )
-    identifier.text = identifier_text
+    # # Create the 'xbrli:context' element within 'ix:resources'
+    # context = etree.SubElement(
+    #     resources,
+    #     "{http://www.xbrl.org/2003/instance}context",
+    #     id=context_id,
+    #     nsmap={"xbrli": namespace.get("xbrli")},
+    # )
+    # # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
+    # entity = etree.SubElement(context, "{http://www.xbrl.org/2003/instance}entity")
 
-    # create the context tags
-    # Create the 'xbrli:period' element within 'xbrli:context'
-    period = etree.SubElement(
-        context,
-        "{http://www.xbrl.org/2003/instance}period",
-        nsmap={"xbrli": namespace.get("xbrli")},
-    )
-    start_date = etree.SubElement(
-        period, "{http://www.xbrl.org/2003/instance}startDate"
-    )
-    start_date.text = start_date_text
-    end_date = etree.SubElement(period, "{http://www.xbrl.org/2003/instance}endDate")
-    end_date.text = end_date_text
+    # identifier = etree.SubElement(
+    #     resources,
+    #     "{http://www.xbrl.org/2003/instance}identifier",
+    #     scheme="http://www.sec.gov/CIK",
+    #     nsmap={"xbrli": namespace.get("xbrli")},
+    # )
+    # identifier.text = identifier_text
+
+    # # create the context tags
+    # # Create the 'xbrli:period' element within 'xbrli:context'
+    # period = etree.SubElement(
+    #     resources,
+    #     "{http://www.xbrl.org/2003/instance}period",
+    #     nsmap={"xbrli": namespace.get("xbrli")},
+    # )
+    # start_date = etree.SubElement(
+    #     period, "{http://www.xbrl.org/2003/instance}startDate"
+    # )
+    # start_date.text = start_date_text
+    # end_date = etree.SubElement(period, "{http://www.xbrl.org/2003/instance}endDate")
+    # end_date.text = end_date_text
+
     unique_contexts = get_unique_context_elements(html_file)
     for context in unique_contexts:
-        elements = context.split("_")
-        for element in elements:
-            if element.startswith("c"):
-                req_list = elements[elements.index(element) : -1]
-                # Remove empty values (empty strings) from the list
-                filtered_list = [item for item in req_list if item]
-                if len(filtered_list) >= 2:
-                    result = check_first_two_numbers_or_not(filtered_list[:2])
-                    # if True duration else instance
-                    from_ = filtered_list[0].replace("c", "")
-                    to_ = filtered_list[1]
-                    if result:
-                        duration_dimension = check_dimension(filtered_list)
-                        if duration_dimension:
-                            duration_dimension_xml(
-                                resources, cik, from_, to_, filtered_list
-                            )
-                        duration_xml(resources, cik, from_, to_)
-                    else:
-                        instance_dimension = check_dimension(filtered_list)
-                        if instance_dimension:
-                            instance_dimension_xml(resources, cik, from_, filtered_list)
-                        instance_xml(resources, cik, from_)
+        if len(context) == 2:
+            # Create the instance_context element
+            instance_context = etree.SubElement(
+                resources,
+                "{http://www.xbrl.org/2003/instance}context",
+                id=f"AsOf{date_formate(context[0])}",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            # Create xbrli:entity element and its child elements
+            entity = etree.SubElement(
+                instance_context,
+                "{http://www.xbrl.org/2003/instance}entity",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            identifier = etree.SubElement(
+                entity,
+                "{http://www.xbrl.org/2003/instance}identifier",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            identifier.set("scheme", "http://www.sec.gov/CIK")
+            identifier.text = f"{get_cik(cik)}"
+
+            # Create xbrli:period element and its child elements
+            period = etree.SubElement(
+                instance_context,
+                "{http://www.xbrl.org/2003/instance}period",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            start_date = etree.SubElement(
+                period,
+                "{http://www.xbrl.org/2003/instance}startDate",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            start_date.text = date_formate(context[0])
+            end_date = etree.SubElement(
+                period,
+                "{http://www.xbrl.org/2003/instance}endDate",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            end_date.text = date_formate(context[0])
+        else:
+            # Create the dutation_context element
+            dutation_context = etree.SubElement(
+                resources,
+                "{http://www.xbrl.org/2003/instance}context",
+                id=f"From{date_formate(context[0])}{date_formate(context[1])}_{context[-1]}",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            # Create xbrli:entity element and its child elements
+            entity = etree.SubElement(
+                dutation_context, "{http://www.xbrl.org/2003/instance}entity"
+            )
+            identifier = etree.SubElement(
+                entity, "{http://www.xbrl.org/2003/instance}identifier"
+            )
+            identifier.set("scheme", "http://www.sec.gov/CIK")
+            identifier.text = f"{get_cik(cik)}"
+
+            # Create xbrli:segment element and its child elements
+            segment = etree.SubElement(
+                entity,
+                "{http://www.xbrl.org/2003/instance}segment",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+
+            explicit_member1 = etree.SubElement(
+                segment,
+                "{http://www.xbrl.org/2003/instance}explicitMember",
+                dimension=f"{context[-2]}".replace("--", ":"),
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            explicit_member1.text = f"{context[-1]}".replace("--", ":")
+
+            # Create xbrli:period element and its child elements
+            period = etree.SubElement(
+                dutation_context,
+                "{http://www.xbrl.org/2003/instance}period",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            startdate = etree.SubElement(
+                period,
+                "{http://www.xbrl.org/2003/instance}startDate",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            startdate.text = date_formate(context[0])
+            enddate = etree.SubElement(
+                period,
+                "{http://www.xbrl.org/2003/instance}endDate",
+                nsmap={"xbrli": namespace.get("xbrli")},
+            )
+            enddate.text = date_formate(context[1])
+
+        # elements = context.split("_")
+        # for element in elements:
+        #     if element.startswith("c"):
+        #         req_list = elements[elements.index(element) : -1]
+        #         # Remove empty values (empty strings) from the list
+        #         filtered_list = [item for item in req_list if item]
+        #         if len(filtered_list) >= 2:
+        #             result = check_first_two_numbers_or_not(filtered_list[:2])
+        #             # if True duration else instance
+        #             from_ = filtered_list[0].replace("c", "")
+        #             to_ = filtered_list[1]
+        #             if result:
+        #                 duration_dimension = check_dimension(filtered_list)
+        #                 if duration_dimension:
+        #                     duration_dimension_xml(
+        #                         resources, cik, from_, to_, filtered_list
+        #                     )
+        #                 duration_xml(resources, cik, from_, to_)
+        #             else:
+        #                 instance_dimension = check_dimension(filtered_list)
+        #                 if instance_dimension:
+        #                     instance_dimension_xml(resources, cik, from_, filtered_list)
+        #                 instance_xml(resources, cik, from_)
 
     # create unit tags
     for unit in units:
@@ -815,45 +1591,29 @@ def generate_xml_comments(filepath=None):
                 file.write(str(soup.prettify()))
 
 
-def add_attributes_html_tag(existing_html_code):
-    # Parse the existing HTML code
-    existing_html_tree = html.fromstring(existing_html_code)
-
-    # Add the specified namespaces to the root HTML element
-    existing_html_tree.attrib.update(
-        {
-            "xmlns": "http://www.w3.org/1999/xhtml",
-            "xmlns:xs": "http://www.w3.org/2001/XMLSchema-instance",
-            "xmlns:xlink": "http://www.w3.org/1999/xlink",
-            "xmlns:xbrli": "http://www.xbrl.org/2003/instance",
-            "xmlns:xbrldi": "http://xbrl.org/2006/xbrldi",
-            "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
-            "xmlns:iso4217": "http://www.xbrl.org/2003/iso4217",
-            "xmlns:ix": "http://www.xbrl.org/2013/inlineXBRL",
-            "xmlns:ixt": "http://www.xbrl.org/inlineXBRL/transformation/2015-02-26",
-            "xmlns:ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31",
-            "xmlns:link": "http://www.xbrl.org/2003/linkbase",
-            "xmlns:dei": "http://xbrl.sec.gov/dei/2023",
-            "xmlns:ref": "http://www.xbrl.org/2006/ref",
-            "xmlns:us-gaap": "http://fasb.org/us-gaap/2023",
-            "xmlns:us-roles": "http://fasb.org/us-roles/2023",
-            "xmlns:country": "http://xbrl.sec.gov/country/2023",
-            "xmlns:srt": "http://fasb.org/srt/2023",
-            "xmlns:fult": "http://fult.com/20230516",
-        }
-    )
-
-    # Save the modified HTML to a file or use it as needed
-    modified_html_code = html.tostring(
-        existing_html_tree, pretty_print=True, encoding="utf-8"
-    ).decode("utf-8")
-    return modified_html_code
-
-
-def get_element_type(html_elements, name):
+def get_element_name_type(html_elements, name):
     for html_element in html_elements:
         if html_element.get("name") == name:
-            return html_element.get("type", None)
+            element_type = html_element.get("type", None)
+            prefix = html_element.get("prefix", None)
+            name = html_element.get("name", None)
+            return element_type, f"{prefix}:{name}"
+
+
+def get_format_value(data_type, input_text):
+    print(data_type, input_text)
+    with open("assets/format.json", "r") as json_file:
+        data = json.load(json_file)
+        for record in data:
+            if (
+                record.get("Datatype 1") == data_type
+                or record.get("Datatype 2") == data_type
+                or record.get("Datatype 3") == data_type
+                or record.get("Datatype 4") == data_type
+            ):
+                    return record.get("Format Code", "")
+            else:
+                    return ""
 
 
 def add_datatype_tags(html_content, html_elements, output_file):
@@ -868,8 +1628,10 @@ def add_datatype_tags(html_content, html_elements, output_file):
 
     for tag in filtered_fonts_tags:
         try:
+            tag_data = tag["id"].split("--")[0].split("_")
+            element_id = f"{tag_data[0]}_{tag_data[1]}"
             name = tag["id"].split("--")[1].split("_")[0]
-            data_type = get_element_type(html_elements, name)
+            data_type, element_name = get_element_name_type(html_elements, name)
             # get tagged elements
             tag_names = tag["id"].split("--")
             elements = [
@@ -881,7 +1643,7 @@ def add_datatype_tags(html_content, html_elements, output_file):
                 formatted_date = parsed_date.strftime("%Y-%m-%d")
                 # From2023-05-162023-05-16_us-gaap_CommonStockMember
                 val = elements[-1].split("_")[0]
-                contextRef = f"From{formatted_date}{formatted_date}_us-gaap_{val}"
+                contextRef = f"From{formatted_date}to{formatted_date}_us-gaap_{val}"
 
             else:
                 context = elements[0].split("_c")[1].split("__")[0]
@@ -901,9 +1663,15 @@ def add_datatype_tags(html_content, html_elements, output_file):
                                 if attr == "contextRef":
                                     new_tag[attr] = contextRef
                                 elif attr == "name":
-                                    new_tag[attr] = record.get("datatype")
+                                    new_tag[attr] = element_name
+                                elif attr == "id":
+                                    new_tag[attr] = element_id
+                                elif attr == "format":
+                                    format_value = get_format_value(data_type, tag.text)
+                                    print(format_value)
+                                    new_tag[attr] = format_value
                                 else:
-                                    new_tag[attr] = "attribute_value"
+                                    new_tag[attr] = ""
                             # Append the text to the new tag
                             new_tag.append(tag.text)
                             tag.string = ""
