@@ -1324,7 +1324,9 @@ def generate_ix_header(file_id=None, filename=None):
             dutation_context = etree.SubElement(
                 resources,
                 "{http://www.xbrl.org/2003/instance}context",
-                id=f"From{date_formate(context[0])}{date_formate(context[1])}_{context[-1]}",
+                id=f"From{date_formate(context[0])}{date_formate(context[1])}_{context[-1]}".replace(
+                    "--", "_"
+                ),
                 nsmap={"xbrli": namespace.get("xbrli")},
             )
             # Create xbrli:entity element and its child elements
@@ -1610,9 +1612,10 @@ def get_format_value(data_type, input_text):
                 or record.get("Datatype 3") == data_type
                 or record.get("Datatype 4") == data_type
             ):
-                    return record.get("Format Code", "")
-            else:
-                    return ""
+                formate_value = record.get("Format Code", "")
+                return formate_value
+        else:
+            return ""
 
 
 def add_datatype_tags(html_content, html_elements, output_file):
@@ -1642,7 +1645,7 @@ def add_datatype_tags(html_content, html_elements, output_file):
                 formatted_date = parsed_date.strftime("%Y-%m-%d")
                 # From2023-05-162023-05-16_us-gaap_CommonStockMember
                 val = elements[-1].split("_")[0]
-                contextRef = f"From{formatted_date}to{formatted_date}_us-gaap_{val}"
+                contextRef = f"From{formatted_date}{formatted_date}_us-gaap_{val}"
 
             else:
                 context = elements[0].split("_c")[1].split("__")[0]
@@ -1667,7 +1670,6 @@ def add_datatype_tags(html_content, html_elements, output_file):
                                     new_tag[attr] = element_id
                                 elif attr == "format":
                                     format_value = get_format_value(data_type, tag.text)
-                                    print(format_value)
                                     new_tag[attr] = format_value
                                 else:
                                     new_tag[attr] = ""
