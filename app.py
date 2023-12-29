@@ -318,9 +318,17 @@ def generate_xml_files():
         except Exception as e:
             print("Body Element Not fount")
 
-        with open(output_file, "w") as output_file:
-            output_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
-            output_file.write(soup.prettify())
+        prettified_html = soup.prettify("ascii", formatter="html")
+
+        with open(output_file, "wb") as output_file:
+            xml_declaration = '<?xml version="1.0" encoding="utf-8"?>\n'
+            xml_declaration_bytes = xml_declaration.encode("utf-8")
+
+            # output_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
+
+            output_file.write(xml_declaration_bytes)
+            # Convert to bytes with UTF-8 encoding
+            output_file.write(prettified_html)
 
         # add comments to generated xml files
         generate_xml_comments(out_dir)

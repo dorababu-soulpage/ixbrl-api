@@ -281,7 +281,7 @@ def duration_xml(resources, cik, from_, to_):
     dutation_context = etree.SubElement(
         resources,
         "{http://www.xbrl.org/2003/instance}context",
-        id=f"From{date_formate(from_)}{date_formate(to_)}",
+        id=f"From{date_formate(from_)}to{date_formate(to_)}",
         nsmap={"xbrli": namespace.get("xbrli")},
     )
     # Create xbrli:entity element and its child elements
@@ -368,7 +368,7 @@ def duration_dimension_xml(resources, cik, from_, to_, items):
             dimensions.append(item)
         if item.endswith("Member"):
             members.append(item)
-    context_id = f"From{date_formate(from_)}{date_formate(to_)}"
+    context_id = f"From{date_formate(from_)}to{date_formate(to_)}"
     for member in members:
         context_id += f"_{member}".replace("--", "_")
     # Create the root element
@@ -514,10 +514,10 @@ def generate_ix_header(file_id=None, filename=None):
 
     units = record.get("unit", [])
 
-    non_numeric_1_contextRef = f"From{period_from}{period_to}"
+    non_numeric_1_contextRef = f"From{period_from}to{period_to}"
     non_numeric_1_text = get_cik(cik)
 
-    non_numeric_2_contextRef = f"From{period_from}{period_to}"
+    non_numeric_2_contextRef = f"From{period_from}to{period_to}"
 
     schema_ref_xlink_href = f"{filename}.xsd"
 
@@ -653,7 +653,7 @@ def generate_ix_header(file_id=None, filename=None):
             dutation_context = etree.SubElement(
                 resources,
                 "{http://www.xbrl.org/2003/instance}context",
-                id=f"From{date_formate(context[0])}{date_formate(context[1])}_{context[-1]}".replace(
+                id=f"From{date_formate(context[0])}to{date_formate(context[1])}_{context[-1]}".replace(
                     "--", "_"
                 ),
                 nsmap={"xbrli": namespace.get("xbrli")},
@@ -974,7 +974,7 @@ def add_datatype_tags(html_content, html_elements, output_file):
                 formatted_date = parsed_date.strftime("%Y-%m-%d")
                 # From2023-05-162023-05-16_us-gaap_CommonStockMember
                 val = elements[-1].split("_")[0]
-                contextRef = f"From{formatted_date}{formatted_date}_us-gaap_{val}"
+                contextRef = f"From{formatted_date}to{formatted_date}_us-gaap_{val}"
 
             else:
                 context = elements[0].split("_c")[1].split("__")[0]
