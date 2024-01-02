@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import boto3
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from decouple import config
 
 # from auto_tagging.tagging import auto_tagging
@@ -318,17 +318,36 @@ def generate_xml_files():
         except Exception as e:
             print("Body Element Not fount")
 
+        # Find all font tags
+        font_tags = soup.find_all("font")
+
+        # Replace each font tag with a span tag
+        for font_tag in font_tags:
+            span_tag = soup.new_tag("span")
+            span_tag.attrs = font_tag.attrs  # Copy attributes
+            span_tag.string = font_tag.get_text()  # Copy text content
+            font_tag.replace_with(span_tag)
+
         prettified_html = soup.prettify("ascii", formatter="html")
 
-        with open(output_file, "wb") as output_file:
+        with open(output_file, "wb") as out_file:
             xml_declaration = '<?xml version="1.0" encoding="utf-8"?>\n'
             xml_declaration_bytes = xml_declaration.encode("utf-8")
 
-            # output_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
+            # out_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
 
-            output_file.write(xml_declaration_bytes)
+            out_file.write(xml_declaration_bytes)
             # Convert to bytes with UTF-8 encoding
-            output_file.write(prettified_html)
+            out_file.write(prettified_html)
+
+        with open(output_file, "r", encoding="utf-8") as f:
+            html_content = f.read()
+            # Find all occurrences of &nbsp; in the HTML document
+            # Replace each occurrence with &#160;
+            html_content = html_content.replace("&nbsp;", "&#160")
+
+            with open(output_file, "w", encoding="utf-8") as output_file:
+                output_file.write(html_content)
 
         # add comments to generated xml files
         generate_xml_comments(out_dir)
