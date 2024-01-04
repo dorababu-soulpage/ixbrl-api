@@ -20,7 +20,7 @@ def clean_cell_text(cell):
     return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
 
-def add_tag_to_keyword(file_id, html_file, xlsx_file):
+def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
     response = requests.get(html_file)
 
     # Check if the request was successful (status code 200)
@@ -31,11 +31,36 @@ def add_tag_to_keyword(file_id, html_file, xlsx_file):
         print(f"Failed to retrieve HTML. Status code: {response.status_code}")
 
     # read excel
+    master_elements = read_excel_sheet(xlsx_file, "Master Element")
+    # Find the first record with CIK equal to target_cik
+
+    #  Find the first record with matching CIK and Document Type
+    matching_record = next(
+        (
+            record
+            for record in master_elements
+            if str(record["CIK"]) == cik.strip()
+            and str(record.get("Document Type")) == form_type.strip()
+        ),
+        None,
+    )
+
+    mapping_id = None
+    # Extract and print the 'Mapping ID' if a matching record was found
+    if matching_record:
+        mapping_id = matching_record["Mapping ID"]
+        print(f"Mapping ID for CIK {cik} and Document Type {form_type}: {mapping_id}")
+    else:
+        print("No record found for CIK =", cik, "and Document Type =", form_type)
+
     mappings = read_excel_sheet(xlsx_file, "Mapping")
     # statement_name = read_excel_sheet(file_path, "Statement Name")
-    # master_elements = read_excel_sheet(file_path, "Master Element")
+    # Filter the list based on 'Mapping ID' equal to 1
+    filtered_mappings = [
+        element for element in mappings if element.get("Mapping ID") == mapping_id
+    ]
 
-    for record in mappings:
+    for record in filtered_mappings:
         keyword = record.get("Element Lable", "")
         tag = record.get("Element Tagging", "")
         element_type = record.get("Element Type", "")
