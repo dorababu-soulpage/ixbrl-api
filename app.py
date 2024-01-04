@@ -344,7 +344,14 @@ def generate_xml_files():
             html_content = f.read()
             # Find all occurrences of &nbsp; in the HTML document
             # Replace each occurrence with &#160;
-            html_content = html_content.replace("&nbsp;", "&#160")
+            html_content = (
+                html_content.replace("&nbsp;", "&#160;")
+                .replace("&rsquo;", "&#180;")
+                .replace("&sect;", "&#167;")
+                .replace("&ndash;", "&#8211;")
+                .replace("&ldquo;", "&#8220;")
+                .replace("&rdquo;", "&#8221;")
+            )
 
             with open(output_file, "w", encoding="utf-8") as output_file:
                 output_file.write(html_content)
@@ -387,7 +394,7 @@ def read_html_tagging_file():
 @app.route("/api/rule-based-tagging", methods=["POST"])
 def rule_based_tagging_view():
     file_id = request.json.get("file_id", None)
-    xlsx_file = request.json.get("xlsx_file", None)
+    xlsx_file = config("RULE_BASED_XLSX")
     record = get_db_record(file_id=file_id)
     html_file = record.get("url", None)
 
