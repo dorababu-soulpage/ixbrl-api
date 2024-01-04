@@ -1,0 +1,189 @@
+[
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:boolballotbox",
+    "Description": null,
+    "Input format": "&#9744;",
+    "Output format": false,
+    "Comments": null
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:boolballotbox",
+    "Description": null,
+    "Input format": "&#9745;",
+    "Output format": true,
+    "Comments": null
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:boolballotbox",
+    "Description": null,
+    "Input format": "&#9746;",
+    "Output format": true,
+    "Comments": null
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:yesnoballotbox",
+    "Description": null,
+    "Input format": "&#9744;",
+    "Output format": "No",
+    "Comments": null
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:yesnoballotbox",
+    "Description": null,
+    "Input format": "&#9745;",
+    "Output format": "Yes",
+    "Comments": null
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:yesnoballotbox",
+    "Description": null,
+    "Input format": "&#9746;",
+    "Output format": "Yes",
+    "Comments": null
+  },
+  {
+    "Datatype 1": "dei:edgarExchangeCodeItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:exchnameen",
+    "Description": null,
+    "Input format": "The New York Stock Exchange",
+    "Output format": "NYSE",
+    "Comments": "sample input text (lower or proper case, leading and trailing \"The\" \"LLC\", etc. ignored)"
+  },
+  {
+    "Datatype 1": "dei:edgarExchangeCodeItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:exchnameen",
+    "Description": null,
+    "Input format": "New York Stock Exchange LLC",
+    "Output format": "NYSE",
+    "Comments": "sample input text (lower or proper case, leading and trailing \"The\" \"LLC\", etc. ignored)"
+  },
+  {
+    "Datatype 1": "dei:stateOrProvinceItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:stateprovnameen",
+    "Description": null,
+    "Input format": "California",
+    "Output format": "CA",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:stateOrProvinceItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:stateprovnameen",
+    "Description": null,
+    "Input format": "Ontario",
+    "Output format": "ON",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:countryCodeItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:countrynameen",
+    "Description": null,
+    "Input format": "Canada",
+    "Output format": "CA",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:countryCodeItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:countrynameen",
+    "Description": null,
+    "Input format": "Cayman Islands",
+    "Output format": "KY",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:countryCodeItemType",
+    "Datatype 2": "dei:stateOrProvinceItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:edgarprovcountryen",
+    "Description": null,
+    "Input format": "Ontario",
+    "Output format": "A6",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:countryCodeItemType",
+    "Datatype 2": "dei:stateOrProvinceItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:edgarprovcountryen",
+    "Description": null,
+    "Input format": "Canada",
+    "Output format": "Z4",
+    "Comments": "sample input text (lower or proper case)"
+  },
+  {
+    "Datatype 1": "dei:filerCategoryItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:entityfilercategoryen",
+    "Description": null,
+    "Input format": "Large accelerated filer",
+    "Output format": "Large Accelerated Filer",
+    "Comments": null
+  },
+  {
+    "Datatype 1": "dei:filerCategoryItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:entityfilercategoryen",
+    "Description": null,
+    "Input format": "accelerated filer",
+    "Output format": "Accelerated Filer",
+    "Comments": null
+  },
+  {
+    "Datatype 1": "dei:filerCategoryItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:entityfilercategoryen",
+    "Description": null,
+    "Input format": "Non-Accelerated Filer",
+    "Output format": "Non-accelerated Filer",
+    "Comments": null
+  }
+]

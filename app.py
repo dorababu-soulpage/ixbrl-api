@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import boto3
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from decouple import config
 
 # from auto_tagging.tagging import auto_tagging
@@ -22,6 +22,8 @@ from utils import (
     get_filename,
     initialize_concepts_dts,
     update_db_record,
+    generate_xml_comments,
+    add_datatype_tags,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -218,7 +220,7 @@ def ixbrl_viewer_file_generation():
     s3_url = upload_zip_to_s3(filename, zip_file_path)
 
     # Remove the file, zip directory
-    shutil.rmtree(file)
+    # shutil.rmtree(file)
     os.remove(zip_file_path)
 
     return {"url": s3_url}
@@ -229,6 +231,7 @@ def generate_xml_files():
     html = request.args.get("html", None)
     xlsx = request.args.get("xlsx", None)
     file_id = request.args.get("file_id", None)
+    html_elements = extract_html_elements(html)
 
     filename = get_filename(html)
     out_dir = f"{storage_dir}/{Path(html).stem}"
@@ -252,31 +255,109 @@ def generate_xml_files():
         html_content = response.text
 
         input_file = f"{out_dir}/input.htm"
+
         # Specify the name of the file where you want to save the content
-        file_name = f"{out_dir}/{Path(html).stem}.htm"
+        output_file = f"{out_dir}/{Path(html).stem}.htm"
 
         # Write the content to a local file
         with open(input_file, "w") as file:
             file.write(html_content)
 
-        # Write the content to a local file
-        with open(file_name, "w") as file:
-            soup = BeautifulSoup(html_content, "html.parser")
-            # Create a temp div element
-            div_element = soup.new_tag("div", style="display: none")
-            ix_header = generate_ix_header(file_id=file_id, filename=filename)
-            div_element.append(BeautifulSoup(ix_header, "lxml-xml"))
+        # add DataTypes tags to tagged elements
+        soup = add_datatype_tags(html_content, html_elements, output_file)
 
-            try:
-                body = soup.body
-                # Insert the div element as the first child of the body
-                body.insert(0, div_element)
+        div_element = soup.new_tag("div", style="display: none")
+        ix_header = generate_ix_header(file_id=file_id, filename=filename)
+        div_element.append(BeautifulSoup(ix_header, "xml"))
+        try:
+            body = soup.body
+            html_tag = soup.html
 
-                # Convert the modified soup object back to a string
-                modified_html = str(soup.prettify())
-                file.write(modified_html)
-            except Exception as e:
-                print("Body Element Not fount")
+            # Find the head tag
+            head_tag = soup.head
+
+            # Create a new meta tag
+            meta_tag = soup.new_tag("meta")
+            meta_tag.attrs["http-equiv"] = "Content-Type"
+            meta_tag.attrs["content"] = "text/html"
+
+            # Insert the meta tag into the head tag
+            head_tag.insert(0, meta_tag)
+
+            # add attributes to html tag
+            html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
+            html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+            html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+            html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
+            html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
+            html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
+            html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+            html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
+            html_tag[
+                "xmlns:ixt"
+            ] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+
+            html_tag[
+                "xmlns:ixt-sec"
+            ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+
+            html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
+            html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
+            html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
+            html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
+            html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
+            html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
+            html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
+            html_tag["xmlns:fult"] = "http://fult.com/20230516"
+            html_tag["xml:lang"] = "en-US"
+            html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+            html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+
+            # Insert the div element as the first child of the body
+            body.insert(0, div_element)
+        except Exception as e:
+            print("Body Element Not fount")
+
+        # Find all font tags
+        font_tags = soup.find_all("font")
+
+        # Replace each font tag with a span tag
+        for font_tag in font_tags:
+            span_tag = soup.new_tag("span")
+            span_tag.attrs = font_tag.attrs  # Copy attributes
+            span_tag.string = font_tag.get_text()  # Copy text content
+            font_tag.replace_with(span_tag)
+
+        prettified_html = soup.prettify("ascii", formatter="html")
+
+        with open(output_file, "wb") as out_file:
+            xml_declaration = '<?xml version="1.0" encoding="utf-8"?>\n'
+            xml_declaration_bytes = xml_declaration.encode("utf-8")
+
+            # out_file.write('<?xml version="1.0" encoding="utf-8"?>\n')
+
+            out_file.write(xml_declaration_bytes)
+            # Convert to bytes with UTF-8 encoding
+            out_file.write(prettified_html)
+
+        with open(output_file, "r", encoding="utf-8") as f:
+            html_content = f.read()
+            # Find all occurrences of &nbsp; in the HTML document
+            # Replace each occurrence with &#160;
+            html_content = (
+                html_content.replace("&nbsp;", "&#160;")
+                .replace("&rsquo;", "&#180;")
+                .replace("&sect;", "&#167;")
+                .replace("&ndash;", "&#8211;")
+                .replace("&ldquo;", "&#8220;")
+                .replace("&rdquo;", "&#8221;")
+            )
+
+            with open(output_file, "w", encoding="utf-8") as output_file:
+                output_file.write(html_content)
+
+        # add comments to generated xml files
+        generate_xml_comments(out_dir)
 
     return redirect(url_for("ixbrl_viewer_file_generation", file_path=out_dir))
 
@@ -300,7 +381,10 @@ def read_html_tagging_file():
         generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
         return redirect(
             url_for(
-                "generate_xml_files", file_id=file_id, html=html_file, xlsx=file_name
+                "generate_xml_files",
+                file_id=file_id,
+                html=html_file,
+                xlsx=file_name,
             )
         )
     else:
@@ -310,7 +394,7 @@ def read_html_tagging_file():
 @app.route("/api/rule-based-tagging", methods=["POST"])
 def rule_based_tagging_view():
     file_id = request.json.get("file_id", None)
-    xlsx_file = request.json.get("xlsx_file", None)
+    xlsx_file = config("RULE_BASED_XLSX")
     record = get_db_record(file_id=file_id)
     html_file = record.get("url", None)
 
