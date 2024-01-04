@@ -397,7 +397,8 @@ def rule_based_tagging_view():
     xlsx_file = config("RULE_BASED_XLSX")
     record = get_db_record(file_id=file_id)
     html_file = record.get("url", None)
-
+    cik = record.get("cik", None)
+    form_type = record.get("formType", None)
     if file_id is None or xlsx_file is None:
         return {"error": "invalid input file id, xlsx_file is required"}
     if html_file is None:
@@ -406,8 +407,10 @@ def rule_based_tagging_view():
     # # Read the contents of the file without saving it
     # add_tag_to_keyword(file_id, html_file, xlsx_file)
 
-    thread = Thread(target=add_tag_to_keyword, args=(file_id, html_file, xlsx_file))
-    thread.start()
+    add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type)
+
+    # thread = Thread(target=add_tag_to_keyword, args=(file_id, html_file, xlsx_file))
+    # thread.start()
 
     return {"message": "rule based tagging is started "}, 200
 
