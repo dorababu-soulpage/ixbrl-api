@@ -841,7 +841,7 @@ def update_db_record(file_id, data):
         # SQL query to update the JSON field using -> operator
         update_sql = f"""
             UPDATE files
-            SET extra = extra || %s::jsonb
+            SET extra = extra || %s::jsonb, status = 'Success'
             WHERE id = %s
         """
         # Execute the SQL query with parameters
