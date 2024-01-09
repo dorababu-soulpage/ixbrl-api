@@ -318,16 +318,6 @@ def generate_xml_files():
         except Exception as e:
             print("Body Element Not fount")
 
-        # Find all font tags
-        font_tags = soup.find_all("font")
-
-        # Replace each font tag with a span tag
-        for font_tag in font_tags:
-            span_tag = soup.new_tag("span")
-            span_tag.attrs = font_tag.attrs  # Copy attributes
-            span_tag.string = font_tag.get_text()  # Copy text content
-            font_tag.replace_with(span_tag)
-
         prettified_html = soup.prettify("ascii", formatter="html")
 
         with open(output_file, "wb") as out_file:
@@ -351,6 +341,8 @@ def generate_xml_files():
                 .replace("&ndash;", "&#8211;")
                 .replace("&ldquo;", "&#8220;")
                 .replace("&rdquo;", "&#8221;")
+                .replace("<font", "<span")
+                .replace("</font>", "</span>")
             )
 
             with open(output_file, "w", encoding="utf-8") as output_file:

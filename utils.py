@@ -60,8 +60,8 @@ def get_unique_context_elements(file):
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
 
-        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
         taxonomy_tags = []
         # Extract and print the attribute values
         for element in tags:
@@ -222,8 +222,8 @@ def extract_html_elements(file):
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
 
-        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
 
         # Extract and print the attribute values
         for element in tags:
@@ -952,9 +952,9 @@ def add_datatype_tags(html_content, html_elements, output_file):
 
     soup = BeautifulSoup(html_content, "html.parser")
 
-    # Find all FONT tags with ID starting with "xdx"
+    # Find all FONT tags with ID starting with "apex"
     filtered_fonts_tags = soup.find_all(
-        "font", id=lambda value: value and value.startswith("xdx")
+        "font", id=lambda value: value and value.startswith("apex")
     )
 
     for tag in filtered_fonts_tags:
@@ -1007,6 +1007,7 @@ def add_datatype_tags(html_content, html_elements, output_file):
                             tag.string = ""
                             # Replace the original tag with the new_tag
                             tag.append(new_tag)
+
         except Exception as e:
             print(str(e))
     return soup
