@@ -677,9 +677,9 @@ def generate_ix_header(file_id=None, filename=None):
 
             explicit_member1 = etree.SubElement(
                 segment,
-                "{http://www.xbrl.org/2003/instance}explicitMember",
+                "{http://xbrl.org/2006/xbrldi}explicitMember",
                 dimension=f"{context[-2]}".replace("--", ":"),
-                nsmap={"xbrli": namespace.get("xbrli")},
+                nsmap={"xbrldi": namespace.get("xbrldi")},
             )
             explicit_member1.text = f"{context[-1]}".replace("--", ":")
 
@@ -1014,3 +1014,11 @@ def add_datatype_tags(html_content, html_elements, output_file):
 
     # with open(output_file, "w") as output_file:
     #     output_file.write(str(soup))
+
+
+def remove_ix_namespaces(html_content):
+    for key, value in namespace.items():
+        namespace_format = f'xmlns:{key}="{value}"'
+        html_content = html_content.replace(namespace_format, "")
+
+    return html_content

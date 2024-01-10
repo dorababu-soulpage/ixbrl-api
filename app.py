@@ -24,6 +24,7 @@ from utils import (
     update_db_record,
     generate_xml_comments,
     add_datatype_tags,
+    remove_ix_namespaces,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -268,7 +269,10 @@ def generate_xml_files():
 
         div_element = soup.new_tag("div", style="display: none")
         ix_header = generate_ix_header(file_id=file_id, filename=filename)
-        div_element.append(BeautifulSoup(ix_header, "xml"))
+        ix_header_content = str(BeautifulSoup(ix_header, "xml"))
+        final_ix_header_content = remove_ix_namespaces(ix_header_content)
+        div_element.append(BeautifulSoup(final_ix_header_content, "xml"))
+
         try:
             body = soup.body
             html_tag = soup.html
