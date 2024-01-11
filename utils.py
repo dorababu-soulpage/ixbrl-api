@@ -1022,3 +1022,38 @@ def remove_ix_namespaces(html_content):
         html_content = html_content.replace(namespace_format, "")
 
     return html_content
+
+
+def add_html_attributes():
+    # Create a BeautifulSoup object
+    soup = BeautifulSoup("", "html.parser")
+
+    # Create the html tag
+    html_tag = soup.new_tag("html")
+
+    # Add attributes to the html tag
+    html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
+    html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+    html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+    html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
+    html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
+    html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
+    html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+    html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
+    html_tag["xmlns:ixt"] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+    html_tag[
+        "xmlns:ixt-sec"
+    ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+    html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
+    html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
+    html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
+    html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
+    html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
+    html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
+    html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
+    html_tag["xmlns:fult"] = "http://fult.com/20230516"
+    html_tag["xml:lang"] = "en-US"
+    html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+    html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+
+    return html_tag
