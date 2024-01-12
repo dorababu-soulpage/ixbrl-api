@@ -308,7 +308,7 @@ def generate_xml_files():
 
             html_content = remove_ix_namespaces(html_content)
             html_attributes = add_html_attributes()
-
+            html_attributes = str(html_attributes).replace("</html>", "")
             # Find all occurrences of &nbsp; in the HTML document
             # Replace each occurrence with &#160;
             html_content = (
@@ -320,8 +320,7 @@ def generate_xml_files():
                 .replace("&rdquo;", "&#8221;")
                 .replace("<font", "<span")
                 .replace("</font>", "</span>")
-                .replace("<html>", str(html_attributes))
-                .replace("</html>", "")
+                .replace("<html>", html_attributes)
             )
             with open(output_file, "w", encoding="utf-8") as output_file:
                 output_file.write(html_content)
