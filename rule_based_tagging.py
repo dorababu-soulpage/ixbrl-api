@@ -87,12 +87,12 @@ def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
                     if modified_text == keyword:
                         if cell.string is not None:
                             # keyword is not not table row
-                            # tag = f'<font id="xdx_40N_e{tag}_{uuid.uuid4().hex}">{keyword}</font>'
+                            # tag = f'<font id="apex_40N_e{tag}_{uuid.uuid4().hex}">{keyword}</font>'
                             # cell.string.replace_with(BeautifulSoup(tag, "html.parser"))
 
                             # keyword is table row
                             # Find the <tr> tag and add the id attribute
-                            row["id"] = f"xdx_40N_e{tag}_{uuid.uuid4().hex}"
+                            row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
 
     # Create a BytesIO object to store the modified HTML content
     html_bytes = io.BytesIO()
@@ -110,7 +110,9 @@ def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
     # Assuming s3_uploader is a function to upload the file to S3
     # Replace this with your actual S3 upload implementation
     url = s3_uploader(new_file_name, html_bytes)
+    print(url)
     update_db_record(file_id, {"url": url})
+    print("Url updated successfully in database")
 
     return
 

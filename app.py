@@ -24,6 +24,8 @@ from utils import (
     update_db_record,
     generate_xml_comments,
     add_datatype_tags,
+    remove_ix_namespaces,
+    add_html_attributes,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -269,9 +271,9 @@ def generate_xml_files():
         div_element = soup.new_tag("div", style="display: none")
         ix_header = generate_ix_header(file_id=file_id, filename=filename)
         div_element.append(BeautifulSoup(ix_header, "xml"))
+
         try:
             body = soup.body
-            html_tag = soup.html
 
             # Find the head tag
             head_tag = soup.head
@@ -284,49 +286,10 @@ def generate_xml_files():
             # Insert the meta tag into the head tag
             head_tag.insert(0, meta_tag)
 
-            # add attributes to html tag
-            html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
-            html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
-            html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
-            html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
-            html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
-            html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
-            html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
-            html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
-            html_tag[
-                "xmlns:ixt"
-            ] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
-
-            html_tag[
-                "xmlns:ixt-sec"
-            ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
-
-            html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
-            html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
-            html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
-            html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
-            html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
-            html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
-            html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
-            html_tag["xmlns:fult"] = "http://fult.com/20230516"
-            html_tag["xml:lang"] = "en-US"
-            html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-            html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
-
             # Insert the div element as the first child of the body
             body.insert(0, div_element)
         except Exception as e:
             print("Body Element Not fount")
-
-        # Find all font tags
-        font_tags = soup.find_all("font")
-
-        # Replace each font tag with a span tag
-        for font_tag in font_tags:
-            span_tag = soup.new_tag("span")
-            span_tag.attrs = font_tag.attrs  # Copy attributes
-            span_tag.string = font_tag.get_text()  # Copy text content
-            font_tag.replace_with(span_tag)
 
         prettified_html = soup.prettify("ascii", formatter="html")
 
@@ -342,6 +305,10 @@ def generate_xml_files():
 
         with open(output_file, "r", encoding="utf-8") as f:
             html_content = f.read()
+
+            html_content = remove_ix_namespaces(html_content)
+            html_attributes = add_html_attributes()
+            html_attributes = str(html_attributes).replace("</html>", "")
             # Find all occurrences of &nbsp; in the HTML document
             # Replace each occurrence with &#160;
             html_content = (
@@ -351,8 +318,10 @@ def generate_xml_files():
                 .replace("&ndash;", "&#8211;")
                 .replace("&ldquo;", "&#8220;")
                 .replace("&rdquo;", "&#8221;")
+                .replace("<font", "<span")
+                .replace("</font>", "</span>")
+                .replace("<html>", html_attributes)
             )
-
             with open(output_file, "w", encoding="utf-8") as output_file:
                 output_file.write(html_content)
 

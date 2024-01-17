@@ -60,8 +60,8 @@ def get_unique_context_elements(file):
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
 
-        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
         taxonomy_tags = []
         # Extract and print the attribute values
         for element in tags:
@@ -166,7 +166,6 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
         # for category, records in concepts.items():
         #     concept_headers = records[0]
         #     break
-
         for header, value in concept_headers.items():
             if record.get(value, None) == "credit":
                 record.update({"calculationWeight": 1})
@@ -175,17 +174,26 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
 
             record_data[header] = record.get(value, None)
 
+        counter = 1
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
             concepts[definition].append(record_data)
+
+            # change number
+            parts = definition.split("-")
+            formatted_number = f"{counter:06d}"
+            result_string = f"{formatted_number} - {' - '.join(parts[1:]).strip()}"
+            counter += 1
+
             # add definition into DTS sheet also
             new_definition = {
                 "specification": "extension",
                 "file type": "role",
-                "file, href or role definition": definition,
+                "file, href or role definition": result_string,
                 "namespace URI": f"http://xbrl.us/widgetexample/role/{name}",
             }
+
             DTS.append(new_definition)
         else:
             concepts[definition].append(record_data)
@@ -222,8 +230,8 @@ def extract_html_elements(file):
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
 
-        # Find all tags with attributes that start with "id" and have a value starting with "xdx_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("xdx_"))
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
 
         # Extract and print the attribute values
         for element in tags:
@@ -677,9 +685,9 @@ def generate_ix_header(file_id=None, filename=None):
 
             explicit_member1 = etree.SubElement(
                 segment,
-                "{http://www.xbrl.org/2003/instance}explicitMember",
+                "{http://xbrl.org/2006/xbrldi}explicitMember",
                 dimension=f"{context[-2]}".replace("--", ":"),
-                nsmap={"xbrli": namespace.get("xbrli")},
+                nsmap={"xbrldi": namespace.get("xbrldi")},
             )
             explicit_member1.text = f"{context[-1]}".replace("--", ":")
 
@@ -952,9 +960,9 @@ def add_datatype_tags(html_content, html_elements, output_file):
 
     soup = BeautifulSoup(html_content, "html.parser")
 
-    # Find all FONT tags with ID starting with "xdx"
+    # Find all FONT tags with ID starting with "apex"
     filtered_fonts_tags = soup.find_all(
-        "font", id=lambda value: value and value.startswith("xdx")
+        "font", id=lambda value: value and value.startswith("apex")
     )
 
     for tag in filtered_fonts_tags:
@@ -1007,9 +1015,53 @@ def add_datatype_tags(html_content, html_elements, output_file):
                             tag.string = ""
                             # Replace the original tag with the new_tag
                             tag.append(new_tag)
+
         except Exception as e:
             print(str(e))
     return soup
 
     # with open(output_file, "w") as output_file:
     #     output_file.write(str(soup))
+
+
+def remove_ix_namespaces(html_content):
+    for key, value in namespace.items():
+        namespace_format = f'xmlns:{key}="{value}"'
+        html_content = html_content.replace(namespace_format, "")
+
+    return html_content
+
+
+def add_html_attributes():
+    # Create a BeautifulSoup object
+    soup = BeautifulSoup("", "html.parser")
+
+    # Create the html tag
+    html_tag = soup.new_tag("html")
+
+    # Add attributes to the html tag
+    html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
+    html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+    html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+    html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
+    html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
+    html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
+    html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+    html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
+    html_tag["xmlns:ixt"] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+    html_tag[
+        "xmlns:ixt-sec"
+    ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+    html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
+    html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
+    html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
+    html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
+    html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
+    html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
+    html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
+    html_tag["xmlns:fult"] = "http://fult.com/20230516"
+    html_tag["xml:lang"] = "en-US"
+    html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+    html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+
+    return html_tag
