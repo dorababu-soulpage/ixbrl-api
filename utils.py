@@ -166,7 +166,6 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
         # for category, records in concepts.items():
         #     concept_headers = records[0]
         #     break
-
         for header, value in concept_headers.items():
             if record.get(value, None) == "credit":
                 record.update({"calculationWeight": 1})
@@ -175,17 +174,26 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
 
             record_data[header] = record.get(value, None)
 
+        counter = 1
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
             concepts[definition].append(record_data)
+
+            # change number
+            parts = definition.split("-")
+            formatted_number = f"{counter:06d}"
+            result_string = f"{formatted_number} - {' - '.join(parts[1:]).strip()}"
+            counter += 1
+
             # add definition into DTS sheet also
             new_definition = {
                 "specification": "extension",
                 "file type": "role",
-                "file, href or role definition": definition,
+                "file, href or role definition": result_string,
                 "namespace URI": f"http://xbrl.us/widgetexample/role/{name}",
             }
+
             DTS.append(new_definition)
         else:
             concepts[definition].append(record_data)
