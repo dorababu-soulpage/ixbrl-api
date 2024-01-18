@@ -160,6 +160,7 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
         # make definition as key in output dict
         name = record.get("name")
         definition = record.get("definition")
+        parenthetical = record.get("definition")
 
         # concept_keys =
         # # get concept headers
@@ -238,6 +239,9 @@ def extract_html_elements(file):
             try:
                 name = element["id"].split("--")[1].split("_")[0]
                 taxonomy_data = get_taxonomy_values(name)
+                # Check if the parenthetical attribute exists
+                if "parenthetical" in element.attrs.keys():
+                    taxonomy_data["parenthetical"] = True
                 html_elements_data.append(taxonomy_data)
             except Exception as e:
                 print(str(e))
