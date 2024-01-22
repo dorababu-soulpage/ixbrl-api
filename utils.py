@@ -176,6 +176,31 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
             record_data[header] = record.get(value, None)
 
         counter = 1
+        if parenthetical:
+            parenthetical_definition = f"{definition} - parenthetical"
+            # add definition matched records into category list
+            if parenthetical_definition not in concepts.keys():
+                concepts[parenthetical_definition] = []
+                concepts[parenthetical_definition].append(record_data)
+
+                # change number
+                parts = parenthetical_definition.split("-")
+                formatted_number = f"{counter:06d}"
+                result_string = f"{formatted_number} - {' - '.join(parts[1:]).strip()}"
+                counter += 1
+
+                # add parenthetical_definition into DTS sheet also
+                new_parenthetical_definition = {
+                    "specification": "extension",
+                    "file type": "role",
+                    "file, href or role definition": result_string,
+                    "namespace URI": f"http://xbrl.us/widgetexample/role/{name}",
+                }
+
+                DTS.append(new_parenthetical_definition)
+            else:
+                concepts[parenthetical_definition].append(record_data)
+
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
