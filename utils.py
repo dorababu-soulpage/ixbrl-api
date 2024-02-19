@@ -160,6 +160,7 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
         # make definition as key in output dict
         name = record.get("name")
         definition = record.get("definition")
+        parenthetical = record.get("definition")
 
         # concept_keys =
         # # get concept headers
@@ -175,6 +176,31 @@ def add_html_elements_to_concept(html_elements_data, concepts: dict, DTS: list):
             record_data[header] = record.get(value, None)
 
         counter = 1
+        if parenthetical:
+            parenthetical_definition = f"{definition} - parenthetical"
+            # add definition matched records into category list
+            if parenthetical_definition not in concepts.keys():
+                concepts[parenthetical_definition] = []
+                concepts[parenthetical_definition].append(record_data)
+
+                # change number
+                parts = parenthetical_definition.split("-")
+                formatted_number = f"{counter:06d}"
+                result_string = f"{formatted_number} - {' - '.join(parts[1:]).strip()}"
+                counter += 1
+
+                # add parenthetical_definition into DTS sheet also
+                new_parenthetical_definition = {
+                    "specification": "extension",
+                    "file type": "role",
+                    "file, href or role definition": result_string,
+                    "namespace URI": f"http://xbrl.us/widgetexample/role/{name}",
+                }
+
+                DTS.append(new_parenthetical_definition)
+            else:
+                concepts[parenthetical_definition].append(record_data)
+
         # add definition matched records into category list
         if definition not in concepts.keys():
             concepts[definition] = []
@@ -238,6 +264,9 @@ def extract_html_elements(file):
             try:
                 name = element["id"].split("--")[1].split("_")[0]
                 taxonomy_data = get_taxonomy_values(name)
+                # Check if the parenthetical attribute exists
+                if "parenthetical" in element.attrs.keys():
+                    taxonomy_data["parenthetical"] = True
                 html_elements_data.append(taxonomy_data)
             except Exception as e:
                 print(str(e))
@@ -812,6 +841,28 @@ username = config("DATABASE_USERNAME")
 password = config("DATABASE_PASSWORD")
 
 
+def get_client_record(client_id):
+    import psycopg2
+
+    db_url = f"postgresql://{username}:{password}@{host}:5432/{db}"
+    try:
+        # Attempt to connect and execute queries
+        connection = psycopg2.connect(db_url)
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM clients where id={client_id}")
+        row = cursor.fetchone()
+        columns = [column[0] for column in cursor.description]
+        return dict(zip(columns, row))
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 def get_db_record(file_id):
     import psycopg2
 
@@ -849,7 +900,7 @@ def update_db_record(file_id, data):
         # SQL query to update the JSON field using -> operator
         update_sql = f"""
             UPDATE files
-            SET extra = extra || %s::jsonb, status = 'Success'
+            SET extra = extra || %s::jsonb
             WHERE id = %s
         """
         # Execute the SQL query with parameters
@@ -1049,9 +1100,9 @@ def add_html_attributes():
     html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
     html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
     html_tag["xmlns:ixt"] = "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
-    html_tag[
-        "xmlns:ixt-sec"
-    ] = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+    html_tag["xmlns:ixt-sec"] = (
+        "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+    )
     html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
     html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
     html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
@@ -1065,3 +1116,28 @@ def add_html_attributes():
     html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
 
     return html_tag
+
+
+def get_definitions(file):
+    # Send an HTTP GET request to the URL
+    response = requests.get(file)
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse the HTML content using BeautifulSoup
+        html_content = response.text
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+
+    roles = [tag.get("id", "") for tag in tags]
+    definitions = []
+
+    for _role in roles:
+        role = _role.split("--")
+        _definition = role[1].split(":")
+        definition = _definition[1].split("_")[0]
+        if definition not in definitions:
+            definitions.append(definition)
+
+    return definitions

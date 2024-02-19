@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com/ -->
+<!-- Creation Date : -->
+<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->
+
+<link:linkbase xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:xbrldt="http://xbrl.org/2005/xbrldt"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <link:roleRef roleURI="http://www.microsoft.com/20230930/taxonomy/role/Role_StatementINCOMESTATEMENTS" xlink:href="msft-20230930.xsd#Role_StatementINCOMESTATEMENTS" xlink:type="simple" />
+
+  <link:roleRef roleURI="http://www.microsoft.com/20230930/taxonomy/role/Role_StatementCOMPREHENSIVEINCOMESTATEMENTS" xlink:href="msft-20230930.xsd#Role_StatementCOMPREHENSIVEINCOMESTATEMENTS" xlink:type="simple" />
+
+  <link:roleRef roleURI="http://www.microsoft.com/20230930/taxonomy/role/Role_StatementBALANCESHEETS" xlink:href="msft-20230930.xsd#Role_StatementBALANCESHEETS" xlink:type="simple" />
+
+
+  <link:calculationLink xlink:role="http://www.apple.com/role/CONDENSEDCONSOLIDATEDSTATEMENTSOFOPERATIONSUnaudited" xlink:type="extended">
+
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_NetIncomeLoss_86a444f7-44a4-428c-897b-40c0811f9da8" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_NetIncomeLoss" />
+
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest_68ce667c-4126-4f34-9a7a-459160d85111" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest" />
+
+    <link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_NetIncomeLoss_86a444f7-44a4-428c-897b-40c0811f9da8" xlink:to="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest_68ce667c-4126-4f34-9a7a-459160d85111" xlink:type="arc" />
+
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_IncomeTaxExpenseBenefit_a0fc63bd-261b-43e2-acf6-771b7797ff16" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_IncomeTaxExpenseBenefit" />
+
+    <link:calculationArc order="2" weight="-1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_NetIncomeLoss_86a444f7-44a4-428c-897b-40c0811f9da8" xlink:to="loc_us-gaap_IncomeTaxExpenseBenefit_a0fc63bd-261b-43e2-acf6-771b7797ff16" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_OperatingExpenses_797d5eb6-f593-409b-87af-0e7be6d62aad" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_OperatingExpenses" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_ResearchAndDevelopmentExpense_f44aedb8-f3a0-4eef-ae83-5fa9fb8d7490" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_ResearchAndDevelopmentExpense" />
+    <link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_OperatingExpenses_797d5eb6-f593-409b-87af-0e7be6d62aad" xlink:to="loc_us-gaap_ResearchAndDevelopmentExpense_f44aedb8-f3a0-4eef-ae83-5fa9fb8d7490" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_SellingGeneralAndAdministrativeExpense_5c1663a4-997a-42c7-905e-0ab0472bd079" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_SellingGeneralAndAdministrativeExpense" />
+    <link:calculationArc order="2" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_OperatingExpenses_797d5eb6-f593-409b-87af-0e7be6d62aad" xlink:to="loc_us-gaap_SellingGeneralAndAdministrativeExpense_5c1663a4-997a-42c7-905e-0ab0472bd079" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest_ed7a5195-2975-4ebf-948a-f8ecd4edb17d" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_OperatingIncomeLoss_b28b38cf-ebd8-4349-b86a-51a3a9102a55" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_OperatingIncomeLoss" />
+    <link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest_ed7a5195-2975-4ebf-948a-f8ecd4edb17d" xlink:to="loc_us-gaap_OperatingIncomeLoss_b28b38cf-ebd8-4349-b86a-51a3a9102a55" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_NonoperatingIncomeExpense_55fcaaf5-dbca-4a97-ac6a-be84afb4ef7b" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_NonoperatingIncomeExpense" />
+    <link:calculationArc order="2" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest_ed7a5195-2975-4ebf-948a-f8ecd4edb17d" xlink:to="loc_us-gaap_NonoperatingIncomeExpense_55fcaaf5-dbca-4a97-ac6a-be84afb4ef7b" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_OperatingIncomeLoss_5fea7c37-b394-4c80-b5fb-5c1336a05df0" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_OperatingIncomeLoss" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_GrossProfit_8102da1e-fd02-4fb8-8ee2-256f1b71b1bc" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_GrossProfit" />
+    <link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_OperatingIncomeLoss_5fea7c37-b394-4c80-b5fb-5c1336a05df0" xlink:to="loc_us-gaap_GrossProfit_8102da1e-fd02-4fb8-8ee2-256f1b71b1bc" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_OperatingExpenses_b20c3aea-ea5a-4492-a6fc-fa9b4dd81d6a" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_OperatingExpenses" />
+    <link:calculationArc order="2" weight="-1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_OperatingIncomeLoss_5fea7c37-b394-4c80-b5fb-5c1336a05df0" xlink:to="loc_us-gaap_OperatingExpenses_b20c3aea-ea5a-4492-a6fc-fa9b4dd81d6a" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_GrossProfit_33c8c77d-9ea1-45f2-88fa-3b2cf67167fc" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_GrossProfit" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax_06965c70-89da-4c7a-b8f1-c162545cf492" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax" />
+    <link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_GrossProfit_33c8c77d-9ea1-45f2-88fa-3b2cf67167fc" xlink:to="loc_us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax_06965c70-89da-4c7a-b8f1-c162545cf492" xlink:type="arc" />
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_CostOfGoodsAndServicesSold_4db8fa71-c585-4dcf-8609-2ea38b192069" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_CostOfGoodsAndServicesSold" />
+    <link:calculationArc order="2" weight="-1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_GrossProfit_33c8c77d-9ea1-45f2-88fa-3b2cf67167fc" xlink:to="loc_us-gaap_CostOfGoodsAndServicesSold_4db8fa71-c585-4dcf-8609-2ea38b192069" xlink:type="arc" />
+  </link:calculationLink> 

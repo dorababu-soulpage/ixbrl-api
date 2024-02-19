@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com/ -->
+<!-- Creation Date : -->
+<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->
+
+<link:linkbase xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedLabel" xlink:type="simple" />
+
+  <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedTerseLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTerseLabel" xlink:type="simple" />
+
+  <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedTotalLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTotalLabel" xlink:type="simple" />
+
+  <link:roleRef roleURI="http://www.xbrl.org/2009/role/netLabel" xlink:href="http://www.xbrl.org/lrr/role/net-2009-12-16.xsd#netLabel" xlink:type="simple" />
+
+  <link:labelLink xlink:role="http://www.xbrl.org/2003/role/link" xlink:title="labelLink" xlink:type="extended">
+
+    <link:label id="lab_us-gaap_OtherShortTermInvestments_234723b2-7343-476f-b9a9-f832cb18bd36_terseLabel_en-US" xlink:label="lab_us-gaap_OtherShortTermInvestments" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xlink:type="resource"
+      xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en-US">Short-term investments</link:label>
+
+    <link:label id="lab_us-gaap_OtherShortTermInvestments_label_en-US" xlink:label="lab_us-gaap_OtherShortTermInvestments" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource"
+      xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en-US">Other Short-Term Investments</link:label>
+
+    <link:loc xlink:type="locator" xlink:label="loc_us-gaap_OtherShortTermInvestments" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_OtherShortTermInvestments" />
+
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_us-gaap_OtherShortTermInvestments" xlink:to="lab_us-gaap_OtherShortTermInvestments" xlink:type="arc" order="1" />

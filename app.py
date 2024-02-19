@@ -5,14 +5,15 @@ from threading import Thread
 from urllib.parse import urlparse
 
 import boto3
-import pandas as pd
 import requests
-from bs4 import BeautifulSoup, NavigableString
+import pandas as pd
 from decouple import config
+from datetime import datetime
+from bs4 import BeautifulSoup, NavigableString
 
 # from auto_tagging.tagging import auto_tagging
 from flask import Flask, redirect, request, url_for
-
+from xml_generation.generate_xsd import generate_xsd_schema
 from utils import (
     add_html_elements_to_concept,
     extract_html_elements,
@@ -26,6 +27,8 @@ from utils import (
     add_datatype_tags,
     remove_ix_namespaces,
     add_html_attributes,
+    get_definitions,
+    get_client_record,
 )
 from rule_based_tagging import add_tag_to_keyword
 
@@ -366,10 +369,10 @@ def rule_based_tagging_view():
     xlsx_file = config("RULE_BASED_XLSX")
     record = get_db_record(file_id=file_id)
     html_file = record.get("url", None)
-    cik = record.get("cik", None)
+    cik = request.json.get("cik", None)
     form_type = record.get("formType", None)
-    if file_id is None or xlsx_file is None:
-        return {"error": "invalid input file id, xlsx_file is required"}
+    if file_id is None or cik is None:
+        return {"error": "invalid input file id, cik is required"}
     if html_file is None:
         return {"error": "This file id done not have any html files"}
 
@@ -382,6 +385,51 @@ def rule_based_tagging_view():
     # thread.start()
 
     return {"message": "rule based tagging is started "}, 200
+
+
+@app.route("/api/xml-generation", methods=["GET", "POST"])
+def read_html_tagging_file():
+    file_id = request.json.get("file_id")
+    record = get_db_record(file_id=file_id)
+    client_id = record.get("clientId", None)
+    client_data = get_client_record(client_id)
+    extra = record.get("extra", None)
+    # period date
+    period = record.get("period", "")
+    if period:
+        input_date = datetime.strptime(str(period), "%Y-%m-%d %H:%M:%S")
+        period_date_str = input_date.strftime("%Y%m%d")
+    if extra is not None:
+        html_file = extra.get("url")
+        url_path = Path(html_file)
+        filename = get_filename(html_file)
+        # Use the name attribute to get the file name
+        # file_name = f"{url_path.stem}.xlsx"
+        # xlsx_file = f"{storage_dir}/{Path(html_file).stem}/DTS/{file_name}"
+        # xlsx_file_store_loc = f"{storage_dir}/{Path(html_file).stem}/DTS/"
+        # html_elements = extract_html_elements(html_file)
+        definitions = get_definitions(html_file)
+
+        ticker = client_data.get("ticker", "")
+        filing_date = period_date_str
+        company_website = client_data.get("website", "")
+        generate_xsd_schema(definitions, ticker, filing_date, company_website)
+
+        # print(html_elements)
+        # DTS, concepts = initialize_concepts_dts(filename)
+        # add_html_elements_to_concept(html_elements, concepts, DTS)
+        # generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
+        # return redirect(
+        #     url_for(
+        #         "generate_xml_files",
+        #         file_id=file_id,
+        #         html=html_file,
+        #         xlsx=file_name,
+        #     )
+        # )
+        return {"messages": "Okay"}
+    else:
+        return {"error": "html file Not found"}, 400
 
 
 if __name__ == "__main__":
