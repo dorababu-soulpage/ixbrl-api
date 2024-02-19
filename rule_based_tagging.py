@@ -35,15 +35,19 @@ def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
     # Find the first record with CIK equal to target_cik
 
     #  Find the first record with matching CIK and Document Type
-    matching_record = next(
-        (
-            record
-            for record in master_elements
-            if str(record["CIK"]) == cik.strip()
+    matching_record = None
+
+    for record in master_elements:
+        cik_str = str(record["CIK"]).zfill(10)
+
+        if (
+            cik_str == cik.strip()
             and str(record.get("Document Type")) == form_type.strip()
-        ),
-        None,
-    )
+        ):
+            matching_record = record
+            break
+
+    print(matching_record, "========[matched record]========")
 
     mapping_id = None
     # Extract and print the 'Mapping ID' if a matching record was found
@@ -110,8 +114,7 @@ def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
     # Assuming s3_uploader is a function to upload the file to S3
     # Replace this with your actual S3 upload implementation
     url = s3_uploader(new_file_name, html_bytes)
-    print(url)
-    update_db_record(file_id, {"url": url})
+    update_db_record(file_id, {"url": url, "inAutoTaggingProcess": False})
     print("Url updated successfully in database")
 
     return
