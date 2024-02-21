@@ -55,9 +55,9 @@ class RuleBasedTagging:
     def clean_cell_text(self, cell):
         return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
-    def extract_table_after_statement(self, soup, target_text):
+    def extract_table_after_statement(self, soup, target_text: str):
         # Finding the element with the target text
-        target_element = soup.find("font", text=target_text)
+        target_element = soup.find("font", text=target_text.upper())
 
         # Checking if the target element is found
         if target_element:
