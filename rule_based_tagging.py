@@ -55,9 +55,11 @@ class RuleBasedTagging:
     def clean_cell_text(self, cell):
         return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
-    def extract_table_after_statement(self, soup, target_text):
+    def extract_table_after_statement(self, soup: BeautifulSoup, statement: str):
         # Finding the element with the target text
-        target_element = soup.find("font", text=target_text)
+
+        # target_element = soup.find("font", text=statement)
+        target_element = soup.find(text=re.compile(statement))
 
         # Checking if the target element is found
         if target_element:
@@ -68,9 +70,9 @@ class RuleBasedTagging:
             if next_table:
                 return next_table
             else:
-                print(f"No table found next to '{target_text}'")
+                print(f"No table found next to '{statement}'")
         else:
-            print(f"Text '{target_text}' not found in the HTML content")
+            print(f"Text '{statement}' not found in the HTML content")
 
     def get_matching_records(self):
 
@@ -133,7 +135,8 @@ class RuleBasedTagging:
                 for element in self.mappings
                 if element.get("Mapping ID") == mapping_id
             ]
-            self.find_element_add_id_attribute(filtered_mappings, target_table)
+            if target_table:
+                self.find_element_add_id_attribute(filtered_mappings, target_table)
         # save into database
         self.save()
 
