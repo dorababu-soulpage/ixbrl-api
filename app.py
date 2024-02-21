@@ -30,7 +30,7 @@ from utils import (
     get_definitions,
     get_client_record,
 )
-from rule_based_tagging import add_tag_to_keyword
+from rule_based_tagging import RuleBasedTagging
 
 app = Flask(__name__)
 
@@ -379,7 +379,9 @@ def rule_based_tagging_view():
     # # Read the contents of the file without saving it
     # add_tag_to_keyword(file_id, html_file, xlsx_file)
 
-    add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type)
+    # add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type)
+    rbt = RuleBasedTagging(html_file, xlsx_file, file_id, cik, form_type)
+    rbt.start()
 
     # thread = Thread(target=add_tag_to_keyword, args=(file_id, html_file, xlsx_file))
     # thread.start()
