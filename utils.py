@@ -1137,7 +1137,9 @@ def get_definitions(file):
         role = _role.split("--")
         _definition = role[1].split(":")
         definition = _definition[1].split("_")[0]
+        # TODO: Ned to extract role information from tag
+        role = "DocumentDocumentAndEntityInformation"
         if definition not in definitions:
-            definitions.append(definition)
+            definitions.append({"definition": definition, "role": role})
 
     return definitions

@@ -6,121 +6,164 @@ from bs4 import BeautifulSoup
 from utils import s3_uploader, update_db_record
 
 
-def read_excel_sheet(file_path, sheet_name):
-    # Read the Excel file into a pandas DataFrame
-    df = pd.read_excel(file_path, sheet_name=sheet_name)
+class RuleBasedTagging:
+    def __init__(self, html_file, xlsx_file, file_id, cik, form_type):
+        self.cik = cik
+        self.file_id = file_id
+        self.form_type = form_type
+        self.html_file = html_file
+        # read s3 url
+        self.soup = self.fetch_and_parse_html(html_file)
+        # # read the local html
+        # self.soup = self.fetch_and_parse_local_html(html_file)
+        self.mappings = self.read_excel_sheet(xlsx_file, "Mapping")
+        self.master_elements = self.read_excel_sheet(xlsx_file, "Master Element")
 
-    # Convert each row into a dictionary and append it to a list
-    records = df.to_dict(orient="records")
+    def fetch_and_parse_html(self, html_file):
+        response = requests.get(html_file)
 
-    return records
+        if response.status_code == 200:
+            html_content = response.content
+            soup = BeautifulSoup(html_content, "html.parser")
+            return soup
+        else:
+            print(f"Failed to retrieve HTML. Status code: {response.status_code}")
+            return None
 
+    def fetch_and_parse_local_html(self, html_file):
+        try:
+            with open(html_file, "r", encoding="utf-8") as file:
+                html_content = file.read()
+                soup = BeautifulSoup(html_content, "html.parser")
+                return soup
+        except FileNotFoundError:
+            print(f"Error: File not found - {html_file}")
+            return None
+        except Exception as e:
+            print(f"An error occurred while parsing the HTML file: {str(e)}")
+            return None
 
-def clean_cell_text(cell):
-    return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
+    def read_excel_sheet(self, file_path, sheet_name):
+        # Read the Excel file into a pandas DataFrame
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
 
+        # Convert each row into a dictionary and append it to a list
+        records = df.to_dict(orient="records")
 
-def add_tag_to_keyword(file_id, html_file, xlsx_file, cik, form_type):
-    response = requests.get(html_file)
+        return records
 
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        html_content = response.content
-        soup = BeautifulSoup(html_content, "html.parser")
-    else:
-        print(f"Failed to retrieve HTML. Status code: {response.status_code}")
+    def clean_cell_text(self, cell):
+        return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
-    # read excel
-    master_elements = read_excel_sheet(xlsx_file, "Master Element")
-    # Find the first record with CIK equal to target_cik
+    def extract_table_after_statement(self, soup, target_text):
+        # Finding the element with the target text
+        target_element = soup.find("font", text=target_text)
 
-    #  Find the first record with matching CIK and Document Type
-    matching_record = None
+        # Checking if the target element is found
+        if target_element:
+            # Finding the next table tag after the target element
+            next_table = target_element.find_next("table")
 
-    for record in master_elements:
-        cik_str = str(record["CIK"]).zfill(10)
+            # Checking if the next element is a table tag
+            if next_table:
+                return next_table
+            else:
+                print(f"No table found next to '{target_text}'")
+        else:
+            print(f"Text '{target_text}' not found in the HTML content")
 
-        if (
-            cik_str == cik.strip()
-            and str(record.get("Document Type")) == form_type.strip()
-        ):
-            matching_record = record
-            break
+    def get_matching_records(self):
 
-    print(matching_record, "========[matched record]========")
+        #  Find the first record with matching CIK and Document Type
+        matching_records = []
 
-    mapping_id = None
-    # Extract and print the 'Mapping ID' if a matching record was found
-    if matching_record:
-        mapping_id = matching_record["Mapping ID"]
-        print(f"Mapping ID for CIK {cik} and Document Type {form_type}: {mapping_id}")
-    else:
-        print("No record found for CIK =", cik, "and Document Type =", form_type)
+        for record in self.master_elements:
+            cik_str = str(record["CIK"]).zfill(10)
 
-    mappings = read_excel_sheet(xlsx_file, "Mapping")
-    # statement_name = read_excel_sheet(file_path, "Statement Name")
-    # Filter the list based on 'Mapping ID' equal to 1
-    filtered_mappings = [
-        element for element in mappings if element.get("Mapping ID") == mapping_id
-    ]
+            if (
+                cik_str == self.cik.strip()
+                and str(record.get("Document Type")) == self.form_type.strip()
+            ):
+                matching_records.append(record)
+        return matching_records
 
-    for record in filtered_mappings:
-        keyword = record.get("Element Lable", "")
-        tag = record.get("Element Tagging", "")
-        element_type = record.get("Element Type", "")
-        is_custom = record.get("Is_Custom", "")
+    def find_element_add_id_attribute(self, filtered_mappings, target_table):
+        for record in filtered_mappings:
+            keyword = record.get("Element Lable", "")
+            tag = record.get("Element Tagging", "")
+            element_type = record.get("Element Type", "")
+            is_custom = record.get("Is_Custom", "")
 
-        # Find all rows in the table
-        rows = soup.find_all("tr")
+            # Find all rows in the table
+            rows = target_table.find_all("tr")
 
-        # Iterate through each row and extract data
-        for row in rows:
-            # Find all cells (td) in the row
-            cells = row.find_all(["td", "th"])
+            # Iterate through each row and extract data
+            for row in rows:
+                # Find all cells (td) in the row
+                cells = row.find_all(["td", "th"])
 
-            # Extract and clean the text content of each cell
-            row_data = [clean_cell_text(cell) for cell in cells]
+                # Extract and clean the text content of each cell
+                row_data = [self.clean_cell_text(cell) for cell in cells]
 
-            # Remove empty strings from the list
-            row_data = list(filter(None, row_data))
+                # Remove empty strings from the list
+                row_data = list(filter(None, row_data))
 
-            # Check if search term exists in the row data
-            if keyword in row_data:
-                # Modify the content of the corresponding cells
-                for cell, modified_text in zip(cells, row_data):
-                    if modified_text == keyword:
-                        if cell.string is not None:
-                            # keyword is not not table row
-                            # tag = f'<font id="apex_40N_e{tag}_{uuid.uuid4().hex}">{keyword}</font>'
-                            # cell.string.replace_with(BeautifulSoup(tag, "html.parser"))
-
-                            # keyword is table row
-                            # Find the <tr> tag and add the id attribute
+                # Check if search term exists in the row data
+                if keyword in row_data:
+                    # Modify the content of the corresponding cells
+                    for cell, modified_text in zip(cells, row_data):
+                        if modified_text == keyword:
+                            # add id attribute to the row
                             row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
 
-    # Create a BytesIO object to store the modified HTML content
-    html_bytes = io.BytesIO()
+    def start(self):
+        matching_records = self.get_matching_records()
 
-    # Convert the soup to a string and encode it to bytes
-    html_bytes.write(str(soup).encode("utf-8"))
+        if not matching_records:
+            print("Error: 'matching_records' list is empty.")
 
-    # Extract the filename from the URL
-    file_name = os.path.basename(html_file)
+        for matching_record in matching_records:
+            statement: str = matching_record.get("Statement Name", "")
+            target_table = self.extract_table_after_statement(self.soup, statement)
 
-    # Add "_1" to the filename before the extension
-    new_file_name = (
-        os.path.splitext(file_name)[0] + "_1" + os.path.splitext(file_name)[1]
-    )
-    # Assuming s3_uploader is a function to upload the file to S3
-    # Replace this with your actual S3 upload implementation
-    url = s3_uploader(new_file_name, html_bytes)
-    update_db_record(file_id, {"url": url, "inAutoTaggingProcess": False})
-    print("Url updated successfully in database")
+            mapping_id = matching_record.get("Mapping ID", "")
+            # Filter the list based on 'Mapping ID' equal to 1
+            filtered_mappings = [
+                element
+                for element in self.mappings
+                if element.get("Mapping ID") == mapping_id
+            ]
+            self.find_element_add_id_attribute(filtered_mappings, target_table)
+        # save into database
+        self.save()
 
-    return
+    def save(self):
+
+        # Create a BytesIO object to store the modified HTML content
+        html_bytes = io.BytesIO()
+
+        # Convert the soup to a string and encode it to bytes
+        html_bytes.write(str(self.soup).encode("utf-8"))
+
+        # Extract the filename from the URL
+        file_name = os.path.basename(self.html_file)
+
+        # Add "_1" to the filename before the extension
+        new_file_name = (
+            os.path.splitext(file_name)[0] + "_1" + os.path.splitext(file_name)[1]
+        )
+        # Assuming s3_uploader is a function to upload the file to S3
+        # Replace this with your actual S3 upload implementation
+        url = s3_uploader(new_file_name, html_bytes)
+        update_db_record(self.file_id, {"url": url, "inAutoTaggingProcess": False})
+        print(f"{url} updated successfully in database")
 
 
 # if __name__ == "__main__":
-#     html_file_path = "mays4160726-10q.htm"
-#     xlsx_file = "Rule_Based_Tagging.xlsx"
-#     add_tag_to_keyword(html_file_path, xlsx_file)
+#     html_file_path = "Input_Rulebased.html"
+#     xlsx_file = config("RULE_BASED_XLSX")
+#     file_id = 55
+#     cik = "0000320193"
+#     form_type = "10-K"
+#     rbt = RuleBasedTagging(html_file_path, xlsx_file, file_id, cik, form_type)
+#     rbt.start()
