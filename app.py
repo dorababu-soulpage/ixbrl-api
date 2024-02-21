@@ -388,7 +388,7 @@ def rule_based_tagging_view():
 
 
 @app.route("/api/xml-generation", methods=["GET", "POST"])
-def read_html_tagging_file():
+def generate_xml_schema_files():
     file_id = request.json.get("file_id")
     record = get_db_record(file_id=file_id)
     client_id = record.get("clientId", None)

@@ -126,14 +126,16 @@ def generate_xsd_schema(definitions, ticker, filing_date, company_website):
         linkbase_ref_element = ET.Element("link:linkbaseRef", attrib=linkbase_ref)
         xsd_appinfo.append(linkbase_ref_element)
 
-    for definition in definitions:
+    for record in definitions:
         # HTML attributes values start from here
         # Create link:roleType element
+        role = record.get("role", "")
+        definition = record.get("definition", "")
         link_role_type = ET.Element(
             "link:roleType",
             attrib={
-                "roleURI": f"{company_website}/{filing_date}/role/DocumentDocumentAndEntityInformation",
-                "id": "DocumentDocumentAndEntityInformation",
+                "roleURI": f"{company_website}/{filing_date}/role/{role}",
+                "id": role,
             },
         )
 
