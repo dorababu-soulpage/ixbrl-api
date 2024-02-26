@@ -56,23 +56,26 @@ class RuleBasedTagging:
         return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
 
     def extract_table_after_statement(self, soup: BeautifulSoup, statement: str):
-        # Finding the element with the target text
 
         # target_element = soup.find("font", text=statement)
-        target_element = soup.find(text=re.compile(statement))
+        # target_element = soup.find(text=re.compile(statement))
 
-        # Checking if the target element is found
-        if target_element:
-            # Finding the next table tag after the target element
-            next_table = target_element.find_next("table")
+        # Finding the element with the target text
+        for target_element in soup.find_all(text=re.compile(statement)):
+            if str(target_element).strip() == statement:
+                target_element = soup.find(text=re.compile(statement))
+                # Checking if the target element is FOUND
+                if target_element:
+                    # Finding the next table tag after the target element
+                    next_table = target_element.find_next("table")
 
-            # Checking if the next element is a table tag
-            if next_table:
-                return next_table
-            else:
-                print(f"No table found next to '{statement}'")
-        else:
-            print(f"Text '{statement}' not found in the HTML content")
+                    # Checking if the next element is a table tag
+                    if next_table:
+                        return next_table
+                    else:
+                        print(f"No table found next to '{statement}'")
+                else:
+                    print(f"Text '{statement}' not found in the HTML content")
 
     def get_matching_records(self):
 
