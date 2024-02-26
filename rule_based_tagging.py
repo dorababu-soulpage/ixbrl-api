@@ -63,7 +63,6 @@ class RuleBasedTagging:
         # Finding the element with the target text
         for target_element in soup.find_all(text=re.compile(statement)):
             if str(target_element).strip() == statement:
-                target_element = soup.find(text=re.compile(statement))
                 # Checking if the target element is FOUND
                 if target_element:
                     # Finding the next table tag after the target element
