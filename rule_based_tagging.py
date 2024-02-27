@@ -60,6 +60,7 @@ class RuleBasedTagging:
         # target_element = soup.find("font", text=statement)
         # target_element = soup.find(text=re.compile(statement))
 
+        target_tables = []
         # Finding the element with the target text
         for target_element in soup.find_all(text=re.compile(statement)):
             if str(target_element).strip() == statement:
@@ -70,11 +71,12 @@ class RuleBasedTagging:
 
                     # Checking if the next element is a table tag
                     if next_table:
-                        return next_table
+                        target_tables.append(next_table)
                     else:
                         print(f"No table found next to '{statement}'")
                 else:
                     print(f"Text '{statement}' not found in the HTML content")
+        return target_tables
 
     def get_matching_records(self):
 
@@ -91,34 +93,59 @@ class RuleBasedTagging:
                 matching_records.append(record)
         return matching_records
 
-    def find_element_add_id_attribute(self, filtered_mappings, target_table):
+    def get_element_occurrences(self, filtered_mappings):
+        element_occurrences = {}
         for record in filtered_mappings:
             keyword = record.get("Element Lable", "")
             tag = record.get("Element Tagging", "")
             element_type = record.get("Element Type", "")
             is_custom = record.get("Is_Custom", "")
 
-            # Find all rows in the table
-            rows = target_table.find_all("tr")
+            if keyword not in element_occurrences.keys():
+                element_occurrences[keyword] = {"count": 1, "tags": [tag]}
+            else:
+                element_occurrences[keyword]["count"] += 1
+                element_occurrences[keyword]["tags"].append(tag)
 
-            # Iterate through each row and extract data
-            for row in rows:
-                # Find all cells (td) in the row
-                cells = row.find_all(["td", "th"])
+        return element_occurrences
 
-                # Extract and clean the text content of each cell
-                row_data = [self.clean_cell_text(cell) for cell in cells]
+    def find_element_add_id_attribute(self, filtered_mappings, target_table):
+        element_occurrences = self.get_element_occurrences(filtered_mappings)
 
-                # Remove empty strings from the list
-                row_data = list(filter(None, row_data))
+        total_rows = []
+        total_row_data = []
 
-                # Check if search term exists in the row data
-                if keyword in row_data:
-                    # Modify the content of the corresponding cells
-                    for cell, modified_text in zip(cells, row_data):
-                        if modified_text == keyword:
-                            # add id attribute to the row
-                            row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
+        # Find all rows in the table
+        rows = target_table.find_all("tr")
+
+        # Iterate through each row and extract data
+        for row in rows:
+            # Find all cells (td) in the row
+            cells = row.find_all(["td", "th"])
+
+            # Extract and clean the text content of each cell
+            row_data = [self.clean_cell_text(cell) for cell in cells]
+
+            # Remove empty strings from the list
+            row_data = list(filter(None, row_data))
+
+            total_row_data.append(row_data)
+            total_rows.append(row)
+
+        for keyword, value in element_occurrences.items():
+            item_index = []
+            for _ in range(value.get("count"), 0, -1):
+                # Iterate through the outer list
+                for i, inner_list in enumerate(total_row_data):
+                    # Check if 'ASSETS' is in the inner list
+                    for target_value in inner_list:
+                        if keyword == target_value:
+                            item_index.append(i)
+
+            for i, index in enumerate(set(item_index)):
+                tag = value.get("tags")[i]
+                row = total_rows[index]
+                row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
 
     def start(self):
         matching_records = self.get_matching_records()
@@ -128,7 +155,7 @@ class RuleBasedTagging:
 
         for matching_record in matching_records:
             statement: str = matching_record.get("Statement Name", "")
-            target_table = self.extract_table_after_statement(self.soup, statement)
+            target_tables = self.extract_table_after_statement(self.soup, statement)
 
             mapping_id = matching_record.get("Mapping ID", "")
             # Filter the list based on 'Mapping ID' equal to 1
@@ -137,8 +164,11 @@ class RuleBasedTagging:
                 for element in self.mappings
                 if element.get("Mapping ID") == mapping_id
             ]
-            if target_table:
+            counter = 1
+            for target_table in target_tables:
+                print(statement, counter)
                 self.find_element_add_id_attribute(filtered_mappings, target_table)
+                counter = counter + 1
         # save into database
         self.save()
 
