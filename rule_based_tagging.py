@@ -60,6 +60,7 @@ class RuleBasedTagging:
         # target_element = soup.find("font", text=statement)
         # target_element = soup.find(text=re.compile(statement))
 
+        target_tables = []
         # Finding the element with the target text
         for target_element in soup.find_all(text=re.compile(statement)):
             if str(target_element).strip() == statement:
@@ -70,11 +71,12 @@ class RuleBasedTagging:
 
                     # Checking if the next element is a table tag
                     if next_table:
-                        return next_table
+                        target_tables.append(next_table)
                     else:
                         print(f"No table found next to '{statement}'")
                 else:
                     print(f"Text '{statement}' not found in the HTML content")
+        return target_tables
 
     def get_matching_records(self):
 
@@ -128,7 +130,7 @@ class RuleBasedTagging:
 
         for matching_record in matching_records:
             statement: str = matching_record.get("Statement Name", "")
-            target_table = self.extract_table_after_statement(self.soup, statement)
+            target_tables = self.extract_table_after_statement(self.soup, statement)
 
             mapping_id = matching_record.get("Mapping ID", "")
             # Filter the list based on 'Mapping ID' equal to 1
@@ -137,8 +139,11 @@ class RuleBasedTagging:
                 for element in self.mappings
                 if element.get("Mapping ID") == mapping_id
             ]
-            if target_table:
+            counter = 1
+            for target_table in target_tables:
+                print(statement, counter)
                 self.find_element_add_id_attribute(filtered_mappings, target_table)
+                counter = counter + 1
         # save into database
         self.save()
 
