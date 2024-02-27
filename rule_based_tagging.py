@@ -143,9 +143,12 @@ class RuleBasedTagging:
                             item_index.append(i)
 
             for i, index in enumerate(set(item_index)):
-                tag = value.get("tags")[i]
-                row = total_rows[index]
-                row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
+                try:
+                    tag = value.get("tags")[i]
+                    row = total_rows[index]
+                    row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
+                except Exception:
+                    pass
 
     def start(self):
         matching_records = self.get_matching_records()
