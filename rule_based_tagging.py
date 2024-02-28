@@ -14,7 +14,7 @@ class RuleBasedTagging:
         self.html_file = html_file
         # read s3 url
         self.soup = self.fetch_and_parse_html(html_file)
-        # # read the local html
+        # read the local html
         # self.soup = self.fetch_and_parse_local_html(html_file)
         self.mappings = self.read_excel_sheet(xlsx_file, "Mapping")
         self.master_elements = self.read_excel_sheet(xlsx_file, "Master Element")
@@ -57,17 +57,19 @@ class RuleBasedTagging:
 
     def extract_table_after_statement(self, soup: BeautifulSoup, statement: str):
 
-        # target_element = soup.find("font", text=statement)
-        # target_element = soup.find(text=re.compile(statement))
-
         target_tables = []
-        # Finding the element with the target text
-        for target_element in soup.find_all(text=re.compile(statement)):
-            if str(target_element).strip() == statement:
+        bold_tags = soup.find_all("b")
+
+        # Iterate through matching bold_tags
+        for bold_tag in bold_tags:
+            # Extract the text content of the bold_tag
+            value = bold_tag.get_text()
+            final_value = " ".join(word.strip() for word in value.split("\n"))
+            if final_value.lower() == statement.lower():
                 # Checking if the target element is FOUND
-                if target_element:
+                if bold_tag:
                     # Finding the next table tag after the target element
-                    next_table = target_element.find_next("table")
+                    next_table = bold_tag.find_next("table")
 
                     # Checking if the next element is a table tag
                     if next_table:
@@ -96,7 +98,7 @@ class RuleBasedTagging:
     def get_element_occurrences(self, filtered_mappings):
         element_occurrences = {}
         for record in filtered_mappings:
-            keyword = record.get("Element Lable", "")
+            keyword = record.get("Element Label", "")
             tag = record.get("Element Tagging", "")
             element_type = record.get("Element Type", "")
             is_custom = record.get("Is_Custom", "")
@@ -198,10 +200,10 @@ class RuleBasedTagging:
 
 
 # if __name__ == "__main__":
-#     html_file_path = "Input_Rulebased.html"
-#     xlsx_file = config("RULE_BASED_XLSX")
+#     html_file_path = "data/rule_based/f10q0320_niocorpdevelop.htm"
+#     xlsx_file = "https://deeplobe.s3.ap-south-1.amazonaws.com/Rule_Based_Tagging_OG_1709111231656.xlsx"
 #     file_id = 55
-#     cik = "0000320193"
-#     form_type = "10-K"
+#     cik = "0001512228"
+#     form_type = "10-Q"
 #     rbt = RuleBasedTagging(html_file_path, xlsx_file, file_id, cik, form_type)
 #     rbt.start()
