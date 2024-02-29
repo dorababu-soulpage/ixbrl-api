@@ -57,27 +57,51 @@ class RuleBasedTagging:
 
     def extract_table_after_statement(self, soup: BeautifulSoup, statement: str):
 
+        # List to store target tables
         target_tables = []
-        bold_tags = soup.find_all("b")
 
-        # Iterate through matching bold_tags
-        for bold_tag in bold_tags:
-            # Extract the text content of the bold_tag
-            value = bold_tag.get_text()
-            final_value = " ".join(word.strip() for word in value.split("\n"))
-            if final_value.lower() == statement.lower():
-                # Checking if the target element is FOUND
-                if bold_tag:
-                    # Finding the next table tag after the target element
-                    next_table = bold_tag.find_next("table")
+        # Find all bold tags in the HTML
+        bold_tags_b = soup.find_all("b")
 
-                    # Checking if the next element is a table tag
-                    if next_table:
+        # Find all font bold tags in the HTML
+        bold_tags_font = soup.find_all(
+            "font", style=lambda value: value and "font-weight:bold" in value.lower()
+        )
+
+        # Combine both lists
+        bold_tags = bold_tags_b + bold_tags_font
+
+        # Function to clean and format text
+        def clean_text(text):
+            return " ".join(text.strip().replace("\n", "").split())
+
+        # Loop through each bold tag in the HTML
+        for tag in bold_tags:
+            # Check if the bold tag contains a line break
+            if tag.find("br"):
+                # Extract text with line breaks and clean it
+                text = tag.get_text(separator="<br>")
+                cleaned_list = [
+                    clean_text(item) for item in text.split("<br>") if item.strip()
+                ]
+                # Loop through cleaned text items
+                for cleaned_list_item in cleaned_list:
+                    # Check if input text matches cleaned text item
+                    if statement.lower() == cleaned_list_item.lower():
+                        # Find the next table after the bold tag and append it to target_tables
+                        next_table = tag.find_next("table")
                         target_tables.append(next_table)
-                    else:
-                        print(f"No table found next to '{statement}'")
-                else:
-                    print(f"Text '{statement}' not found in the HTML content")
+            else:
+                # If no line break, extract and clean the text
+                text = tag.get_text().strip()
+                cleaned_text = clean_text(text)
+                # Check if input text matches cleaned text
+                if statement.lower() == cleaned_text.lower():
+                    # Find the next table after the bold tag and append it to target_tables
+                    next_table = tag.find_next("table")
+                    target_tables.append(next_table)
+
+        # Return the list of target tables
         return target_tables
 
     def get_matching_records(self):
@@ -200,10 +224,10 @@ class RuleBasedTagging:
 
 
 # if __name__ == "__main__":
-#     html_file_path = "data/rule_based/f10q0320_niocorpdevelop.htm"
+#     html_file_path = "sfb35772717-10k-output.htm"
 #     xlsx_file = "https://deeplobe.s3.ap-south-1.amazonaws.com/Rule_Based_Tagging_OG_1709111231656.xlsx"
 #     file_id = 55
-#     cik = "0001512228"
-#     form_type = "10-Q"
+#     cik = "0001090009"
+#     form_type = "10-K"
 #     rbt = RuleBasedTagging(html_file_path, xlsx_file, file_id, cik, form_type)
 #     rbt.start()
