@@ -168,7 +168,7 @@ class RuleBasedTagging:
                         if keyword == target_value:
                             item_index.append(i)
 
-            for i, index in enumerate(set(item_index)):
+            for i, index in enumerate(item_index):
                 try:
                     tag = value.get("tags")[i]
                     row = total_rows[index]
@@ -224,7 +224,7 @@ class RuleBasedTagging:
 
 
 # if __name__ == "__main__":
-#     html_file_path = "sfb35772717-10k-output.htm"
+#     html_file_path = "sfb35772717-10k_1709205766138.htm"
 #     xlsx_file = "https://deeplobe.s3.ap-south-1.amazonaws.com/Rule_Based_Tagging_OG_1709111231656.xlsx"
 #     file_id = 55
 #     cik = "0001090009"
