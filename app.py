@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup, NavigableString
 
 # from auto_tagging.tagging import auto_tagging
 from flask import Flask, redirect, request, url_for
-from xml_generation.generate_xsd import generate_xsd_schema
 from utils import (
     add_html_elements_to_concept,
     extract_html_elements,
@@ -415,7 +414,7 @@ def generate_xml_schema_files():
         ticker = client_data.get("ticker", "")
         filing_date = period_date_str
         company_website = client_data.get("website", "")
-        generate_xsd_schema(definitions, ticker, filing_date, company_website)
+        # generate_xsd_schema(definitions, ticker, filing_date, company_website)
 
         # print(html_elements)
         # DTS, concepts = initialize_concepts_dts(filename)
