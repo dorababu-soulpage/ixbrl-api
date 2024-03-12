@@ -20,14 +20,15 @@
     <link:loc xlink:type="locator" xlink:label="loc_dei_CoverAbstract_78b692da-072f-46a4-a033-5240eccee245" xlink:href="https://xbrl.sec.gov/dei/2023/dei-2023.xsd#dei_CoverAbstract" />
 
     <link:loc xlink:type="locator" xlink:label="loc_dei_EntitiesTable_67ac2dcd-9ad2-412b-b1f5-329d0c812ae0" xlink:href="https://xbrl.sec.gov/dei/2023/dei-2023.xsd#dei_EntitiesTable" />
-
     <link:presentationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="loc_dei_CoverAbstract_78b692da-072f-46a4-a033-5240eccee245" xlink:to="loc_dei_EntitiesTable_67ac2dcd-9ad2-412b-b1f5-329d0c812ae0" xlink:type="arc" preferredLabel="http://www.xbrl.org/2003/role/terseLabel" />
 
     <link:loc xlink:type="locator" xlink:label="loc_us-gaap_StatementClassOfStockAxis_26a5602a-3bb1-4f49-8bae-6a141a3012e9" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_StatementClassOfStockAxis" />
     <link:presentationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="loc_dei_EntitiesTable_67ac2dcd-9ad2-412b-b1f5-329d0c812ae0" xlink:to="loc_us-gaap_StatementClassOfStockAxis_26a5602a-3bb1-4f49-8bae-6a141a3012e9" xlink:type="arc" preferredLabel="http://www.xbrl.org/2003/role/terseLabel" />
+
     <link:loc xlink:type="locator" xlink:label="loc_us-gaap_ClassOfStockDomain_078cb525-8a77-488f-a8c8-6a253c3be873" xlink:href="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#us-gaap_ClassOfStockDomain" />
     <link:presentationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="loc_us-gaap_StatementClassOfStockAxis_26a5602a-3bb1-4f49-8bae-6a141a3012e9" xlink:to="loc_us-gaap_ClassOfStockDomain_078cb525-8a77-488f-a8c8-6a253c3be873" xlink:type="arc" preferredLabel="http://www.xbrl.org/2003/role/terseLabel" />
     <link:loc xlink:type="locator" xlink:label="loc_ko_CommonStock0.25ParValueMember_ab5aa9d1-3370-40ba-8694-0241ab515767" xlink:href="ko-20230630.xsd#ko_CommonStock0.25ParValueMember" />
+
   </link:presentationLink>
 
 

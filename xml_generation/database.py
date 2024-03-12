@@ -15,7 +15,7 @@ html_elements_data: list[dict] = [
         "Table": "us-gaap--StatementTable",
         "LineItem": "Table",
         "RootLevelAbstract": "us-gaap--LandAndLandImprovementsAbstract",
-        "RoleName": "Consoladated Table",
+        "RoleName": "ConsoladatedTable",
         "UniqueId": "efb6deb824c493da1b6e03669691c36",
     },
     {
@@ -28,12 +28,12 @@ html_elements_data: list[dict] = [
         "CountedAs": "6",
         "Calculation": "a7b4c79a89bfd48a48ac7b8d562c893b1__us-gaap--AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities",
         "Period": "20230101_20231231",
-        "PreferredLabel": "Land",
+        "PreferredLabel": "",
         "PreferredLabelType": "Gain on Sale of Investments",
         "Table": "us-gaap--StatementTable",
         "LineItem": "Table",
         "RootLevelAbstract": "us-gaap--StatementOfCashFlowsAbstract",
-        "RoleName": "StatementOfConsoildatedCashFlow Table",
+        "RoleName": "StatementOfConsoildatedCashFlowTable",
         "UniqueId": "efb6deb824c493da1b6e03669691c45",
     },
 ]

@@ -1,4 +1,5 @@
 from itertools import groupby
+from labels import labels_dict
 import xml.etree.ElementTree as ET
 from database import html_elements_data
 
@@ -11,6 +12,13 @@ class PreXMLGenerator:
         self.ticker = ticker
         self.company_website = company_website
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
+
+    def get_preferred_label(self, label: str):
+
+        for key, value in labels_dict.items():
+            if key.replace(" ", "").lower() == label.replace(" ", "").lower():
+                print(label, value)
+                return value
 
     def group_data_by_role(self):
         # Group the data by RoleName using itertools groupby and store it in grouped_data.
@@ -51,19 +59,18 @@ class PreXMLGenerator:
         xlink_to=None,
         preferred_label=None,
     ):
-        # Create an XML element for presentationArc with specified attributes.
-        return ET.SubElement(
-            parent_tag,
-            "link:presentationArc",
-            attrib={
-                "order": order,
-                "xlink:arcrole": arc_role,
-                "xlink:from": xlink_from,
-                "xlink:to": xlink_to,
-                "xlink:type": "arc",
-                "preferredLabel": preferred_label,
-            },
-        )
+        attrib = {
+            "order": order,
+            "xlink:arcrole": arc_role,
+            "xlink:from": xlink_from,
+            "xlink:to": xlink_to,
+            "xlink:type": "arc",
+        }
+
+        if preferred_label is not None:
+            attrib["preferredLabel"] = preferred_label
+
+        return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
     def generate_pre_xml(self):
         # Create the root linkbase element with XML namespaces and schema location.
@@ -90,6 +97,8 @@ class PreXMLGenerator:
                 _element: str = record.get("Element")
                 element = _element.replace("--", "_")
                 label = record.get("PreferredLabel")
+                label_type = record.get("PreferredLabelType")
+                preferred_label = self.get_preferred_label(label_type)
                 _root_level_abstract = record.get("RootLevelAbstract")
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
@@ -113,24 +122,30 @@ class PreXMLGenerator:
                 root_level_abstract_loc = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
                     label=f"loc_{root_level_abstract}",
-                    xlink_href=f"https://xbrl.sec.gov/dei/2023/dei-2023.xsd#{root_level_abstract}",
+                    xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{root_level_abstract}",
                 )
 
                 loc_entities = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
                     label=f"loc_{element}",
-                    xlink_href=f"https://xbrl.sec.gov/dei/2023/dei-2023.xsd#{element}",
+                    xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{element}",
                 )
 
+                # Common arguments for create_presentation_arc_element
+                arc_args = {
+                    "parent_tag": presentation_link,
+                    "order": "1",
+                    "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                    "xlink_from": f"loc_{root_level_abstract}",
+                    "xlink_to": f"loc_{element}",
+                }
+
+                # Add label-specific argument
+                if label:
+                    arc_args["preferred_label"] = preferred_label
                 # Create presentationArc element and append it to presentation_links list.
-                presentation_arc = self.create_presentation_arc_element(
-                    parent_tag=presentation_link,
-                    order="1",
-                    arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
-                    xlink_from=f"loc_{root_level_abstract}",
-                    xlink_to=f"{label}",
-                    preferred_label="http://www.xbrl.org/2003/role/terseLabel",
-                )
+                presentation_arc = self.create_presentation_arc_element(**arc_args)
+
                 presentation_links.append(presentation_link)
 
         # XML declaration and comments.
