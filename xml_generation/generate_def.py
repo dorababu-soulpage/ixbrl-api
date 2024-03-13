@@ -60,6 +60,48 @@ class DefXMLGenerator:
             },
         )
 
+    def get_arcrole_refs_xml(self):
+        # Define arcroleRefs data
+        arcrole_refs_data = [
+            {
+                "arcroleURI": "http://xbrl.org/int/dim/arcrole/all",
+                "xlink:href": "http://www.xbrl.org/2005/xbrldt-2005.xsd#all",
+            },
+            {
+                "arcroleURI": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
+                "xlink:href": "http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension",
+            },
+            {
+                "arcroleURI": "http://xbrl.org/int/dim/arcrole/dimension-default",
+                "xlink:href": "http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default",
+            },
+            {
+                "arcroleURI": "http://xbrl.org/int/dim/arcrole/dimension-domain",
+                "xlink:href": "http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain",
+            },
+            {
+                "arcroleURI": "http://xbrl.org/int/dim/arcrole/domain-member",
+                "xlink:href": "http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member",
+            },
+        ]
+
+        # Create arcroleRef elements
+        arcrole_ref_elements = []
+        for arcrole_ref_data in arcrole_refs_data:
+            arcrole_ref = ET.Element(
+                "link:arcroleRef",
+                arcroleURI=arcrole_ref_data["arcroleURI"],
+                xlink_type="simple",
+                xlink_href=arcrole_ref_data["xlink:href"],
+            )
+            arcrole_ref_elements.append(arcrole_ref)
+
+        arcrole_ref_elements_xml = "\n".join(
+            [ET.tostring(e, encoding="utf-8").decode() for e in arcrole_ref_elements]
+        )
+
+        return arcrole_ref_elements_xml
+
     def generate_def_xml(self):
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
@@ -124,7 +166,7 @@ class DefXMLGenerator:
                     order="1",
                     arc_role="http://www.xbrl.org/2003/arcrole/all",
                     xlink_from=f"loc_{root_level_abstract}",
-                    xlink_to=f"loc_{label}",
+                    xlink_to=f"loc_{element}",
                 )
 
                 definition_links.append(definition_link)
@@ -136,6 +178,7 @@ class DefXMLGenerator:
         definition_links_xml = "\n".join(
             [ET.tostring(e, encoding="utf-8").decode() for e in definition_links]
         )
+        arcrole_refs_xml = self.get_arcrole_refs_xml()
 
         # Concatenate XML declaration, comments, and linkbase element
         xml_data = (
@@ -144,6 +187,7 @@ class DefXMLGenerator:
             + "\n"
             + ET.tostring(linkbase_element, encoding="utf-8").decode()
             + "\n"
+            + arcrole_refs_xml
             + role_ref_elements_xml  # Use the concatenated XML string
             + "\n"
             + definition_links_xml

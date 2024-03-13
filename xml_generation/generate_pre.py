@@ -17,7 +17,6 @@ class PreXMLGenerator:
 
         for key, value in labels_dict.items():
             if key.replace(" ", "").lower() == label.replace(" ", "").lower():
-                print(label, value)
                 return value
 
     def group_data_by_role(self):
@@ -99,7 +98,9 @@ class PreXMLGenerator:
                 label = record.get("PreferredLabel")
                 label_type = record.get("PreferredLabelType")
                 preferred_label = self.get_preferred_label(label_type)
-                _root_level_abstract = record.get("RootLevelAbstract")
+                _root_level_abstract: str = record.get("RootLevelAbstract")
+                _pre_element_parent: str = record.get("PreElementParent")
+                pre_element_parent = _pre_element_parent.replace(":", "_")
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
                 # Create roleRef element and append it to role_ref_elements list.
@@ -125,7 +126,29 @@ class PreXMLGenerator:
                     xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{root_level_abstract}",
                 )
 
-                loc_entities = self.create_presentation_loc_element(
+                # pre element parent
+                pre_element_parent_loc = self.create_presentation_loc_element(
+                    parent_tag=presentation_link,
+                    label=f"loc_{pre_element_parent}",
+                    xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{pre_element_parent}",
+                )
+
+                # Common arguments for create_presentation_arc_element
+                pre_element_parent_arc_args = {
+                    "parent_tag": presentation_link,
+                    "order": "1",
+                    "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                    "xlink_from": f"loc_{root_level_abstract}",
+                    "xlink_to": f"loc_{pre_element_parent}",
+                }
+
+                # Create presentationArc element and append it to presentation_links list.
+                pre_element_parent_arc = self.create_presentation_arc_element(
+                    **pre_element_parent_arc_args
+                )
+
+                # main elements
+                entities_loc = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
                     label=f"loc_{element}",
                     xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{element}",
