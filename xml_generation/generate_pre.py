@@ -155,18 +155,27 @@ class PreXMLGenerator:
                 preferred_label = self.get_preferred_label(label_type)
                 if element not in elements_list:
                     # main elements
-                    element_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{element}",
-                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{element}",
-                    )
+
+                    if element.startswith(self.ticker):
+                        element_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
+                        )
+
+                    else:
+                        element_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{element}",
+                        )
 
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
                         "order": order,
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                        "xlink_from": f"loc_{root_level_abstract}",
+                        "xlink_from": f"loc_{pre_element_parent}",
                         "xlink_to": f"loc_{element}",
                     }
 
