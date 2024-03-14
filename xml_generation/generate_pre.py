@@ -148,14 +148,108 @@ class PreXMLGenerator:
             for record in role_data:
                 role = record.get("RoleName")
                 order = record.get("Indenting")
+                label = record.get("PreferredLabel")
+
+                _table = record.get("Table")
+                table = _table.replace("--", "_")
+
                 _element: str = record.get("Element")
                 element = _element.replace("--", "_")
-                label = record.get("PreferredLabel")
+                axis_member: str = record.get("Axis_Member")
+
                 label_type = record.get("PreferredLabelType")
                 preferred_label = self.get_preferred_label(label_type)
+
+                line_item = record.get("LineItem")
+
+                if axis_member:
+                    axis, member = axis_member.split("__")
+
+                    # table location
+                    table_loc = self.create_presentation_loc_element(
+                        parent_tag=presentation_link,
+                        label=f"loc_{table}",
+                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{table}",
+                    )
+
+                    # Common arguments for create_presentation_arc_element
+                    arc_args = {
+                        "parent_tag": presentation_link,
+                        "order": order,
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                        "xlink_from": f"loc_{root_level_abstract}",
+                        "xlink_to": f"loc_{table}",
+                    }
+
+                    # Create presentationArc element and append it to presentation_links list.
+                    presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+                    # axis location
+                    axis_loc = self.create_presentation_loc_element(
+                        parent_tag=presentation_link,
+                        label=f"loc_{axis}",
+                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{axis}",
+                    )
+
+                    # Common arguments for create_presentation_arc_element
+                    arc_args = {
+                        "parent_tag": presentation_link,
+                        "order": order,
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                        "xlink_from": f"loc_{table}",
+                        "xlink_to": f"loc_{axis}",
+                    }
+
+                    # Create presentationArc element and append it to presentation_links list.
+                    presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+                    # domain location
+                    # TODO:
+
+                    # member location
+                    member_loc = self.create_presentation_loc_element(
+                        parent_tag=presentation_link,
+                        label=f"loc_{member}",
+                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{member}",
+                    )
+
+                    # Common arguments for create_presentation_arc_element
+                    arc_args = {
+                        "parent_tag": presentation_link,
+                        "order": order,
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                        "xlink_from": f"loc_{table}",
+                        "xlink_to": f"loc_{member}",
+                    }
+
+                    # Add label-specific argument
+                    if label:
+                        arc_args["preferred_label"] = preferred_label
+
+                    # Create presentationArc element and append it to presentation_links list.
+                    presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+                    # line item location
+                    line_item_loc = self.create_presentation_loc_element(
+                        parent_tag=presentation_link,
+                        label=f"loc_{line_item}",
+                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{line_item}",
+                    )
+
+                    # Common arguments for create_presentation_arc_element
+                    arc_args = {
+                        "parent_tag": presentation_link,
+                        "order": order,
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                        "xlink_from": f"loc_{table}",
+                        "xlink_to": f"loc_{line_item}",
+                    }
+
+                    # Create presentationArc element and append it to presentation_links list.
+                    presentation_arc = self.create_presentation_arc_element(**arc_args)
+
                 if element not in elements_list:
                     # main elements
-
                     if element.startswith(self.ticker):
                         element_loc = self.create_presentation_loc_element(
                             parent_tag=presentation_link,
@@ -182,6 +276,7 @@ class PreXMLGenerator:
                     # Add label-specific argument
                     if label:
                         arc_args["preferred_label"] = preferred_label
+
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
                     # add element into elements list
