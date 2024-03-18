@@ -71,6 +71,119 @@ class PreXMLGenerator:
 
         return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
+    def generate_dimension_xml(
+        self,
+        table,
+        order,
+        label,
+        domain,
+        line_item,
+        axis_member,
+        preferred_label,
+        presentation_link,
+        root_level_abstract,
+    ):
+        axis, member = axis_member.split("__")
+
+        # table location
+        table_loc = self.create_presentation_loc_element(
+            parent_tag=presentation_link,
+            label=f"loc_{table}",
+            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{table}",
+        )
+
+        # Common arguments for create_presentation_arc_element
+        arc_args = {
+            "parent_tag": presentation_link,
+            "order": order,
+            "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "xlink_from": f"loc_{root_level_abstract}",
+            "xlink_to": f"loc_{table}",
+        }
+
+        # Create presentationArc element and append it to presentation_links list.
+        presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+        # axis location
+        axis_loc = self.create_presentation_loc_element(
+            parent_tag=presentation_link,
+            label=f"loc_{axis}",
+            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{axis}",
+        )
+
+        # Common arguments for create_presentation_arc_element
+        arc_args = {
+            "parent_tag": presentation_link,
+            "order": order,
+            "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "xlink_from": f"loc_{table}",
+            "xlink_to": f"loc_{axis}",
+        }
+
+        # Create presentationArc element and append it to presentation_links list.
+        presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+        # domain location
+        domain_loc = self.create_presentation_loc_element(
+            parent_tag=presentation_link,
+            label=f"loc_{domain}",
+            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{domain}",
+        )
+
+        # Common arguments for create_presentation_arc_element
+        arc_args = {
+            "parent_tag": presentation_link,
+            "order": order,
+            "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "xlink_from": f"loc_{axis}",
+            "xlink_to": f"loc_{domain}",
+        }
+
+        # Create presentationArc element and append it to presentation_links list.
+        presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+        # member location
+        member_loc = self.create_presentation_loc_element(
+            parent_tag=presentation_link,
+            label=f"loc_{member}",
+            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{member}",
+        )
+
+        # Common arguments for create_presentation_arc_element
+        arc_args = {
+            "parent_tag": presentation_link,
+            "order": order,
+            "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "xlink_from": f"loc_{table}",
+            "xlink_to": f"loc_{member}",
+        }
+
+        # Add label-specific argument
+        if label:
+            arc_args["preferred_label"] = preferred_label
+
+        # Create presentationArc element and append it to presentation_links list.
+        presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+        # line item location
+        line_item_loc = self.create_presentation_loc_element(
+            parent_tag=presentation_link,
+            label=f"loc_{line_item}",
+            xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{line_item}",
+        )
+
+        # Common arguments for create_presentation_arc_element
+        arc_args = {
+            "parent_tag": presentation_link,
+            "order": order,
+            "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+            "xlink_from": f"loc_{table}",
+            "xlink_to": f"loc_{line_item}",
+        }
+
+        # Create presentationArc element and append it to presentation_links list.
+        presentation_arc = self.create_presentation_arc_element(**arc_args)
+
     def generate_pre_xml(self):
         # Create the root linkbase element with XML namespaces and schema location.
         linkbase_element = ET.Element(
@@ -122,132 +235,69 @@ class PreXMLGenerator:
                 xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{root_level_abstract}",
             )
 
-            # pre element parent
-            pre_element_parent_loc = self.create_presentation_loc_element(
-                parent_tag=presentation_link,
-                label=f"loc_{pre_element_parent}",
-                xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{pre_element_parent}",
-            )
-
-            # Common arguments for create_presentation_arc_element
-            pre_element_parent_arc_args = {
-                "parent_tag": presentation_link,
-                "order": "1",
-                "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                "xlink_from": f"loc_{root_level_abstract}",
-                "xlink_to": f"loc_{pre_element_parent}",
-            }
-
-            # Create presentationArc element and append it to presentation_links list.
-            pre_element_parent_arc = self.create_presentation_arc_element(
-                **pre_element_parent_arc_args
-            )
-
             # main elements
             elements_list: list = []
+            is_pre_element_parent = False
             for record in role_data:
                 role = record.get("RoleName")
                 order = record.get("Indenting")
                 label = record.get("PreferredLabel")
 
                 _table = record.get("Table")
-                table = _table.replace("--", "_")
+                if _table:
+                    table = _table.replace("--", "_")
 
                 _element: str = record.get("Element")
                 element = _element.replace("--", "_")
-                axis_member: str = record.get("Axis_Member")
+                _axis_member: str = record.get("Axis_Member")
+                axis_member: str = _axis_member.replace("--", "_")
+                domain: str = record.get("Domain")
 
                 label_type = record.get("PreferredLabelType")
                 preferred_label = self.get_preferred_label(label_type)
 
                 line_item = record.get("LineItem")
 
+                # dimension XML
                 if axis_member:
-                    axis, member = axis_member.split("__")
+                    self.generate_dimension_xml(
+                        table,
+                        order,
+                        label,
+                        domain,
+                        line_item,
+                        axis_member,
+                        preferred_label,
+                        presentation_link,
+                        root_level_abstract,
+                    )
 
-                    # table location
-                    table_loc = self.create_presentation_loc_element(
+                if is_pre_element_parent is False:
+                    # pre element parent
+                    pre_element_parent_loc = self.create_presentation_loc_element(
                         parent_tag=presentation_link,
-                        label=f"loc_{table}",
-                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{table}",
+                        label=f"loc_{pre_element_parent}",
+                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{pre_element_parent}",
                     )
 
                     # Common arguments for create_presentation_arc_element
-                    arc_args = {
+                    pre_element_parent_arc_args = {
                         "parent_tag": presentation_link,
-                        "order": order,
+                        "order": "1",
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{root_level_abstract}",
-                        "xlink_to": f"loc_{table}",
+                        "xlink_to": f"loc_{pre_element_parent}",
                     }
 
                     # Create presentationArc element and append it to presentation_links list.
-                    presentation_arc = self.create_presentation_arc_element(**arc_args)
-
-                    # axis location
-                    axis_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{axis}",
-                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{axis}",
+                    pre_element_parent_arc = self.create_presentation_arc_element(
+                        **pre_element_parent_arc_args
                     )
 
-                    # Common arguments for create_presentation_arc_element
-                    arc_args = {
-                        "parent_tag": presentation_link,
-                        "order": order,
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                        "xlink_from": f"loc_{table}",
-                        "xlink_to": f"loc_{axis}",
-                    }
+                    # update pre_element_parent value is True once pre parent element is created
+                    is_pre_element_parent = True
 
-                    # Create presentationArc element and append it to presentation_links list.
-                    presentation_arc = self.create_presentation_arc_element(**arc_args)
-
-                    # domain location
-                    # TODO:
-
-                    # member location
-                    member_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{member}",
-                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{member}",
-                    )
-
-                    # Common arguments for create_presentation_arc_element
-                    arc_args = {
-                        "parent_tag": presentation_link,
-                        "order": order,
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                        "xlink_from": f"loc_{table}",
-                        "xlink_to": f"loc_{member}",
-                    }
-
-                    # Add label-specific argument
-                    if label:
-                        arc_args["preferred_label"] = preferred_label
-
-                    # Create presentationArc element and append it to presentation_links list.
-                    presentation_arc = self.create_presentation_arc_element(**arc_args)
-
-                    # line item location
-                    line_item_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{line_item}",
-                        xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{line_item}",
-                    )
-
-                    # Common arguments for create_presentation_arc_element
-                    arc_args = {
-                        "parent_tag": presentation_link,
-                        "order": order,
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                        "xlink_from": f"loc_{table}",
-                        "xlink_to": f"loc_{line_item}",
-                    }
-
-                    # Create presentationArc element and append it to presentation_links list.
-                    presentation_arc = self.create_presentation_arc_element(**arc_args)
-
+                # Non dimensional XML
                 if element not in elements_list:
                     # main elements
                     if element.startswith(self.ticker):
