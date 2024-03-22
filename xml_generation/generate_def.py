@@ -44,6 +44,16 @@ class DefXMLGenerator:
             },
         )
 
+    def get_href_url(self, element: str):
+        if element.startswith("us-gaap"):
+            return "https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd"
+        if element.startswith("dei"):
+            return "https://xbrl.sec.gov/dei/2023/dei-2023.xsd"
+        if element.startswith("srt"):
+            return "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd"
+        if element.startswith(self.ticker):
+            return f"{self.ticker}-{self.filing_date}.xsd"
+
     def create_definition_arc_element(
         self, parent_tag=None, order=None, arc_role=None, xlink_from=None, xlink_to=None
     ):
@@ -132,11 +142,24 @@ class DefXMLGenerator:
         for role_name, role_data in self.grouped_data.items():
             for record in role_data:
                 role = record.get("RoleName")
+
+                _table = record.get("Table")
+                table = _table.replace("--", "_")
+
                 _element = record.get("Element")
                 element = _element.replace("--", "_")
+
                 label = record.get("PreferredLabel")
+                order = record.get("Indenting")
+
                 _root_level_abstract = record.get("RootLevelAbstract")
                 root_level_abstract = _root_level_abstract.replace("--", "_")
+
+                _line_item: str = record.get("LineItem")
+                line_item = _line_item.replace("--", "_")
+
+                _pre_element_parent: str = record.get("PreElementParent")
+                pre_element_parent = _pre_element_parent.replace(":", "_")
 
                 # Create definitionLink root element
                 definition_link = ET.Element(
@@ -147,17 +170,29 @@ class DefXMLGenerator:
                     },
                 )
 
-                # Add definition loc elements
-                root_level_abstract_loc = self.create_definition_loc_element(
+                # line item location
+                line_item_xlink_href = self.get_href_url(line_item)
+                line_item_loc = self.create_definition_loc_element(
                     parent_tag=definition_link,
-                    label=f"loc_{root_level_abstract}",
-                    xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{root_level_abstract}",
+                    label=f"loc_{line_item}",
+                    xlink_href=f"{line_item_xlink_href}#{line_item}",
                 )
 
-                loc_entities = self.create_definition_loc_element(
+                # Common arguments for create_presentation_arc_element
+                arc_args = {
+                    "parent_tag": definition_link,
+                    "order": order,
+                    "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                    "xlink_from": f"loc_{table}",
+                    "xlink_to": f"loc_{line_item}",
+                }
+
+                # pre parent element
+                pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
+                pre_element_parent_loc = self.create_definition_loc_element(
                     parent_tag=definition_link,
-                    label=f"loc_{element}",
-                    xlink_href=f"https://xbrl.sec.gov/dei/2023/dei-2023.xsd#{element}",
+                    label=f"loc_{pre_element_parent}",
+                    xlink_href=f"{pre_element_parent_xlink_href}#{pre_element_parent}",
                 )
 
                 # Add definition arc elements
@@ -165,7 +200,24 @@ class DefXMLGenerator:
                     parent_tag=definition_link,
                     order="1",
                     arc_role="http://www.xbrl.org/2003/arcrole/all",
-                    xlink_from=f"loc_{root_level_abstract}",
+                    xlink_from=f"loc_{line_item}",
+                    xlink_to=f"loc_{pre_element_parent}",
+                )
+
+                # main elements
+                element_xlink_href = self.get_href_url(element)
+                element_loc = self.create_definition_loc_element(
+                    parent_tag=definition_link,
+                    label=f"loc_{element}",
+                    xlink_href=f"{element_xlink_href}#{element}",
+                )
+
+                # Add definition arc elements
+                definition_arc = self.create_definition_arc_element(
+                    parent_tag=definition_link,
+                    order="1",
+                    arc_role="http://www.xbrl.org/2003/arcrole/all",
+                    xlink_from=f"loc_{pre_element_parent}",
                     xlink_to=f"loc_{element}",
                 )
 
