@@ -14,7 +14,6 @@ class PreXMLGenerator:
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
 
     def get_preferred_label(self, label: str):
-
         for key, value in labels_dict.items():
             if key.replace(" ", "").lower() == label.replace(" ", "").lower():
                 return value
@@ -121,11 +120,8 @@ class PreXMLGenerator:
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                     "xlink_from": f"loc_{pre_element_parent}",
                     "xlink_to": f"loc_{element}",
+                    "preferred_label": preferred_label,
                 }
-
-                # Add label-specific argument
-                if label:
-                    arc_args["preferred_label"] = preferred_label
 
                 # Create presentationArc element and append it to presentation_links list.
                 presentation_arc = self.create_presentation_arc_element(**arc_args)
@@ -156,7 +152,9 @@ class PreXMLGenerator:
                 axis_member = _axis_member.replace("--", "_")
 
             order = record.get("Indenting")
-            domain: str = record.get("Domain")
+
+            _domain: str = record.get("Domain")
+            domain: str = _domain.replace("--", "_")
 
             _line_item: str = record.get("LineItem")
             line_item = _line_item.replace("--", "_")
@@ -244,10 +242,6 @@ class PreXMLGenerator:
                 "xlink_from": f"loc_{domain}",
                 "xlink_to": f"loc_{member}",
             }
-
-            # Add label-specific argument
-            if label:
-                arc_args["preferred_label"] = preferred_label
 
             # Create presentationArc element and append it to presentation_links list.
             presentation_arc = self.create_presentation_arc_element(**arc_args)

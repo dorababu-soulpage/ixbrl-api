@@ -20,6 +20,6 @@ labels_dict = {
     "Negated Total": "http://xbrl.us/us-gaap/role/label/negatedTotal",
     "Negated Period Start": "http://xbrl.us/us-gaap/role/label/negatedPeriodStart",
     "Negated Period End": "http://xbrl.us/us-gaap/role/label/negatedPeriodEnd",
-    "Terse": "https://www.xbrl.org/2003/role/terseLabel",
-    "Verbose": "http://www.xbrl.org/2003/role/verboseLabel",
+    "Terse Label": "https://www.xbrl.org/2003/role/terseLabel",
+    "Verbose Label": "http://www.xbrl.org/2003/role/verboseLabel",
 }

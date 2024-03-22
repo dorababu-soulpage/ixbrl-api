@@ -121,7 +121,7 @@ html_elements_data: list[dict] = [
     },
     {
         "Type": "90F",
-        "Element": "msft--BankOverdraftsOfSBI  ",
+        "Element": "msft--BankOverdraftsOfSBI",
         "Unit": "Canadian Dollar",
         "PreElementParent": "us-gaap:LiabilitiesCurrentAbstract",
         "Indenting": "01",
@@ -130,7 +130,7 @@ html_elements_data: list[dict] = [
         "Calculation": "a7b4c79a89bfd48a48ac7b8d562c893b1__us-gaap--BuildingsAndImprovementsGross",
         "Period": "20240223",
         "Axis_Member": "srt--RestatementAxis__srt--ScenarioPreviouslyReportedMember",
-        "Domain": "srt-RestatementDomain",
+        "Domain": "srt--RestatementDomain",
         "PreferredLabel": "Right of use assets",
         "PreferredLabelType": "verboselabel",
         "Table": "",
