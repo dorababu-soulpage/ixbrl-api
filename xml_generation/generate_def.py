@@ -163,8 +163,16 @@ class DefXMLGenerator:
 
                 axis_members: str = record.get("Axis_Member")
 
-                _domain: str = record.get("Domain")
-                domain: str = _domain.replace("--", "_")
+                # _domain: str = record.get("Domain")
+                # domain: str = _domain.replace("--", "_")
+
+                # Create roleRef element and append it to role_ref_elements list.
+                role_ref_element = self.create_role_ref_element(
+                    role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/Role_{role_name}",
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#Role_{role_name}",
+                )
+
+                role_ref_elements.append(role_ref_element)
 
                 # Create definitionLink root element
                 definition_link = ET.Element(
@@ -204,8 +212,10 @@ class DefXMLGenerator:
                 definition_arc = self.create_definition_arc_element(**arc_args)
 
                 for axis_member in axis_members.split("__"):
-                    _axis, _member = axis_member.split("_")
-                    axis, member = _axis.replace("--", "_"), _member.replace("--", "_")
+                    _axis, _domain, _member = axis_member.split("_")
+                    axis = _axis.replace("--", "_")
+                    domain = _domain.replace("--", "_")
+                    member = _member.replace("--", "_")
 
                     # axis
                     axis_xlink_href = self.get_href_url(axis)
@@ -238,7 +248,7 @@ class DefXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": definition_link,
-                        "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
+                        "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
                         "xlink_from": f"loc_{axis}",
                         "xlink_to": f"loc_{domain}",
                         "order": order,
@@ -258,7 +268,7 @@ class DefXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": definition_link,
-                        "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-domain",
+                        "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-domain",
                         "xlink_from": f"loc_{axis}",
                         "xlink_to": f"loc_{domain}",
                         "order": order,
@@ -299,7 +309,7 @@ class DefXMLGenerator:
                 definition_arc = self.create_definition_arc_element(
                     parent_tag=definition_link,
                     order="1",
-                    arc_role="http://www.xbrl.org/2003/arcrole/all",
+                    arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
                     xlink_from=f"loc_{line_item}",
                     xlink_to=f"loc_{pre_element_parent}",
                 )
@@ -316,7 +326,7 @@ class DefXMLGenerator:
                 definition_arc = self.create_definition_arc_element(
                     parent_tag=definition_link,
                     order="1",
-                    arc_role="http://www.xbrl.org/2003/arcrole/all",
+                    arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
                     xlink_from=f"loc_{pre_element_parent}",
                     xlink_to=f"loc_{element}",
                 )
