@@ -168,8 +168,8 @@ class DefXMLGenerator:
 
                 # Create roleRef element and append it to role_ref_elements list.
                 role_ref_element = self.create_role_ref_element(
-                    role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/Role_{role_name}",
-                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#Role_{role_name}",
+                    role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/{role_name}",
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
                 )
 
                 role_ref_elements.append(role_ref_element)

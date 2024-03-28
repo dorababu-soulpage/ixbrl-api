@@ -1,14 +1,24 @@
+from itertools import groupby
 import xml.etree.ElementTree as ET
 from database import html_elements_data
 
 
 class XSDGenerator:
-    def __init__(self, ticker, filing_date, company_website, definitions: list[dict]):
+    def __init__(self, data, ticker, filing_date, company_website):
+        self.root = None
+        self.data = data
         self.ticker = ticker
         self.filing_date = filing_date
         self.company_website = company_website
-        self.definitions = definitions
-        self.root = None
+        # self.definitions = definitions
+        self.grouped_data = self.group_data_by_role()
+
+    def group_data_by_role(self):
+        # Group data by RoleName using itertools.groupby
+        grouped_data = {}
+        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
+            grouped_data[key] = list(group)
+        return grouped_data
 
     def create_root_element(self):
         # Create root element with necessary attributes
@@ -83,6 +93,42 @@ class XSDGenerator:
             xsd_import_element = ET.Element("xsd:import", attrib=xsd_import)
             self.root.append(xsd_import_element)
 
+    def get_definition(self, text):
+        # Insert space before each uppercase letter (except the first one)
+        converted_text = "".join(
+            [
+                " " + char if char.isupper() and i != 0 else char
+                for i, char in enumerate(text)
+            ]
+        )
+
+        # Split the text into words
+        converted_text_words = converted_text.split()
+
+        # Join the words with spaces and add 'Statement - ' before the first word
+        final_text = f"{converted_text_words[0]} - {' '.join(converted_text_words)}"
+        return final_text
+
+    def get_definition_index(self, value):
+        original_string = "0000000"  # Original string with 7 zeros
+        value_to_insert = value
+
+        # Calculate the length of the original string
+        original_length = len(original_string)
+
+        # Check if the original string is longer than the value to insert
+        if original_length >= len(value_to_insert):
+            # Calculate the number of zeros to append
+            zeros_to_append = original_length - len(value_to_insert)
+
+            # Create the updated string by appending zeros and the input value
+            updated_string = "0" * zeros_to_append + value_to_insert
+        else:
+            # If the original string is shorter, return the input value as is
+            updated_string = value_to_insert
+
+        return updated_string
+
     def create_xsd_annotation_and_appinfo(self):
         # Create xsd:annotation and xsd:appinfo elements
         xsd_annotation = ET.Element("xsd:annotation")
@@ -125,11 +171,7 @@ class XSDGenerator:
             linkbase_ref_element = ET.Element("link:linkbaseRef", attrib=linkbase_ref)
             xsd_appinfo.append(linkbase_ref_element)
 
-        for record in self.definitions:
-            # HTML attributes values start from here
-            # Create link:roleType element
-            role = record.get("RoleName", "")
-            definition = record.get("definition", "")
+        for index, (role, role_data) in enumerate(self.grouped_data.items(), start=1):
             link_role_type = ET.Element(
                 "link:roleType",
                 attrib={
@@ -142,7 +184,7 @@ class XSDGenerator:
             link_role_type_elements = [
                 {
                     "tag": "link:definition",
-                    "text": definition,
+                    "text": f"{self.get_definition_index(str(index))} - {self.get_definition(role)}",
                 },
                 {"tag": "link:usedOn", "text": "link:presentationLink"},
                 {"tag": "link:usedOn", "text": "link:calculationLink"},
@@ -162,6 +204,21 @@ class XSDGenerator:
 
         # Append xsd:annotation to root
         self.root.append(xsd_annotation)
+
+        # custom elements
+        custom_element = ET.Element(
+            "xs:element",
+            {
+                "id": "msft_CommonStock025ParValueMember",
+                "abstract": "true",
+                "name": "CommonStock025ParValueMember",
+                "nillable": "true",
+                "xbrli:periodType": "duration",
+                "substitutionGroup": "xbrli:item",
+                "type": "dtr-types1:domainItemType",
+            },
+        )
+        self.root.append(custom_element)
 
     def generate_xsd_schema(self):
         # Create an XML declaration
@@ -201,8 +258,8 @@ class XSDGenerator:
 # Example usage:
 ticker = "msft"
 filing_date = "20230630"
-definitions = html_elements_data
+data = html_elements_data
 company_website = "http://www.microsoft.com"
 
-generator = XSDGenerator(ticker, filing_date, company_website, definitions)
+generator = XSDGenerator(data, ticker, filing_date, company_website)
 generator.generate_xsd_schema()

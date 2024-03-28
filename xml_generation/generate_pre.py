@@ -83,6 +83,8 @@ class PreXMLGenerator:
     def generate_elements_xml(self, role_data, presentation_links, presentation_link):
         # main elements
         elements_list: list = []
+        pre_element_parent_created = False
+
         for record in role_data:
             order = record.get("Indenting")
             label = record.get("PreferredLabel")
@@ -95,6 +97,28 @@ class PreXMLGenerator:
 
             _pre_element_parent: str = record.get("PreElementParent")
             pre_element_parent = _pre_element_parent.replace(":", "_")
+
+            _line_item: str = record.get("LineItem")
+            line_item = _line_item.replace("--", "_")
+            if pre_element_parent_created is False:
+                # pre parent element
+                pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
+                pre_element_parent_loc = self.create_presentation_loc_element(
+                    parent_tag=presentation_link,
+                    label=f"loc_{pre_element_parent}",
+                    xlink_href=f"{pre_element_parent_xlink_href}#{pre_element_parent}",
+                )
+
+                # Add definition arc elements
+                definition_arc = self.create_presentation_arc_element(
+                    parent_tag=presentation_link,
+                    order="1",
+                    arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                    xlink_from=f"loc_{line_item}",
+                    xlink_to=f"loc_{pre_element_parent}",
+                )
+
+                pre_element_parent_created = True
 
             if element not in elements_list:
                 # main elements
@@ -311,9 +335,12 @@ class PreXMLGenerator:
 
             # Create roleRef element and append it to role_ref_elements list.
             role_ref_element = self.create_role_ref_element(
-                role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/Role_{role_name}",
-                xlink_href=f"{self.ticker}-{self.filing_date}.xsd#Role_{role_name}",
+                role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/{role_name}",
+                xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
             )
+
+            _line_item: str = record.get("LineItem")
+            line_item = _line_item.replace("--", "_")
 
             role_ref_elements.append(role_ref_element)
 
@@ -321,7 +348,7 @@ class PreXMLGenerator:
             presentation_link = ET.Element(
                 "link:presentationLink",
                 attrib={
-                    "xlink:role": f"{self.company_website}/role/Role_{role_name}",
+                    "xlink:role": f"{self.company_website}/role/{role_name}",
                     "xlink:type": "extended",
                 },
             )
