@@ -171,7 +171,26 @@ class XSDGenerator:
             linkbase_ref_element = ET.Element("link:linkbaseRef", attrib=linkbase_ref)
             xsd_appinfo.append(linkbase_ref_element)
 
+        custom_elements = []
         for index, (role, role_data) in enumerate(self.grouped_data.items(), start=1):
+
+            for record in role_data:
+                axis_members: str = record.get("Axis_Member")
+                for axis_member in axis_members.split("__"):
+                    _axis, _domain, _member = axis_member.split("_")
+                    axis = _axis.replace("--", "_")
+                    domain = _domain.replace("--", "_")
+                    member = _member.replace("--", "_")
+
+                    if axis.startswith(self.ticker):
+                        custom_elements.append(axis)
+
+                    if domain.startswith(self.ticker):
+                        custom_elements.append(domain)
+
+                    if member.startswith(self.ticker):
+                        custom_elements.append(member)
+
             link_role_type = ET.Element(
                 "link:roleType",
                 attrib={
@@ -206,19 +225,20 @@ class XSDGenerator:
         self.root.append(xsd_annotation)
 
         # custom elements
-        custom_element = ET.Element(
-            "xs:element",
-            {
-                "id": "msft_CommonStock025ParValueMember",
-                "abstract": "true",
-                "name": "CommonStock025ParValueMember",
-                "nillable": "true",
-                "xbrli:periodType": "duration",
-                "substitutionGroup": "xbrli:item",
-                "type": "dtr-types1:domainItemType",
-            },
-        )
-        self.root.append(custom_element)
+        for custom_element in custom_elements:
+            custom_element = ET.Element(
+                "xs:element",
+                {
+                    "id": f"{custom_element}",
+                    "abstract": "true",
+                    "name": f"{custom_element}".lstrip(f"{self.ticker}_"),
+                    "nillable": "true",
+                    "xbrli:periodType": "duration",
+                    "substitutionGroup": "xbrli:item",
+                    "type": "dtr-types1:domainItemType",
+                },
+            )
+            self.root.append(custom_element)
 
     def generate_xsd_schema(self):
         # Create an XML declaration
