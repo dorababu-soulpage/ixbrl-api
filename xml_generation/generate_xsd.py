@@ -175,9 +175,14 @@ class XSDGenerator:
         for index, (role, role_data) in enumerate(self.grouped_data.items(), start=1):
 
             for record in role_data:
+
                 axis_members: str = record.get("Axis_Member")
-                for axis_member in axis_members.split("__"):
-                    _axis, _domain, _member = axis_member.split("_")
+                splitted = axis_members.split("__")
+
+                # Group by 3
+                groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
+                for group in groups:
+                    _axis, _domain, _member = group
                     axis = _axis.replace("--", "_")
                     domain = _domain.replace("--", "_")
                     member = _member.replace("--", "_")

@@ -113,33 +113,30 @@ class DefXMLGenerator:
         return arcrole_ref_elements_xml
 
     def generate_def_xml(self):
-        # Create an XML declaration
-        xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
-
-        # Comments after the XML declaration
-        comments_after_declaration = [
-            "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
-            "<!-- Creation Date : -->",
-            "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
-        ]
-
-        # Create the root linkbase element with namespaces
-        linkbase_element = ET.Element(
-            "link:linkbase",
-            attrib={
-                "xsi:schemaLocation": "http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
-                "xmlns:link": "http://www.xbrl.org/2003/linkbase",
-                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
-                "xmlns:xlink": "http://www.w3.org/1999/xlink",
-                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            },
-        )
 
         role_ref_elements = []
         definition_links = []  # List to store presentationLink elements.
 
         # Iterate through grouped data and create roleRef and presentationLink elements
         for role_name, role_data in self.grouped_data.items():
+
+            # Create roleRef element and append it to role_ref_elements list.
+            role_ref_element = self.create_role_ref_element(
+                role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/{role_name}",
+                xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
+            )
+
+            role_ref_elements.append(role_ref_element)
+
+            # Create definitionLink root element
+            definition_link = ET.Element(
+                "link:definitionLink",
+                attrib={
+                    "xlink:role": f"{self.company_website}/role/{role_name}",
+                    "xlink:type": "extended",
+                },
+            )
+
             for record in role_data:
                 role = record.get("RoleName")
 
@@ -162,26 +159,6 @@ class DefXMLGenerator:
                 pre_element_parent = _pre_element_parent.replace(":", "_")
 
                 axis_members: str = record.get("Axis_Member")
-
-                # _domain: str = record.get("Domain")
-                # domain: str = _domain.replace("--", "_")
-
-                # Create roleRef element and append it to role_ref_elements list.
-                role_ref_element = self.create_role_ref_element(
-                    role_uri=f"{self.company_website}/{self.filing_date}/taxonomy/role/{role_name}",
-                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
-                )
-
-                role_ref_elements.append(role_ref_element)
-
-                # Create definitionLink root element
-                definition_link = ET.Element(
-                    "link:definitionLink",
-                    attrib={
-                        "xlink:role": f"{self.company_website}/role/{role}",
-                        "xlink:type": "extended",
-                    },
-                )
 
                 # line item location
                 line_item_xlink_href = self.get_href_url(line_item)
@@ -211,8 +188,12 @@ class DefXMLGenerator:
                 # Add definition arc elements
                 definition_arc = self.create_definition_arc_element(**arc_args)
 
-                for axis_member in axis_members.split("__"):
-                    _axis, _domain, _member = axis_member.split("_")
+                splitted = axis_members.split("__")
+
+                # Group by 3
+                groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
+                for group in groups:
+                    _axis, _domain, _member = group
                     axis = _axis.replace("--", "_")
                     domain = _domain.replace("--", "_")
                     member = _member.replace("--", "_")
@@ -331,7 +312,29 @@ class DefXMLGenerator:
                     xlink_to=f"loc_{element}",
                 )
 
-                definition_links.append(definition_link)
+            definition_links.append(definition_link)
+
+        # Create an XML declaration
+        xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
+
+        # Comments after the XML declaration
+        comments_after_declaration = [
+            "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
+            "<!-- Creation Date : -->",
+            "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
+        ]
+
+        # Create the root linkbase element with namespaces
+        linkbase_element = ET.Element(
+            "link:linkbase",
+            attrib={
+                "xsi:schemaLocation": "http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
+                "xmlns:link": "http://www.xbrl.org/2003/linkbase",
+                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
+                "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            },
+        )
 
         # Convert each role_ref_element to XML string and concatenate
         role_ref_elements_xml = "\n".join(

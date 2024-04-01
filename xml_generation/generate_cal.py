@@ -23,6 +23,13 @@ class CalXMLGenerator:
         for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
             self.grouped_data[key] = list(group)
 
+    def group_data_by_cal_parent(self, data):
+        cal_parent_grouped_data = {}
+        # Group the data by RoleName using itertools groupby and store it in grouped_data.
+        for key, group in groupby(data, key=lambda x: x["CalculationParent"]):
+            cal_parent_grouped_data[key] = list(group)
+        return cal_parent_grouped_data
+
     def create_role_ref_element(self, role_uri=None, xlink_href=None):
         return ET.Element(
             "link:roleRef",
@@ -118,14 +125,15 @@ class CalXMLGenerator:
                     "xlink:type": "extended",
                 },
             )
+
+            # group the by role data based on the calculation parent
+            data = self.group_data_by_cal_parent(role_data)
+
             calculation_parents = []
-            for record in role_data:
+            for cal_parent, children in data.items():
 
-                _calculation_parent = record.get("CalculationParent")
+                _calculation_parent = cal_parent
                 calculation_parent = _calculation_parent.replace("--", "_")
-
-                _element = record.get("Element")
-                element = _element.replace("--", "_")
 
                 # calculation parent
                 calculation_parent_href = self.get_href_url(calculation_parent)
@@ -135,29 +143,35 @@ class CalXMLGenerator:
                     xlink_href=f"{calculation_parent_href}#{calculation_parent}",
                 )
 
-                if element in calculation_parents:
-                    element_label = f"loc_{element}_{index+1}"
-                else:
-                    element_label = f"loc_{element}"
+                # loop all cal parent children and create loc, and arc elements
+                for record in children:
 
-                # element
-                element_href = self.get_href_url(element)
-                element_loc = self.create_calculation_loc_element(
-                    parent_tag=calculation_link,
-                    label=element_label,
-                    xlink_href=f"{element_href}#{calculation_parent}",
-                )
+                    _element = record.get("Element")
+                    element = _element.replace("--", "_")
 
-                # Add calculation arc elements
-                calculation_arc = self.create_calculation_arc_element(
-                    parent_tag=calculation_link,
-                    order="1",
-                    weight="1",
-                    arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
-                    xlink_from=f"loc_{calculation_parent}_{index}",
-                    xlink_to=f"loc_{element}_{index+1}",
-                )
-                calculation_parents.append(calculation_parent)
+                    if element in calculation_parents:
+                        element_label = f"loc_{element}_{index+1}"
+                    else:
+                        element_label = f"loc_{element}"
+
+                    # element
+                    element_href = self.get_href_url(element)
+                    element_loc = self.create_calculation_loc_element(
+                        parent_tag=calculation_link,
+                        label=element_label,
+                        xlink_href=f"{element_href}#{element}",
+                    )
+
+                    # Add calculation arc elements
+                    calculation_arc = self.create_calculation_arc_element(
+                        parent_tag=calculation_link,
+                        order="1",
+                        weight="1",
+                        arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
+                        xlink_from=f"loc_{calculation_parent}_{index}",
+                        xlink_to=element_label,
+                    )
+                    calculation_parents.append(calculation_parent)
 
             calculation_links.append(calculation_link)
 
@@ -204,19 +218,6 @@ filing_date = "20230630"
 data = html_elements_data
 company_website = "http://www.microsoft.com"
 
+# Example usage
 generator = CalXMLGenerator(data, filing_date, ticker, company_website)
-
-# generator.add_role_ref_element(
-#     f"{company_website}/{filing_date}/taxonomy/role/Role_DocumentDocumentAndEntityInformation",
-#     f"{ticker}-{filing_date}.xsd#Role_DocumentDocumentAndEntityInformation",
-# )
-# generator.add_role_ref_element(
-#     f"{company_website}/{filing_date}/taxonomy/role/Role_StatementINCOMESTATEMENTS",
-#     f"{ticker}-{filing_date}.xsd#Role_StatementINCOMESTATEMENTS",
-# )
-
 xml_data = generator.generate_cal_xml()
-
-# # Optionally, write the XML to a file
-# with open("cal.xml", "w", encoding="utf-8") as file:
-#     file.write(xml_data)
