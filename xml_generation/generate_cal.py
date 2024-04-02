@@ -144,7 +144,7 @@ class CalXMLGenerator:
                 )
 
                 # loop all cal parent children and create loc, and arc elements
-                for record in children:
+                for index, record in enumerate(children, start=1):
 
                     _element = record.get("Element")
                     element = _element.replace("--", "_")
@@ -165,7 +165,7 @@ class CalXMLGenerator:
                     # Add calculation arc elements
                     calculation_arc = self.create_calculation_arc_element(
                         parent_tag=calculation_link,
-                        order="1",
+                        order=str(index),
                         weight="1",
                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
                         xlink_from=f"loc_{calculation_parent}_{index}",
