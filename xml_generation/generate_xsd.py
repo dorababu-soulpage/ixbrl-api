@@ -230,7 +230,7 @@ class XSDGenerator:
         self.root.append(xsd_annotation)
 
         # custom elements
-        for custom_element in custom_elements:
+        for custom_element in set(custom_elements):
             custom_element = ET.Element(
                 "xs:element",
                 {
@@ -240,7 +240,7 @@ class XSDGenerator:
                     "nillable": "true",
                     "xbrli:periodType": "duration",
                     "substitutionGroup": "xbrli:item",
-                    "type": "dtr-types1:domainItemType",
+                    "type": "dtr-types:domainItemType",
                 },
             )
             self.root.append(custom_element)
