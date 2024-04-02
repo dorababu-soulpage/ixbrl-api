@@ -6,7 +6,7 @@ from database import html_elements_data
 
 class LabXMLGenerator:
     def __init__(self, data, filing_date, ticker, company_website):
-        # Initialize the CalXMLGenerator with data, filing_date, ticker, and company_website.
+        # Initialize the LabXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
         self.ticker = ticker
