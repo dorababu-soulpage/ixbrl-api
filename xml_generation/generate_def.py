@@ -143,7 +143,6 @@ class DefXMLGenerator:
             )
 
             for index, record in enumerate(role_data, start=1):
-                print(index)
                 role = record.get("RoleName")
 
                 _table = record.get("Table")

@@ -291,7 +291,7 @@ class LabXMLGenerator:
         # add calculation parents
         for calculation_parent in calculation_parents_list:
 
-            cal_parent = calculation_parent.replace("--", "-")
+            cal_parent = calculation_parent.replace("--", "_")
 
             if cal_parent not in elements:
                 href_url = self.get_href_url(cal_parent)
