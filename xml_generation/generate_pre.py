@@ -361,6 +361,7 @@ class PreXMLGenerator:
                     "xlink:type": "extended",
                 },
             )
+
             # Create presentation loc elements for root_level_abstract and element.
             root_level_abstract_loc = self.create_presentation_loc_element(
                 parent_tag=presentation_link,
