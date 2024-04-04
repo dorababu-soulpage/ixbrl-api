@@ -272,14 +272,14 @@ class LabXMLGenerator:
                 # create label
                 self.create_label_element(
                     parent_tag=label_link,
-                    id=f"lab_{element}_label_en-US",
+                    id=f"lab_{element}_1_label_en-US",
                     xlink_label=element,
                 )
 
                 # create terseLabel
                 self.create_label_element(
                     parent_tag=label_link,
-                    id=f"lab_{element}_label_en-US",
+                    id=f"lab_{element}_2_label_en-US",
                     xlink_label=element,
                     xlink_role="http://www.xbrl.org/2003/role/terseLabel",
                 )
@@ -316,14 +316,14 @@ class LabXMLGenerator:
                 # create label
                 self.create_label_element(
                     parent_tag=label_link,
-                    id=f"lab_{cal_parent}_label_en-US",
+                    id=f"lab_{cal_parent}_1_label_en-US",
                     xlink_label=cal_parent,
                 )
 
                 # create terseLabel
                 self.create_label_element(
                     parent_tag=label_link,
-                    id=f"lab_{cal_parent}_label_en-US",
+                    id=f"lab_{cal_parent}_2_label_en-US",
                     xlink_label=cal_parent,
                     xlink_role="http://www.xbrl.org/2003/role/terseLabel",
                 )
