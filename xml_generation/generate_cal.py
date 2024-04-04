@@ -107,7 +107,7 @@ class CalXMLGenerator:
         calculation_links = []  # List to store calculationLink elements.
 
         # Iterate through grouped data and create roleRef and presentationLink elements.
-        for index, (role_name, role_data) in enumerate(
+        for role_index, (role_name, role_data) in enumerate(
             self.grouped_data.items(), start=1
         ):
 
@@ -130,7 +130,7 @@ class CalXMLGenerator:
             data = self.group_data_by_cal_parent(role_data)
 
             calculation_parents = []
-            for cal_parent, children in data.items():
+            for cp_index, (cal_parent, children) in enumerate(data.items(), start=1):
 
                 _calculation_parent = cal_parent
                 calculation_parent = _calculation_parent.replace("--", "_")
@@ -139,7 +139,7 @@ class CalXMLGenerator:
                 calculation_parent_href = self.get_href_url(calculation_parent)
                 calculation_parent_loc = self.create_calculation_loc_element(
                     parent_tag=calculation_link,
-                    label=f"loc_{calculation_parent}_{index}",
+                    label=f"loc_{calculation_parent}_{role_index}",
                     xlink_href=f"{calculation_parent_href}#{calculation_parent}",
                 )
 
@@ -168,7 +168,7 @@ class CalXMLGenerator:
                         order=str(index),
                         weight="1",
                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
-                        xlink_from=f"loc_{calculation_parent}_{index}",
+                        xlink_from=f"loc_{calculation_parent}_{role_index}",
                         xlink_to=element_label,
                     )
                     calculation_parents.append(calculation_parent)
