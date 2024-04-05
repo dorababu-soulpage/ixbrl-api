@@ -174,7 +174,7 @@ class LabXMLGenerator:
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                 "xlink_from": f"loc_{root_level_abstract}",
-                "xlink_to": f"loc_{root_level_abstract}",
+                "xlink_to": f"lab_{root_level_abstract}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
@@ -201,7 +201,7 @@ class LabXMLGenerator:
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                 "xlink_from": f"loc_{table}",
-                "xlink_to": f"loc_{table}",
+                "xlink_to": f"lab_{table}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
@@ -228,7 +228,7 @@ class LabXMLGenerator:
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                 "xlink_from": f"loc_{line_item}",
-                "xlink_to": f"loc_{line_item}",
+                "xlink_to": f"lab_{line_item}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
@@ -263,7 +263,7 @@ class LabXMLGenerator:
                     "order": "1",
                     "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                     "xlink_from": f"loc_{element}",
-                    "xlink_to": f"loc_{element}",
+                    "xlink_to": f"lab_{element}",
                 }
 
                 # Create presentationArc element and append it to presentation_links list.
@@ -307,7 +307,7 @@ class LabXMLGenerator:
                     "order": "1",
                     "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                     "xlink_from": f"loc_{cal_parent}",
-                    "xlink_to": f"loc_{cal_parent}",
+                    "xlink_to": f"lab_{cal_parent}",
                 }
 
                 # Create presentationArc element and append it to presentation_links list.
@@ -345,7 +345,7 @@ class LabXMLGenerator:
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                 "xlink_from": f"loc_{pre_element_parent}",
-                "xlink_to": f"loc_{pre_element_parent}",
+                "xlink_to": f"lab_{pre_element_parent}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
@@ -379,7 +379,7 @@ class LabXMLGenerator:
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                 "xlink_from": f"loc_{axis}",
-                "xlink_to": f"loc_{axis}",
+                "xlink_to": f"lab_{axis}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
