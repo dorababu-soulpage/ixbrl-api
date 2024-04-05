@@ -232,7 +232,7 @@ class XSDGenerator:
         # custom elements
         for custom_element in set(custom_elements):
             custom_element = ET.Element(
-                "xs:element",
+                "xsd:element",
                 {
                     "id": f"{custom_element}",
                     "abstract": "true",
