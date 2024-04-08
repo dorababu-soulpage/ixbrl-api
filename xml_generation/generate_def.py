@@ -19,9 +19,10 @@ class DefXMLGenerator:
             grouped_data[key] = list(group)
         return grouped_data
 
-    def create_role_ref_element(self, role_uri=None, xlink_href=None):
+    def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         # Create a roleRef element with specified attributes
-        return ET.Element(
+        return ET.SubElement(
+            parent,
             "link:roleRef",
             attrib={
                 "roleURI": role_uri,
@@ -70,7 +71,7 @@ class DefXMLGenerator:
             },
         )
 
-    def get_arcrole_refs_xml(self):
+    def get_arcrole_refs_xml(self, parent):
         # Define arcroleRefs data
         arcrole_refs_data = [
             {
@@ -97,19 +98,22 @@ class DefXMLGenerator:
 
         # Create arcroleRef elements
         arcrole_ref_elements = []
+
         for arcrole_ref_data in arcrole_refs_data:
-            arcrole_ref = ET.Element(
+            arcrole_ref = ET.SubElement(
+                parent,
                 "link:arcroleRef",
                 arcroleURI=arcrole_ref_data["arcroleURI"],
-                xlink_type="simple",
-                xlink_href=arcrole_ref_data["xlink:href"],
+                **{
+                    "xlink:type": "simple",
+                    "xlink:href": arcrole_ref_data["xlink:href"],
+                },
             )
             arcrole_ref_elements.append(arcrole_ref)
 
         arcrole_ref_elements_xml = "\n".join(
             [ET.tostring(e, encoding="utf-8").decode() for e in arcrole_ref_elements]
         )
-
         return arcrole_ref_elements_xml
 
     def generate_def_xml(self):
@@ -122,11 +126,26 @@ class DefXMLGenerator:
         dimension_records_list = []
         pre_element_parent_created = False
 
+        # Create the root linkbase element with namespaces
+        linkbase_element = ET.Element(
+            "link:linkbase",
+            attrib={
+                "xsi:schemaLocation": "http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
+                "xmlns:link": "http://www.xbrl.org/2003/linkbase",
+                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
+                "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            },
+        )
+
+        self.get_arcrole_refs_xml(linkbase_element)
+
         # Iterate through grouped data and create roleRef and presentationLink elements
         for role_name, role_data in self.grouped_data.items():
 
             # Create roleRef element and append it to role_ref_elements list.
             role_ref_element = self.create_role_ref_element(
+                parent=linkbase_element,
                 role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name}",
                 xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
             )
@@ -134,7 +153,8 @@ class DefXMLGenerator:
             role_ref_elements.append(role_ref_element)
 
             # Create definitionLink root element
-            definition_link = ET.Element(
+            definition_link = ET.SubElement(
+                linkbase_element,
                 "link:definitionLink",
                 attrib={
                     "xlink:role": f"{self.company_website}/role/{role_name}",
@@ -344,38 +364,12 @@ class DefXMLGenerator:
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
-        # Create the root linkbase element with namespaces
-        linkbase_element = ET.Element(
-            "link:linkbase",
-            attrib={
-                "xsi:schemaLocation": "http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
-                "xmlns:link": "http://www.xbrl.org/2003/linkbase",
-                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
-                "xmlns:xlink": "http://www.w3.org/1999/xlink",
-                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            },
-        )
-
-        # Convert each role_ref_element to XML string and concatenate
-        role_ref_elements_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in role_ref_elements]
-        )
-        definition_links_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in definition_links]
-        )
-        arcrole_refs_xml = self.get_arcrole_refs_xml()
-
         # Concatenate XML declaration, comments, and linkbase element
         xml_data = (
             xml_declaration
             + "\n".join(comments_after_declaration)
             + "\n"
             + ET.tostring(linkbase_element, encoding="utf-8").decode()
-            + "\n"
-            + arcrole_refs_xml
-            + role_ref_elements_xml  # Use the concatenated XML string
-            + "\n"
-            + definition_links_xml
         )
 
         self.save_xml_data(xml_data)

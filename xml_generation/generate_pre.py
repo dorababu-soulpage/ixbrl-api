@@ -23,9 +23,10 @@ class PreXMLGenerator:
         for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
             self.grouped_data[key] = list(group)
 
-    def create_role_ref_element(self, role_uri=None, xlink_href=None):
+    def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         # Create an XML element for roleRef with roleURI and xlink:href attributes.
-        return ET.Element(
+        return ET.SubElement(
+            parent,
             "link:roleRef",
             attrib={
                 "roleURI": role_uri,
@@ -344,6 +345,7 @@ class PreXMLGenerator:
 
             # Create roleRef element and append it to role_ref_elements list.
             role_ref_element = self.create_role_ref_element(
+                linkbase_element,
                 role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name}",
                 xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
             )
@@ -354,7 +356,8 @@ class PreXMLGenerator:
             role_ref_elements.append(role_ref_element)
 
             # Create presentationLink element and append it to presentation_links list.
-            presentation_link = ET.Element(
+            presentation_link = ET.SubElement(
+                linkbase_element,
                 "link:presentationLink",
                 attrib={
                     "xlink:role": f"{self.company_website}/role/{role_name}",
@@ -395,24 +398,12 @@ class PreXMLGenerator:
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
-        # Convert role_ref_elements and presentation_links to XML strings.
-        role_ref_elements_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in role_ref_elements]
-        )
-        presentation_links_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in presentation_links]
-        )
-
         # Concatenate XML data and save it into the pre.xml file.
         xml_data = (
             xml_declaration
             + "\n".join(comments_after_declaration)
             + "\n"
             + ET.tostring(linkbase_element, encoding="utf-8").decode()
-            + "\n"
-            + role_ref_elements_xml
-            + "\n"
-            + presentation_links_xml
         )
         self.save_xml_data(xml_data)
 

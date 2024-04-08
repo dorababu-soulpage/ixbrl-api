@@ -23,8 +23,9 @@ class LabXMLGenerator:
         for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
             self.grouped_data[key] = list(group)
 
-    def create_role_ref_element(self, role_uri=None, xlink_href=None):
-        return ET.Element(
+    def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
+        return ET.SubElement(
+            parent,
             "link:roleRef",
             attrib={
                 "roleURI": role_uri,
@@ -88,7 +89,7 @@ class LabXMLGenerator:
             },
         )
 
-    def add_role_ref_elements(self):
+    def add_role_ref_elements(self, parent):
         labels_list = [
             "negatedPeriodStartLabel",
             "netLabel",
@@ -109,6 +110,7 @@ class LabXMLGenerator:
 
             # Create role_ref_elements
             role_ref_element = self.create_role_ref_element(
+                parent,
                 role_uri=f"http://www.xbrl.org/2009/role/{label}",
                 xlink_href=href,
             )
@@ -131,7 +133,7 @@ class LabXMLGenerator:
         self.group_data_by_role()
 
         # add role ref elements
-        role_ref_elements = self.add_role_ref_elements()
+        role_ref_elements = self.add_role_ref_elements(parent=linkbase_element)
 
         elements: list[str] = []
         axis_members_list: list[str] = []
@@ -151,7 +153,8 @@ class LabXMLGenerator:
             _line_item: str = record.get("LineItem", "")
             line_item = _line_item.replace("--", "_")
 
-            label_link = ET.Element(
+            label_link = ET.SubElement(
+                linkbase_element,
                 "link:labelLink",
                 attrib={
                     "xlink:role": "http://www.xbrl.org/2003/role/link",
@@ -454,21 +457,12 @@ class LabXMLGenerator:
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
-        # Convert role_ref_elements and presentation_links to XML strings.
-        role_ref_elements_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in role_ref_elements]
-        )
-
         # Combine XML elements
         xml_data = (
             xml_declaration
             + "\n".join(comments_after_declaration)
             + "\n"
             + ET.tostring(linkbase_element, encoding="utf-8").decode()
-            + "\n"
-            + role_ref_elements_xml
-            + "\n"
-            + ET.tostring(label_link, encoding="utf-8").decode()
         )
         self.save_xml_data(xml_data)
 

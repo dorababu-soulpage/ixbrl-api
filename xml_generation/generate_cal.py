@@ -30,8 +30,9 @@ class CalXMLGenerator:
             cal_parent_grouped_data[key] = list(group)
         return cal_parent_grouped_data
 
-    def create_role_ref_element(self, role_uri=None, xlink_href=None):
-        return ET.Element(
+    def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
+        return ET.SubElement(
+            parent,
             "link:roleRef",
             attrib={
                 "roleURI": role_uri,
@@ -85,8 +86,8 @@ class CalXMLGenerator:
             },
         )
 
-    def add_role_ref_element(self, role_uri, xlink_href):
-        role_ref_element = self.create_role_ref_element(role_uri, xlink_href)
+    def add_role_ref_element(self, parent, role_uri, xlink_href):
+        role_ref_element = self.create_role_ref_element(parent, role_uri, xlink_href)
         self.role_ref_elements.append(role_ref_element)
 
     def generate_cal_xml(self):
@@ -113,12 +114,14 @@ class CalXMLGenerator:
 
             # Create roleRef element and append it to role_ref_elements list.
             role_ref_element = self.create_role_ref_element(
+                parent=linkbase_element,
                 role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name}",
                 xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
             )
             role_ref_elements.append(role_ref_element)
 
-            calculation_link = ET.Element(
+            calculation_link = ET.SubElement(
+                linkbase_element,
                 "link:calculationLink",
                 attrib={
                     "xlink:role": f"{self.company_website}/role/{role_name}",
@@ -183,25 +186,12 @@ class CalXMLGenerator:
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
-        # Convert role_ref_elements and presentation_links to XML strings.
-        role_ref_elements_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in role_ref_elements]
-        )
-
-        calculation_links_xml = "\n".join(
-            [ET.tostring(e, encoding="utf-8").decode() for e in calculation_links]
-        )
-
         # Combine XML elements
         xml_data = (
             xml_declaration
             + "\n".join(comments_after_declaration)
             + "\n"
             + ET.tostring(linkbase_element, encoding="utf-8").decode()
-            + "\n"
-            + role_ref_elements_xml
-            + "\n"
-            + calculation_links_xml
         )
         self.save_xml_data(xml_data)
 
