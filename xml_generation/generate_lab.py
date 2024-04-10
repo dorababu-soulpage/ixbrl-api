@@ -44,7 +44,7 @@ class LabXMLGenerator:
             "link:label",
             attrib={
                 "id": id,
-                "xlink:label": xlink_label,
+                "xlink:label": f"lab_{xlink_label}",
                 "xlink:role": xlink_role,
                 "xlink:type": "resource",
                 "xml:lang": "en-US",
