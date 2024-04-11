@@ -1,6 +1,5 @@
 from itertools import groupby
 import xml.etree.ElementTree as ET
-from database import html_elements_data
 
 
 class DefXMLGenerator:
@@ -181,7 +180,7 @@ class DefXMLGenerator:
                 line_item = _line_item.replace("--", "_")
 
                 _pre_element_parent: str = record.get("PreElementParent")
-                pre_element_parent = _pre_element_parent.replace(":", "_")
+                pre_element_parent = _pre_element_parent.replace("--", "_")
 
                 axis_members: str = record.get("Axis_Member")
 
@@ -254,7 +253,7 @@ class DefXMLGenerator:
                         domain_xlink_href = self.get_href_url(domain)
                         domain_loc = self.create_definition_loc_element(
                             parent_tag=definition_link,
-                            label=f"loc_{domain}",
+                            label=f"loc_{domain}_1",
                             xlink_href=f"{domain_xlink_href}#{domain}",
                         )
 
@@ -381,12 +380,12 @@ class DefXMLGenerator:
             file.write(xml_data)
 
 
-ticker = "msft"
-filing_date = "20230630"
-data = html_elements_data
-company_website = "http://www.microsoft.com"
+# ticker = "msft"
+# filing_date = "20230630"
+# data = html_elements_data
+# company_website = "http://www.microsoft.com"
 
-# Example usage
-data = html_elements_data  # Assuming html_elements_data is defined
-generator = DefXMLGenerator(data, ticker, filing_date, company_website)
-generator.generate_def_xml()
+# # Example usage
+# data = html_elements_data  # Assuming html_elements_data is defined
+# generator = DefXMLGenerator(data, ticker, filing_date, company_website)
+# generator.generate_def_xml()

@@ -1,7 +1,6 @@
 from itertools import groupby
-from labels import labels_dict
 import xml.etree.ElementTree as ET
-from database import html_elements_data
+from xml_generation.labels import labels_dict
 
 
 class CalXMLGenerator:
@@ -202,12 +201,12 @@ class CalXMLGenerator:
             file.write(xml_data)
 
 
-# Usage example:
-ticker = "msft"
-filing_date = "20230630"
-data = html_elements_data
-company_website = "http://www.microsoft.com"
+# # Usage example:
+# ticker = "msft"
+# filing_date = "20230630"
+# data = html_elements_data
+# company_website = "http://www.microsoft.com"
 
-# Example usage
-generator = CalXMLGenerator(data, filing_date, ticker, company_website)
-xml_data = generator.generate_cal_xml()
+# # Example usage
+# generator = CalXMLGenerator(data, filing_date, ticker, company_website)
+# xml_data = generator.generate_cal_xml()

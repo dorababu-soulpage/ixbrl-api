@@ -1,7 +1,6 @@
 from itertools import groupby
-from labels import labels_dict
 import xml.etree.ElementTree as ET
-from database import html_elements_data
+from xml_generation.labels import labels_dict
 
 
 class LabXMLGenerator:
@@ -473,12 +472,12 @@ class LabXMLGenerator:
             file.write(xml_data)
 
 
-# Usage example:
-ticker = "msft"
-filing_date = "20230630"
-data = html_elements_data
-company_website = "http://www.microsoft.com"
+# # Usage example:
+# ticker = "msft"
+# filing_date = "20230630"
+# data = html_elements_data
+# company_website = "http://www.microsoft.com"
 
-# Instantiate the class
-generator = LabXMLGenerator(data, filing_date, ticker, company_website)
-generator.generate_lab_xml()
+# # Instantiate the class
+# generator = LabXMLGenerator(data, filing_date, ticker, company_website)
+# generator.generate_lab_xml()

@@ -1,7 +1,6 @@
 from itertools import groupby
-from labels import labels_dict
 import xml.etree.ElementTree as ET
-from database import html_elements_data
+from xml_generation.labels import labels_dict
 
 
 class PreXMLGenerator:
@@ -97,7 +96,7 @@ class PreXMLGenerator:
             preferred_label = self.get_preferred_label(label_type)
 
             _pre_element_parent: str = record.get("PreElementParent")
-            pre_element_parent = _pre_element_parent.replace(":", "_")
+            pre_element_parent = _pre_element_parent.replace("--", "_")
 
             _line_item: str = record.get("LineItem")
             line_item = _line_item.replace("--", "_")
@@ -414,12 +413,12 @@ class PreXMLGenerator:
             file.write(xml_data)
 
 
-# Example usage:
-ticker = "msft"
-filing_date = "20230630"
-data = html_elements_data
-company_website = "http://www.microsoft.com"
+# # Example usage:
+# ticker = "msft"
+# filing_date = "20230630"
+# data = html_elements_data
+# company_website = "http://www.microsoft.com"
 
-# Initialize the PreXMLGenerator and generate the pre.xml file.
-generator = PreXMLGenerator(data, filing_date, ticker, company_website)
-generator.generate_pre_xml()
+# # Initialize the PreXMLGenerator and generate the pre.xml file.
+# generator = PreXMLGenerator(data, filing_date, ticker, company_website)
+# generator.generate_pre_xml()

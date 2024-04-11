@@ -11,6 +11,12 @@ from decouple import config
 from datetime import datetime
 from bs4 import BeautifulSoup, NavigableString
 
+from xml_generation.database import html_elements_data
+from xml_generation.generate_pre import PreXMLGenerator
+from xml_generation.generate_def import DefXMLGenerator
+from xml_generation.generate_cal import CalXMLGenerator
+from xml_generation.generate_lab import LabXMLGenerator
+
 # from auto_tagging.tagging import auto_tagging
 from flask import Flask, redirect, request, url_for
 from utils import (
@@ -390,47 +396,27 @@ def rule_based_tagging_view():
 
 @app.route("/api/xml-generation", methods=["GET", "POST"])
 def generate_xml_schema_files():
-    file_id = request.json.get("file_id")
-    record = get_db_record(file_id=file_id)
-    client_id = record.get("clientId", None)
-    client_data = get_client_record(client_id)
-    extra = record.get("extra", None)
-    # period date
-    period = record.get("period", "")
-    if period:
-        input_date = datetime.strptime(str(period), "%Y-%m-%d %H:%M:%S")
-        period_date_str = input_date.strftime("%Y%m%d")
-    if extra is not None:
-        html_file = extra.get("url")
-        url_path = Path(html_file)
-        filename = get_filename(html_file)
-        # Use the name attribute to get the file name
-        # file_name = f"{url_path.stem}.xlsx"
-        # xlsx_file = f"{storage_dir}/{Path(html_file).stem}/DTS/{file_name}"
-        # xlsx_file_store_loc = f"{storage_dir}/{Path(html_file).stem}/DTS/"
-        # html_elements = extract_html_elements(html_file)
-        definitions = get_definitions(html_file)
 
-        ticker = client_data.get("ticker", "")
-        filing_date = period_date_str
-        company_website = client_data.get("website", "")
-        # generate_xsd_schema(definitions, ticker, filing_date, company_website)
+    # Example usage:
+    ticker = "msft"
+    filing_date = "20230630"
+    data = html_elements_data
+    company_website = "http://www.microsoft.com"
 
-        # print(html_elements)
-        # DTS, concepts = initialize_concepts_dts(filename)
-        # add_html_elements_to_concept(html_elements, concepts, DTS)
-        # generate_concepts_dts_sheet(xlsx_file, xlsx_file_store_loc, concepts, DTS)
-        # return redirect(
-        #     url_for(
-        #         "generate_xml_files",
-        #         file_id=file_id,
-        #         html=html_file,
-        #         xlsx=file_name,
-        #     )
-        # )
-        return {"messages": "Okay"}
-    else:
-        return {"error": "html file Not found"}, 400
+    # Initialize XMLGenerators and generate the pre.xml file.
+    pre_generator = PreXMLGenerator(data, filing_date, ticker, company_website)
+    pre_generator.generate_pre_xml()
+
+    def_generator = DefXMLGenerator(data, ticker, filing_date, company_website)
+    def_generator.generate_def_xml()
+
+    cal_generator = CalXMLGenerator(data, filing_date, ticker, company_website)
+    cal_generator.generate_cal_xml()
+
+    lab_generator = LabXMLGenerator(data, filing_date, ticker, company_website)
+    lab_generator.generate_lab_xml()
+
+    return {"messages": "XML Files generated successfully."}
 
 
 if __name__ == "__main__":
