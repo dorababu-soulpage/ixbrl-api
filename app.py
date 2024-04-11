@@ -12,6 +12,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, NavigableString
 
 from xml_generation.database import html_elements_data
+from xml_generation.generate_xsd import XSDGenerator
 from xml_generation.generate_pre import PreXMLGenerator
 from xml_generation.generate_def import DefXMLGenerator
 from xml_generation.generate_cal import CalXMLGenerator
@@ -404,6 +405,9 @@ def generate_xml_schema_files():
     company_website = "http://www.microsoft.com"
 
     # Initialize XMLGenerators and generate the pre.xml file.
+    xsd_generator = XSDGenerator(data, ticker, filing_date, company_website)
+    xsd_generator.generate_xsd_schema()
+
     pre_generator = PreXMLGenerator(data, filing_date, ticker, company_website)
     pre_generator.generate_pre_xml()
 

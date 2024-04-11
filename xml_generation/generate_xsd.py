@@ -1,6 +1,5 @@
 from itertools import groupby
 import xml.etree.ElementTree as ET
-from database import html_elements_data
 
 
 class XSDGenerator:
@@ -274,17 +273,17 @@ class XSDGenerator:
     def save_xml_data(self, xml_data):
         # Serialize only the root element and its children
         xml_data += ET.tostring(self.root, encoding="US-ASCII").decode("utf-8")
-        filename = f"{ticker}-{filing_date}.xsd"
+        filename = f"{self.ticker}-{self.filing_date}.xsd"
         # Optionally, write the XML to a file
         with open(filename, "w", encoding="US-ASCII") as file:
             file.write(xml_data)
 
 
-# Example usage:
-ticker = "msft"
-filing_date = "20230630"
-data = html_elements_data
-company_website = "http://www.microsoft.com"
+# # Example usage:
+# ticker = "msft"
+# filing_date = "20230630"
+# data = html_elements_data
+# company_website = "http://www.microsoft.com"
 
-generator = XSDGenerator(data, ticker, filing_date, company_website)
-generator.generate_xsd_schema()
+# generator = XSDGenerator(data, ticker, filing_date, company_website)
+# generator.generate_xsd_schema()
