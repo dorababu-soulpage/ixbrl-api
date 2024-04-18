@@ -123,7 +123,9 @@ class RuleBasedTagging:
         element_occurrences = {}
         for record in filtered_mappings:
             keyword = record.get("Element Label", "")
-            tag = record.get("Element Tagging", "")
+            _tag: str = record.get("Element Tagging", "")
+            tag = _tag.replace("_", "--").replace(":", "--")
+
             element_type = record.get("Element Type", "")
             is_custom = record.get("Is_Custom", "")
 
@@ -172,7 +174,32 @@ class RuleBasedTagging:
                 try:
                     tag = value.get("tags")[i]
                     row = total_rows[index]
-                    row["id"] = f"apex_40N_e{tag}_{uuid.uuid4().hex}"
+                    for td in row.find_all("td"):
+                        if td.text:
+                            formatted_text = (
+                                td.text.replace(",", "")
+                                .replace("(", "")
+                                .replace(")", "")
+                            )
+
+                            # Converting to integer
+                            try:
+                                number_int = int(formatted_text)
+
+                                inner_html = ""
+                                for _td in td.find_all():
+                                    inner_html += str(_td)
+
+                                formatted_string = f'<font id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</font>'
+
+                                # Replace the contents of the td element with the new HTML content
+                                td.contents.clear()
+                                td.append(
+                                    BeautifulSoup(formatted_string, "html.parser")
+                                )
+                            except ValueError:
+                                pass
+
                 except Exception:
                     pass
 

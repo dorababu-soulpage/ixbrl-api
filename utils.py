@@ -1,6 +1,8 @@
 import os
 import json
-import boto3
+
+from boto3.session import Session
+
 import openpyxl
 import requests
 import pandas as pd
@@ -245,7 +247,7 @@ def extract_html_elements(file):
     # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
 
     # # read tags from html and add into the exists concepts
-    html_elements_data = []
+    html_tags_data = []
 
     # Send an HTTP GET request to the URL
     response = requests.get(file)
@@ -261,17 +263,9 @@ def extract_html_elements(file):
 
         # Extract and print the attribute values
         for element in tags:
-            try:
-                name = element["id"].split("--")[1].split("_")[0]
-                taxonomy_data = get_taxonomy_values(name)
-                # Check if the parenthetical attribute exists
-                if "parenthetical" in element.attrs.keys():
-                    taxonomy_data["parenthetical"] = True
-                html_elements_data.append(taxonomy_data)
-            except Exception as e:
-                print(str(e))
+            html_tags_data.append(element["id"])
 
-    return html_elements_data
+    return html_tags_data
 
 
 def get_cik(value):
@@ -885,6 +879,28 @@ def get_db_record(file_id):
             connection.close()
 
 
+def get_client_record(client_id):
+    import psycopg2
+
+    db_url = f"postgresql://{username}:{password}@{host}:5432/{db}"
+    try:
+        # Attempt to connect and execute queries
+        connection = psycopg2.connect(db_url)
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM clients where id={client_id}")
+        row = cursor.fetchone()
+        columns = [column[0] for column in cursor.description]
+        return dict(zip(columns, row))
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 def update_db_record(file_id, data):
     import psycopg2
 
@@ -919,31 +935,39 @@ def update_db_record(file_id, data):
 
 
 def s3_uploader(name, body):
-    """this function is used to upload the files to the s3 server and return the url"""
-    # name is s3 file name
-    # boyd is io.BytesIO()
+    """
+    Uploads files to an S3 server and returns the URL.
+
+    Parameters:
+    - name: Name/key to store the file in the S3 bucket.
+    - body: BytesIO object representing the content of the file.
+
+    Returns:
+    - The URL of the uploaded file on S3.
+    """
     access_key = config("AWS_S3_ACCESS_KEY_ID")
     secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
     region = config("AWS_S3_REGION")
     bucket = config("AWS_S3_BUCKET_NAME")
 
-    session = boto3.Session(
+    session = Session(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         region_name=region,
     )
+
     s3 = session.resource("s3")
+
+    # Upload the file
     s3.Bucket(bucket).put_object(
         Key=name,
         Body=body.getvalue(),
         ACL="public-read",
         ContentType="application/octet-stream",
     )
-    location = session.client("s3").get_bucket_location(Bucket=bucket)[
-        "LocationConstraint"
-    ]
-    uploaded_url = f"https://s3-{location}.amazonaws.com/{bucket}/{name}"
-    return uploaded_url
+
+    # Generate and return the URL
+    return f"https://{bucket}.s3.amazonaws.com/{name}"
 
 
 def generate_xml_comments(filepath=None):
