@@ -1,3 +1,4 @@
+import json
 import os, shutil
 import subprocess
 from pathlib import Path
@@ -12,6 +13,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, NavigableString
 
 from xml_generation.database import html_elements_data
+from xml_generation.html_parser import HtmlTagParser
 from xml_generation.generate_xsd import XSDGenerator
 from xml_generation.generate_pre import PreXMLGenerator
 from xml_generation.generate_def import DefXMLGenerator
@@ -26,6 +28,7 @@ from utils import (
     generate_concepts_dts_sheet,
     generate_ix_header,
     get_db_record,
+    get_client_record,
     get_filename,
     initialize_concepts_dts,
     update_db_record,
@@ -398,11 +401,44 @@ def rule_based_tagging_view():
 @app.route("/api/xml-generation", methods=["GET", "POST"])
 def generate_xml_schema_files():
 
-    # Example usage:
-    ticker = "msft"
-    filing_date = "20230630"
-    data = html_elements_data
-    company_website = "http://www.microsoft.com"
+    file_id = request.json.get("file_id")
+    record = get_db_record(file_id=file_id)
+
+    client_id = record.get("clientId")
+    client_data = get_client_record(client_id=client_id)
+
+    ticker = client_data.get("ticker", "")
+
+    period_end = record.get("periodTo", "")
+
+    # Convert string to datetime object
+    datetime_obj = datetime.strptime(str(period_end), "%Y-%m-%d %H:%M:%S")
+
+    # Convert datetime object to desired format
+    output_date = datetime_obj.strftime("%Y%m%d")
+
+    # period end date
+    filing_date = output_date
+
+    company_website = client_data.get("website", "")
+
+    extra = record.get("extra", None)
+    if extra is not None:
+        html_file = extra.get("url")
+
+    html_elements = extract_html_elements(html_file)
+
+    for html_element in html_elements:
+        print(html_element)
+
+    # Create an instance of HtmlTagParser
+    parser = HtmlTagParser(html_elements)
+
+    # Get the formatted data for all tags
+    data = parser.process_tags()
+
+    with open("output.json", "w") as output:
+        output.write(json.dumps(data))
 
     # Initialize XMLGenerators and generate the pre.xml file.
     xsd_generator = XSDGenerator(data, ticker, filing_date, company_website)

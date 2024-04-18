@@ -104,9 +104,12 @@ class XSDGenerator:
         # Split the text into words
         converted_text_words = converted_text.split()
 
-        # Join the words with spaces and add 'Statement - ' before the first word
-        final_text = f"{converted_text_words[0]} - {' '.join(converted_text_words)}"
-        return final_text
+        if converted_text:
+            # Join the words with spaces and add 'Statement - ' before the first word
+            final_text = f"{converted_text_words[0]} - {' '.join(converted_text_words)}"
+            return final_text
+        else:
+            return ""
 
     def get_definition_index(self, value):
         original_string = "0000000"  # Original string with 7 zeros
@@ -176,24 +179,27 @@ class XSDGenerator:
             for record in role_data:
 
                 axis_members: str = record.get("Axis_Member")
-                splitted = axis_members.split("__")
+                if axis_members:
+                    splitted = axis_members.split("__")
 
-                # Group by 3
-                groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
-                for group in groups:
-                    _axis, _domain, _member = group
-                    axis = _axis.replace("--", "_")
-                    domain = _domain.replace("--", "_")
-                    member = _member.replace("--", "_")
+                    # Group by 3
+                    groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
+                    for group in groups:
+                        _axis, _domain, _member = group
+                        axis = _axis.replace("--", "_")
+                        domain = _domain.replace("--", "_")
+                        member = _member.replace("--", "_")
 
-                    if axis.startswith(self.ticker):
-                        custom_elements.append(axis)
+                        if axis.startswith(self.ticker):
+                            custom_elements.append(axis)
 
-                    if domain.startswith(self.ticker):
-                        custom_elements.append(domain)
+                        if domain.startswith(self.ticker):
+                            custom_elements.append(domain)
 
-                    if member.startswith(self.ticker):
-                        custom_elements.append(member)
+                        if member.startswith(self.ticker):
+                            custom_elements.append(member)
+                    else:
+                        print("================[Axis Member is empty]================")
 
             link_role_type = ET.Element(
                 "link:roleType",
