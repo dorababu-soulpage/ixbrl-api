@@ -189,11 +189,15 @@ class RuleBasedTagging:
                                 inner_html = ""
                                 for _td in td.find_all():
                                     inner_html += str(_td)
+                                    break
+
+                                for _td in td.find_all():
+                                    # Decompose the <td> tag, removing it from the tree along with its contents
+                                    _td.decompose()
 
                                 formatted_string = f'<font id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</font>'
 
                                 # Replace the contents of the td element with the new HTML content
-                                td.contents.clear()
                                 td.append(
                                     BeautifulSoup(formatted_string, "html.parser")
                                 )
