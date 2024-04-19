@@ -186,14 +186,19 @@ class RuleBasedTagging:
                             try:
                                 number_int = int(formatted_text)
 
-                                inner_html = ""
-                                for _td in td.find_all():
-                                    inner_html += str(_td)
-                                    break
+                                inner_array = (
+                                    str(td)
+                                    .replace("</td>", "")
+                                    .replace("<td", "")
+                                    .split(">")
+                                )
+                                inner_array_string = ">".join(inner_array[1:])
 
-                                for _td in td.find_all():
-                                    # Decompose the <td> tag, removing it from the tree along with its contents
-                                    _td.decompose()
+                                inner_html = inner_array_string
+
+                                td.string = ""
+                                for tag in td.find_all():
+                                    tag.decompose()
 
                                 formatted_string = f'<font id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</font>'
 
@@ -201,10 +206,10 @@ class RuleBasedTagging:
                                 td.append(
                                     BeautifulSoup(formatted_string, "html.parser")
                                 )
-                            except ValueError:
+                            except Exception as e:
                                 pass
 
-                except Exception:
+                except Exception as e:
                     pass
 
     def start(self):
