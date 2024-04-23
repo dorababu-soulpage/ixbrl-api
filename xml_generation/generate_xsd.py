@@ -106,7 +106,9 @@ class XSDGenerator:
 
         if converted_text:
             # Join the words with spaces and add 'Statement - ' before the first word
-            final_text = f"{converted_text_words[0]} - {' '.join(converted_text_words)}"
+            # final_text = f"{converted_text_words[0]} - {' '.join(converted_text_words)}"
+            final_text = f"{' '.join(converted_text_words)}"
+
             return final_text
         else:
             return ""
@@ -175,6 +177,12 @@ class XSDGenerator:
 
         custom_elements = []
         for index, (role, role_data) in enumerate(self.grouped_data.items(), start=1):
+            # get each role type from the role
+            try:
+                _role_data = role_data[0]
+                role_type = _role_data.get("RoleType")
+            except:
+                pass
 
             for record in role_data:
 
@@ -213,7 +221,7 @@ class XSDGenerator:
             link_role_type_elements = [
                 {
                     "tag": "link:definition",
-                    "text": f"{self.get_definition_index(str(index))} - {self.get_definition(role)}",
+                    "text": f"{self.get_definition_index(str(index))} - {role_type} - {self.get_definition(role)}",
                 },
                 {"tag": "link:usedOn", "text": "link:presentationLink"},
                 {"tag": "link:usedOn", "text": "link:calculationLink"},

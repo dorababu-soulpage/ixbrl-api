@@ -9,9 +9,39 @@ class HtmlTagParser:
 
     def extract_field(self, data, prefix):
         # Extract a specific field from the data based on the provided prefix
-        for item in data[1:]:
+        for item in data[1:-1]:
             if item.startswith(prefix):
                 return item.lstrip(prefix)
+        return ""
+
+    def check_heading_or_not(self, data):
+        # Extract a specific field from the data based on the provided prefix
+        for item in data[1:-1]:
+            if item.startswith("iB"):
+                return True
+        return False
+
+    def get_indenting(self, data):
+        for item in data[1:-1]:
+            if item.startswith("i"):
+                value = item.lstrip("iB").lstrip("i")
+                return value
+        return ""
+
+    def get_precision_counted_as(self, data, prefix):
+        result = {"Precision": "", "CountedAs": ""}
+        for item in data[1:-1]:
+            if item.startswith("p"):
+                result["P"] = item[1:]
+                result["Precision"] = item[1] if item[1] in ["d", "i"] else item[1:3]
+                result["CountedAs"] = item.replace("p" + result["Precision"], "", 1)
+        return result.get(prefix).lstrip("d")
+
+    def get_calculation_parent(self, data):
+        for item in data[1:-1]:
+            if item.startswith("m"):
+                _, cal_parent = item.split("__")
+                return cal_parent
         return ""
 
     def get_formatted_data(self, html_tag):
@@ -21,19 +51,19 @@ class HtmlTagParser:
             "Type": "90F",
             "Element": self.extract_field(data, "e"),
             "Unit": self.extract_field(data, "u"),
-            "PreElementParent": self.extract_field(data, "p"),
-            "Indenting": self.extract_field(data, "i"),
-            "Precision": self.extract_field(data, "d"),
-            "CountedAs": self.extract_field(data, "s"),
-            "CalculationParent": self.extract_field(data, "ma"),
+            "PreElementParent": self.extract_field(data, "b"),
+            "Heading": self.check_heading_or_not(data),
+            "Indenting": self.get_indenting(data),
+            "Precision": self.get_precision_counted_as(data, "Precision"),
+            "CountedAs": self.get_precision_counted_as(data, "CountedAs"),
+            "CalculationParent": self.get_calculation_parent(data),
             "Period": self.extract_field(data, "c"),
             "Axis_Member": self.extract_field(data, "h"),
-            "PreferredLabel": self.extract_field(data, "n"),
             "PreferredLabelType": self.extract_field(data, "y"),
             "Table": self.extract_field(data, "t"),
             "LineItem": self.extract_field(data, "l"),
             "RootLevelAbstract": self.extract_field(data, "a"),
-            "RoleName": self.extract_field(data, "r"),
+            "RoleType": self.extract_field(data, "r"),
             "UniqueId": data[-1],
         }
 
@@ -41,7 +71,10 @@ class HtmlTagParser:
         # Process all HTML tags in the list
         formatted_tags = []
         for tag in self.html_tags:
-            formatted_data = self.get_formatted_data(tag)
+            tag_id = tag.get("id")
+            formatted_data = self.get_formatted_data(tag_id)
+            formatted_data["RoleName"] = tag.get("role")
+            formatted_data["PreferredLabel"] = tag.get("label")
             formatted_tags.append(formatted_data)
         return formatted_tags
 

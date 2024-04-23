@@ -243,7 +243,7 @@ def get_taxonomy_values(element):
     return filtered_record
 
 
-def extract_html_elements(file):
+def extract_html_elements(file) -> list[dict]:
     # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
 
     # # read tags from html and add into the exists concepts
@@ -263,7 +263,17 @@ def extract_html_elements(file):
 
         # Extract and print the attribute values
         for element in tags:
-            html_tags_data.append(element["id"])
+            element_role = element.get("role", "")
+            element_label = element.get("title", "")
+            element_id = element.get("id", "")
+
+            html_tags_data.append(
+                {
+                    "role": element_role,
+                    "label": element_label,
+                    "id": element_id,
+                }
+            )
 
     return html_tags_data
 

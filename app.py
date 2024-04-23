@@ -429,7 +429,7 @@ def generate_xml_schema_files():
     html_elements = extract_html_elements(html_file)
 
     for html_element in html_elements:
-        print(html_element)
+        print(html_element.get("id", ""))
 
     # Create an instance of HtmlTagParser
     parser = HtmlTagParser(html_elements)
