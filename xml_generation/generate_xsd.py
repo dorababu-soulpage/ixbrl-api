@@ -1,3 +1,4 @@
+import re
 from itertools import groupby
 import xml.etree.ElementTree as ET
 
@@ -24,13 +25,13 @@ class XSDGenerator:
         self.root = ET.Element(
             "xsd:schema",
             attrib={
-                "targetNamespace": f"{self.company_website}/{self.filing_date}",
+                "targetNamespace": f"http://{self.company_website}/{self.filing_date}",
                 "attributeFormDefault": "unqualified",
                 "elementFormDefault": "qualified",
                 "xmlns:dtr-types": "http://www.xbrl.org/dtr/type/2022-03-31",
                 "xmlns:country": "http://xbrl.sec.gov/country/2023",
                 "xmlns:ecd-sub": "http://xbrl.sec.gov/ecd-sub/2023",
-                f"xmlns:{self.ticker}": f"{self.company_website}/{self.filing_date}",
+                f"xmlns:{self.ticker}": f"http://{self.company_website}/{self.filing_date}",
                 "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
                 "xmlns:link": "http://www.xbrl.org/2003/linkbase",
                 "xmlns:dei": "http://xbrl.sec.gov/dei/2023",
@@ -177,64 +178,69 @@ class XSDGenerator:
 
         custom_elements = []
         for index, (role, role_data) in enumerate(self.grouped_data.items(), start=1):
-            # get each role type from the role
-            try:
-                _role_data = role_data[0]
-                role_type = _role_data.get("RoleType")
-            except:
-                pass
+            if role:
+                # get each role type from the role
+                try:
+                    _role_data = role_data[0]
+                    role_type: str = _role_data.get("RoleType")
+                except:
+                    pass
 
-            for record in role_data:
+                for record in role_data:
 
-                axis_members: str = record.get("Axis_Member")
-                if axis_members:
-                    splitted = axis_members.split("__")
+                    axis_members: str = record.get("Axis_Member")
+                    if axis_members:
+                        splitted = axis_members.split("__")
 
-                    # Group by 3
-                    groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
-                    for group in groups:
-                        _axis, _domain, _member = group
-                        axis = _axis.replace("--", "_")
-                        domain = _domain.replace("--", "_")
-                        member = _member.replace("--", "_")
+                        # Group by 3
+                        groups = [
+                            splitted[i : i + 3] for i in range(0, len(splitted), 3)
+                        ]
+                        for group in groups:
+                            _axis, _domain, _member = group
+                            axis = _axis.replace("--", "_")
+                            domain = _domain.replace("--", "_")
+                            member = _member.replace("--", "_")
 
-                        if axis.startswith(self.ticker):
-                            custom_elements.append(axis)
+                            if axis.startswith(self.ticker):
+                                custom_elements.append(axis)
 
-                        if domain.startswith(self.ticker):
-                            custom_elements.append(domain)
+                            if domain.startswith(self.ticker):
+                                custom_elements.append(domain)
 
-                        if member.startswith(self.ticker):
-                            custom_elements.append(member)
-                    else:
-                        print("================[Axis Member is empty]================")
+                            if member.startswith(self.ticker):
+                                custom_elements.append(member)
+                        else:
+                            print(
+                                "================[Axis Member is empty]================"
+                            )
+                role_without_spaces = re.sub(r"\s+", "", role)
+                link_role_type = ET.Element(
+                    "link:roleType",
+                    attrib={
+                        "roleURI": f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}",
+                        "id": role_without_spaces,
+                    },
+                )
 
-            link_role_type = ET.Element(
-                "link:roleType",
-                attrib={
-                    "roleURI": f"{self.company_website}/{self.filing_date}/role/{role}",
-                    "id": role,
-                },
-            )
+                # Create child elements for link:roleType
+                link_role_type_elements = [
+                    {
+                        "tag": "link:definition",
+                        "text": f"{self.get_definition_index(str(index))} - {role_type.capitalize()} - {self.get_definition(role)}",
+                    },
+                    {"tag": "link:usedOn", "text": "link:presentationLink"},
+                    {"tag": "link:usedOn", "text": "link:calculationLink"},
+                    {"tag": "link:usedOn", "text": "link:definitionLink"},
+                ]
 
-            # Create child elements for link:roleType
-            link_role_type_elements = [
-                {
-                    "tag": "link:definition",
-                    "text": f"{self.get_definition_index(str(index))} - {role_type} - {self.get_definition(role)}",
-                },
-                {"tag": "link:usedOn", "text": "link:presentationLink"},
-                {"tag": "link:usedOn", "text": "link:calculationLink"},
-                {"tag": "link:usedOn", "text": "link:definitionLink"},
-            ]
+                for element_info in link_role_type_elements:
+                    element = ET.Element(element_info["tag"])
+                    element.text = element_info["text"]
+                    link_role_type.append(element)
 
-            for element_info in link_role_type_elements:
-                element = ET.Element(element_info["tag"])
-                element.text = element_info["text"]
-                link_role_type.append(element)
-
-            # Append link:roleType to xsd:appinfo
-            xsd_appinfo.append(link_role_type)
+                # Append link:roleType to xsd:appinfo
+                xsd_appinfo.append(link_role_type)
 
         # Append xsd:appinfo to xsd:annotation
         xsd_annotation.append(xsd_appinfo)

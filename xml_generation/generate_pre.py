@@ -1,3 +1,4 @@
+import re
 from itertools import groupby
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
@@ -28,7 +29,7 @@ class PreXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": role_uri,
+                "roleURI": f"http://{role_uri}",
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -113,7 +114,7 @@ class PreXMLGenerator:
                 definition_arc = self.create_presentation_arc_element(
                     parent_tag=presentation_link,
                     order=str(index),
-                    arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                    arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
                     xlink_from=f"loc_{line_item}",
                     xlink_to=f"loc_{pre_element_parent}",
                 )
@@ -182,7 +183,7 @@ class PreXMLGenerator:
 
             if is_table_loc_created is False:
                 # table location
-                table_xlink_href = href_url = self.get_href_url(table)
+                table_xlink_href = self.get_href_url(table)
                 table_loc = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
                     label=f"loc_{table}",
@@ -338,56 +339,58 @@ class PreXMLGenerator:
         # Iterate through grouped data and create roleRef and presentationLink elements.
         for role_name, role_data in self.grouped_data.items():
             record: dict = role_data[0] | {}
+            if role_name:
+                _root_level_abstract: str = record.get("RootLevelAbstract")
+                root_level_abstract = _root_level_abstract.replace("--", "_")
 
-            _root_level_abstract: str = record.get("RootLevelAbstract")
-            root_level_abstract = _root_level_abstract.replace("--", "_")
-
-            # Create roleRef element and append it to role_ref_elements list.
-            role_ref_element = self.create_role_ref_element(
-                linkbase_element,
-                role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name}",
-                xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
-            )
-
-            _line_item: str = record.get("LineItem")
-            line_item = _line_item.replace("--", "_")
-
-            role_ref_elements.append(role_ref_element)
-
-            # Create presentationLink element and append it to presentation_links list.
-            presentation_link = ET.SubElement(
-                linkbase_element,
-                "link:presentationLink",
-                attrib={
-                    "xlink:role": f"{self.company_website}/role/{role_name}",
-                    "xlink:type": "extended",
-                },
-            )
-
-            # Create presentation loc elements for root_level_abstract and element.
-            root_level_abstract_loc = self.create_presentation_loc_element(
-                parent_tag=presentation_link,
-                label=f"loc_{root_level_abstract}",
-                xlink_href=f"https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd#{root_level_abstract}",
-            )
-
-            # check role is dimension or not
-            dimension_records = self.check_role_is_dimension_or_not(role_data)
-
-            # if role is dimension
-            if dimension_records:
-                self.generate_dimension_xml(
-                    role_data,
-                    dimension_records,
-                    presentation_link,
-                    presentation_links,
-                    root_level_abstract,
+                role_name_without_spaces = re.sub(r"\s+", "", role_name)
+                # Create roleRef element and append it to role_ref_elements list.
+                role_ref_element = self.create_role_ref_element(
+                    linkbase_element,
+                    role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name_without_spaces}",
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name_without_spaces}",
                 )
-            # if role is not dimension
-            else:
-                self.generate_elements_xml(
-                    role_data, presentation_links, presentation_link
+
+                _line_item: str = record.get("LineItem")
+                line_item = _line_item.replace("--", "_")
+
+                role_ref_elements.append(role_ref_element)
+
+                # Create presentationLink element and append it to presentation_links list.
+                presentation_link = ET.SubElement(
+                    linkbase_element,
+                    "link:presentationLink",
+                    attrib={
+                        "xlink:role": f"http://{self.company_website}/role/{role_name_without_spaces}",
+                        "xlink:type": "extended",
+                    },
                 )
+
+                # Create presentation loc elements for root_level_abstract and element.
+                root_level_abstract_href = self.get_href_url(root_level_abstract)
+                root_level_abstract_loc = self.create_presentation_loc_element(
+                    parent_tag=presentation_link,
+                    label=f"loc_{root_level_abstract}",
+                    xlink_href=f"{root_level_abstract_href}#{root_level_abstract}",
+                )
+
+                # check role is dimension or not
+                dimension_records = self.check_role_is_dimension_or_not(role_data)
+
+                # if role is dimension
+                if dimension_records:
+                    self.generate_dimension_xml(
+                        role_data,
+                        dimension_records,
+                        presentation_link,
+                        presentation_links,
+                        root_level_abstract,
+                    )
+                # if role is not dimension
+                else:
+                    self.generate_elements_xml(
+                        role_data, presentation_links, presentation_link
+                    )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'

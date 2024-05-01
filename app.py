@@ -19,6 +19,7 @@ from xml_generation.generate_pre import PreXMLGenerator
 from xml_generation.generate_def import DefXMLGenerator
 from xml_generation.generate_cal import CalXMLGenerator
 from xml_generation.generate_lab import LabXMLGenerator
+from xml_generation.generate_xhtml import XHTMLGenerator
 
 # from auto_tagging.tagging import auto_tagging
 from flask import Flask, redirect, request, url_for
@@ -440,6 +441,10 @@ def generate_xml_schema_files():
     with open("output.json", "w") as output:
         output.write(json.dumps(data))
 
+    # read json data from data.json file
+    # with open("data.json", "r") as file:
+    #     data = json.load(file)
+
     # Initialize XMLGenerators and generate the pre.xml file.
     xsd_generator = XSDGenerator(data, ticker, filing_date, company_website)
     xsd_generator.generate_xsd_schema()
@@ -455,6 +460,10 @@ def generate_xml_schema_files():
 
     lab_generator = LabXMLGenerator(data, filing_date, ticker, company_website)
     lab_generator.generate_lab_xml()
+
+    # generate xHTML file
+    # xhtml_generator = XHTMLGenerator(filing_date, ticker, file_id, html_file)
+    # xhtml_generator.generate_xhtml_file()
 
     return {"messages": "XML Files generated successfully."}
 

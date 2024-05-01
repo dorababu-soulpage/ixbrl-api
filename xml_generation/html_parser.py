@@ -1,5 +1,6 @@
 import re
 import json
+from utils import get_taxonomy_values
 
 
 class HtmlTagParser:
@@ -48,7 +49,7 @@ class HtmlTagParser:
         # Process a single HTML tag and return formatted data
         data = re.findall(r"[^_]+(?:__[^_]+)*|__", html_tag)
         return {
-            "Type": "90F",
+            "Type": data[1],
             "Element": self.extract_field(data, "e"),
             "Unit": self.extract_field(data, "u"),
             "PreElementParent": self.extract_field(data, "b"),
@@ -75,6 +76,11 @@ class HtmlTagParser:
             formatted_data = self.get_formatted_data(tag_id)
             formatted_data["RoleName"] = tag.get("role")
             formatted_data["PreferredLabel"] = tag.get("label")
+            root_level_abstract: str = formatted_data.get("RootLevelAbstract")
+            if root_level_abstract:
+                _, name = root_level_abstract.split("--")
+                element_value: dict = get_taxonomy_values(name)
+                formatted_data["LabelText"] = element_value.get("label", "")
             formatted_tags.append(formatted_data)
         return formatted_tags
 

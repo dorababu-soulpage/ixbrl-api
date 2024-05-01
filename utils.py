@@ -67,6 +67,7 @@ def get_unique_context_elements(file):
         taxonomy_tags = []
         # Extract and print the attribute values
         for element in tags:
+
             try:
                 taxonomy_tags.append(element["id"])
             except Exception as e:
@@ -243,7 +244,7 @@ def get_taxonomy_values(element):
     return filtered_record
 
 
-def extract_html_elements(file) -> list[dict]:
+def extract_html_elements(file, only_id=False) -> list[dict]:
     # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
 
     # # read tags from html and add into the exists concepts
@@ -266,14 +267,16 @@ def extract_html_elements(file) -> list[dict]:
             element_role = element.get("role", "")
             element_label = element.get("title", "")
             element_id = element.get("id", "")
-
-            html_tags_data.append(
-                {
-                    "role": element_role,
-                    "label": element_label,
-                    "id": element_id,
-                }
-            )
+            if only_id:
+                html_tags_data.append(element_id)
+            else:
+                html_tags_data.append(
+                    {
+                        "role": element_role,
+                        "label": element_label,
+                        "id": element_id,
+                    }
+                )
 
     return html_tags_data
 
@@ -541,11 +544,10 @@ def instance_dimension_xml(resources, cik, from_, items):
     instant.text = f"{date_formate(from_)}"
 
 
-def generate_ix_header(file_id=None, filename=None):
-    filename = filename
+def generate_ix_header(file_id=None, xsd_filename=None):
     record = get_db_record(file_id=file_id)
 
-    cik = record.get("cik", None)
+    cik = record.get("cik", "1234567")
     period = record.get("period", None)
     period_from_ = record.get("periodFrom", None)
     period_to_ = record.get("periodTo", None)
@@ -560,7 +562,7 @@ def generate_ix_header(file_id=None, filename=None):
 
     non_numeric_2_contextRef = f"From{period_from}to{period_to}"
 
-    schema_ref_xlink_href = f"{filename}.xsd"
+    schema_ref_xlink_href = xsd_filename
 
     context_id = f"From{period_from}to{period_to}"
     identifier_text = get_cik(cik)
@@ -615,157 +617,125 @@ def generate_ix_header(file_id=None, filename=None):
         nsmap={"ix": namespace.get("ix")},
     )
 
-    # # Create the 'xbrli:context' element within 'ix:resources'
-    # context = etree.SubElement(
-    #     resources,
-    #     "{http://www.xbrl.org/2003/instance}context",
-    #     id=context_id,
-    #     nsmap={"xbrli": namespace.get("xbrli")},
-    # )
-    # # Create the 'xbrli:entity' and 'xbrli:identifier' elements within 'xbrli:context'
-    # entity = etree.SubElement(context, "{http://www.xbrl.org/2003/instance}entity")
+    # unique_contexts = get_unique_context_elements(html_file)
+    # for context in unique_contexts:
+    #     if len(context) == 2:
+    #         # Create the instance_context element
+    #         instance_context = etree.SubElement(
+    #             resources,
+    #             "{http://www.xbrl.org/2003/instance}context",
+    #             id=f"AsOf{date_formate(context[0])}",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         # Create xbrli:entity element and its child elements
+    #         entity = etree.SubElement(
+    #             instance_context,
+    #             "{http://www.xbrl.org/2003/instance}entity",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         identifier = etree.SubElement(
+    #             entity,
+    #             "{http://www.xbrl.org/2003/instance}identifier",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         identifier.set("scheme", "http://www.sec.gov/CIK")
+    #         identifier.text = f"{get_cik(cik)}"
 
-    # identifier = etree.SubElement(
-    #     resources,
-    #     "{http://www.xbrl.org/2003/instance}identifier",
-    #     scheme="http://www.sec.gov/CIK",
-    #     nsmap={"xbrli": namespace.get("xbrli")},
-    # )
-    # identifier.text = identifier_text
+    #         # Create xbrli:period element and its child elements
+    #         period = etree.SubElement(
+    #             instance_context,
+    #             "{http://www.xbrl.org/2003/instance}period",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         start_date = etree.SubElement(
+    #             period,
+    #             "{http://www.xbrl.org/2003/instance}startDate",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         start_date.text = date_formate(context[0])
+    #         end_date = etree.SubElement(
+    #             period,
+    #             "{http://www.xbrl.org/2003/instance}endDate",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         end_date.text = date_formate(context[0])
+    #     else:
+    #         # Create the dutation_context element
+    #         dutation_context = etree.SubElement(
+    #             resources,
+    #             "{http://www.xbrl.org/2003/instance}context",
+    #             id=f"From{date_formate(context[0])}to{date_formate(context[1])}_{context[-1]}".replace(
+    #                 "--", "_"
+    #             ),
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         # Create xbrli:entity element and its child elements
+    #         entity = etree.SubElement(
+    #             dutation_context, "{http://www.xbrl.org/2003/instance}entity"
+    #         )
+    #         identifier = etree.SubElement(
+    #             entity, "{http://www.xbrl.org/2003/instance}identifier"
+    #         )
+    #         identifier.set("scheme", "http://www.sec.gov/CIK")
+    #         identifier.text = f"{get_cik(cik)}"
 
-    # # create the context tags
-    # # Create the 'xbrli:period' element within 'xbrli:context'
-    # period = etree.SubElement(
-    #     resources,
-    #     "{http://www.xbrl.org/2003/instance}period",
-    #     nsmap={"xbrli": namespace.get("xbrli")},
-    # )
-    # start_date = etree.SubElement(
-    #     period, "{http://www.xbrl.org/2003/instance}startDate"
-    # )
-    # start_date.text = start_date_text
-    # end_date = etree.SubElement(period, "{http://www.xbrl.org/2003/instance}endDate")
-    # end_date.text = end_date_text
+    #         # Create xbrli:segment element and its child elements
+    #         segment = etree.SubElement(
+    #             entity,
+    #             "{http://www.xbrl.org/2003/instance}segment",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
 
-    unique_contexts = get_unique_context_elements(html_file)
-    for context in unique_contexts:
-        if len(context) == 2:
-            # Create the instance_context element
-            instance_context = etree.SubElement(
-                resources,
-                "{http://www.xbrl.org/2003/instance}context",
-                id=f"AsOf{date_formate(context[0])}",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            # Create xbrli:entity element and its child elements
-            entity = etree.SubElement(
-                instance_context,
-                "{http://www.xbrl.org/2003/instance}entity",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            identifier = etree.SubElement(
-                entity,
-                "{http://www.xbrl.org/2003/instance}identifier",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            identifier.set("scheme", "http://www.sec.gov/CIK")
-            identifier.text = f"{get_cik(cik)}"
+    #         explicit_member1 = etree.SubElement(
+    #             segment,
+    #             "{http://xbrl.org/2006/xbrldi}explicitMember",
+    #             dimension=f"{context[-2]}".replace("--", ":"),
+    #             nsmap={"xbrldi": namespace.get("xbrldi")},
+    #         )
+    #         explicit_member1.text = f"{context[-1]}".replace("--", ":")
 
-            # Create xbrli:period element and its child elements
-            period = etree.SubElement(
-                instance_context,
-                "{http://www.xbrl.org/2003/instance}period",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            start_date = etree.SubElement(
-                period,
-                "{http://www.xbrl.org/2003/instance}startDate",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            start_date.text = date_formate(context[0])
-            end_date = etree.SubElement(
-                period,
-                "{http://www.xbrl.org/2003/instance}endDate",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            end_date.text = date_formate(context[0])
-        else:
-            # Create the dutation_context element
-            dutation_context = etree.SubElement(
-                resources,
-                "{http://www.xbrl.org/2003/instance}context",
-                id=f"From{date_formate(context[0])}to{date_formate(context[1])}_{context[-1]}".replace(
-                    "--", "_"
-                ),
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            # Create xbrli:entity element and its child elements
-            entity = etree.SubElement(
-                dutation_context, "{http://www.xbrl.org/2003/instance}entity"
-            )
-            identifier = etree.SubElement(
-                entity, "{http://www.xbrl.org/2003/instance}identifier"
-            )
-            identifier.set("scheme", "http://www.sec.gov/CIK")
-            identifier.text = f"{get_cik(cik)}"
+    #         # Create xbrli:period element and its child elements
+    #         period = etree.SubElement(
+    #             dutation_context,
+    #             "{http://www.xbrl.org/2003/instance}period",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         startdate = etree.SubElement(
+    #             period,
+    #             "{http://www.xbrl.org/2003/instance}startDate",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         startdate.text = date_formate(context[0])
+    #         enddate = etree.SubElement(
+    #             period,
+    #             "{http://www.xbrl.org/2003/instance}endDate",
+    #             nsmap={"xbrli": namespace.get("xbrli")},
+    #         )
+    #         enddate.text = date_formate(context[1])
 
-            # Create xbrli:segment element and its child elements
-            segment = etree.SubElement(
-                entity,
-                "{http://www.xbrl.org/2003/instance}segment",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-
-            explicit_member1 = etree.SubElement(
-                segment,
-                "{http://xbrl.org/2006/xbrldi}explicitMember",
-                dimension=f"{context[-2]}".replace("--", ":"),
-                nsmap={"xbrldi": namespace.get("xbrldi")},
-            )
-            explicit_member1.text = f"{context[-1]}".replace("--", ":")
-
-            # Create xbrli:period element and its child elements
-            period = etree.SubElement(
-                dutation_context,
-                "{http://www.xbrl.org/2003/instance}period",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            startdate = etree.SubElement(
-                period,
-                "{http://www.xbrl.org/2003/instance}startDate",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            startdate.text = date_formate(context[0])
-            enddate = etree.SubElement(
-                period,
-                "{http://www.xbrl.org/2003/instance}endDate",
-                nsmap={"xbrli": namespace.get("xbrli")},
-            )
-            enddate.text = date_formate(context[1])
-
-        # elements = context.split("_")
-        # for element in elements:
-        #     if element.startswith("c"):
-        #         req_list = elements[elements.index(element) : -1]
-        #         # Remove empty values (empty strings) from the list
-        #         filtered_list = [item for item in req_list if item]
-        #         if len(filtered_list) >= 2:
-        #             result = check_first_two_numbers_or_not(filtered_list[:2])
-        #             # if True duration else instance
-        #             from_ = filtered_list[0].replace("c", "")
-        #             to_ = filtered_list[1]
-        #             if result:
-        #                 duration_dimension = check_dimension(filtered_list)
-        #                 if duration_dimension:
-        #                     duration_dimension_xml(
-        #                         resources, cik, from_, to_, filtered_list
-        #                     )
-        #                 duration_xml(resources, cik, from_, to_)
-        #             else:
-        #                 instance_dimension = check_dimension(filtered_list)
-        #                 if instance_dimension:
-        #                     instance_dimension_xml(resources, cik, from_, filtered_list)
-        #                 instance_xml(resources, cik, from_)
+    #     # elements = context.split("_")
+    #     # for element in elements:
+    #     #     if element.startswith("c"):
+    #     #         req_list = elements[elements.index(element) : -1]
+    #     #         # Remove empty values (empty strings) from the list
+    #     #         filtered_list = [item for item in req_list if item]
+    #     #         if len(filtered_list) >= 2:
+    #     #             result = check_first_two_numbers_or_not(filtered_list[:2])
+    #     #             # if True duration else instance
+    #     #             from_ = filtered_list[0].replace("c", "")
+    #     #             to_ = filtered_list[1]
+    #     #             if result:
+    #     #                 duration_dimension = check_dimension(filtered_list)
+    #     #                 if duration_dimension:
+    #     #                     duration_dimension_xml(
+    #     #                         resources, cik, from_, to_, filtered_list
+    #     #                     )
+    #     #                 duration_xml(resources, cik, from_, to_)
+    #     #             else:
+    #     #                 instance_dimension = check_dimension(filtered_list)
+    #     #                 if instance_dimension:
+    #     #                     instance_dimension_xml(resources, cik, from_, filtered_list)
+    #     #                 instance_xml(resources, cik, from_)
 
     # create unit tags
     for unit in units:
@@ -1040,7 +1010,7 @@ def get_format_value(data_type, input_text):
             return ""
 
 
-def add_datatype_tags(html_content, html_elements, output_file):
+def add_datatype_tags(html_content, html_elements):
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html_content, "html.parser")
@@ -1149,7 +1119,7 @@ def add_html_attributes():
     html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
     html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
 
-    return html_tag
+    return str(html_tag).replace("</html>", "")
 
 
 def get_definitions(file):
@@ -1177,3 +1147,5 @@ def get_definitions(file):
             definitions.append({"definition": definition, "role": role})
 
     return definitions
+
+
