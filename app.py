@@ -427,23 +427,23 @@ def generate_xml_schema_files():
     if extra is not None:
         html_file = extra.get("url")
 
-    html_elements = extract_html_elements(html_file)
+    # html_elements = extract_html_elements(html_file)
 
-    for html_element in html_elements:
-        print(html_element.get("id", ""))
+    # for html_element in html_elements:
+    #     print(html_element.get("id", ""))
 
-    # Create an instance of HtmlTagParser
-    parser = HtmlTagParser(html_elements)
+    # # Create an instance of HtmlTagParser
+    # parser = HtmlTagParser(html_elements)
 
-    # Get the formatted data for all tags
-    data = parser.process_tags()
+    # # Get the formatted data for all tags
+    # data = parser.process_tags()
 
-    with open("output.json", "w") as output:
-        output.write(json.dumps(data))
+    # with open("output.json", "w") as output:
+    #     output.write(json.dumps(data))
 
     # read json data from data.json file
-    # with open("data.json", "r") as file:
-    #     data = json.load(file)
+    with open("data.json", "r") as file:
+        data = json.load(file)
 
     # Initialize XMLGenerators and generate the pre.xml file.
     xsd_generator = XSDGenerator(data, ticker, filing_date, company_website)

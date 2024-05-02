@@ -189,6 +189,10 @@ class XSDGenerator:
                 for record in role_data:
 
                     axis_members: str = record.get("Axis_Member")
+                    element_name: str = record.get("Element")
+                    if element_name.startswith("custom"):
+                        custom_elements.append(element_name)
+
                     if axis_members:
                         splitted = axis_members.split("__")
 
@@ -202,19 +206,19 @@ class XSDGenerator:
                             domain = _domain.replace("--", "_")
                             member = _member.replace("--", "_")
 
-                            if axis.startswith(self.ticker):
+                            if axis.startswith("custom"):
                                 custom_elements.append(axis)
 
-                            if domain.startswith(self.ticker):
+                            if domain.startswith("custom"):
                                 custom_elements.append(domain)
 
-                            if member.startswith(self.ticker):
+                            if member.startswith("custom"):
                                 custom_elements.append(member)
                         else:
-                            print(
-                                "================[Axis Member is empty]================"
-                            )
-                role_without_spaces = re.sub(r"\s+", "", role)
+                            print("====[Axis Member is empty]====")
+                _role = role.replace("(", "").replace(")", "")
+                role_without_spaces = re.sub(r"\s+", "", _role)
+
                 link_role_type = ET.Element(
                     "link:roleType",
                     attrib={
@@ -253,9 +257,11 @@ class XSDGenerator:
             custom_element = ET.Element(
                 "xsd:element",
                 {
-                    "id": f"{custom_element}",
+                    "id": f"{custom_element}".replace("custom", self.ticker).replace(
+                        "--", "_"
+                    ),
                     "abstract": "true",
-                    "name": f"{custom_element}".lstrip(f"{self.ticker}_"),
+                    "name": f"{custom_element}".lstrip(f"custom--"),
                     "nillable": "true",
                     "xbrli:periodType": "duration",
                     "substitutionGroup": "xbrli:item",

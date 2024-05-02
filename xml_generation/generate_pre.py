@@ -81,15 +81,16 @@ class PreXMLGenerator:
 
         return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
-    def generate_elements_xml(self, role_data, presentation_links, presentation_link):
+    def generate_elements_xml(
+        self, role_data, presentation_links, presentation_link, line_item
+    ):
         # main elements
         elements_list: list = []
         pre_element_parent_created = False
 
         for index, record in enumerate(role_data, start=1):
-            order = record.get("Indenting")
-            label = record.get("PreferredLabel")
 
+            root_level_abstract = record.get("RootLevelAbstract")
             _element: str = record.get("Element")
             element = _element.replace("--", "_")
 
@@ -99,9 +100,13 @@ class PreXMLGenerator:
             _pre_element_parent: str = record.get("PreElementParent")
             pre_element_parent = _pre_element_parent.replace("--", "_")
 
-            _line_item: str = record.get("LineItem")
-            line_item = _line_item.replace("--", "_")
-            if pre_element_parent_created is False:
+            # _line_item: str = record.get("LineItem")
+            # line_item = _line_item.replace("--", "_")
+
+            if (
+                pre_element_parent_created is False
+                and root_level_abstract != _pre_element_parent
+            ):
                 # pre parent element
                 pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
                 pre_element_parent_loc = self.create_presentation_loc_element(
@@ -120,14 +125,14 @@ class PreXMLGenerator:
                 )
 
                 pre_element_parent_created = True
-
             if element not in elements_list:
                 # main elements
-                if element.startswith(self.ticker):
+                if element.startswith("custom"):
+                    element_name = element.replace("custom", self.ticker)
                     element_loc = self.create_presentation_loc_element(
                         parent_tag=presentation_link,
-                        label=f"loc_{element}",
-                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
+                        label=f"loc_{element_name}",
+                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element_name}",
                     )
 
                 else:
@@ -143,7 +148,7 @@ class PreXMLGenerator:
                     "parent_tag": presentation_link,
                     "order": str(index),
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                    "xlink_from": f"loc_{pre_element_parent}",
+                    "xlink_from": f"loc_{pre_element_parent if pre_element_parent_created else line_item}",
                     "xlink_to": f"loc_{element}",
                     "preferred_label": preferred_label,
                 }
@@ -193,7 +198,7 @@ class PreXMLGenerator:
                 # Common arguments for create_presentation_arc_element
                 arc_args = {
                     "parent_tag": presentation_link,
-                    "order": order,
+                    "order": "1",
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                     "xlink_from": f"loc_{root_level_abstract}",
                     "xlink_to": f"loc_{table}",
@@ -227,7 +232,7 @@ class PreXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
-                        "order": order,
+                        "order": "1",
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{table}",
                         "xlink_to": f"loc_{axis}",
@@ -247,7 +252,7 @@ class PreXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
-                        "order": order,
+                        "order": "1",
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{axis}",
                         "xlink_to": f"loc_{domain}",
@@ -267,7 +272,7 @@ class PreXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
-                        "order": order,
+                        "order": "1",
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{domain}",
                         "xlink_to": f"loc_{member}",
@@ -291,7 +296,7 @@ class PreXMLGenerator:
                 # Common arguments for create_presentation_arc_element
                 arc_args = {
                     "parent_tag": presentation_link,
-                    "order": order,
+                    "order": "2",
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                     "xlink_from": f"loc_{table}",
                     "xlink_to": f"loc_{line_item}",
@@ -301,7 +306,9 @@ class PreXMLGenerator:
                 presentation_arc = self.create_presentation_arc_element(**arc_args)
 
         # generate mail element xml
-        self.generate_elements_xml(role_data, presentation_links, presentation_link)
+        self.generate_elements_xml(
+            role_data, presentation_links, presentation_link, line_item
+        )
 
     def check_role_is_dimension_or_not(self, role_data):
         # Flag variable to track if any Axis_Member has a value
@@ -389,7 +396,10 @@ class PreXMLGenerator:
                 # if role is not dimension
                 else:
                     self.generate_elements_xml(
-                        role_data, presentation_links, presentation_link
+                        role_data,
+                        presentation_links,
+                        presentation_link,
+                        root_level_abstract,
                     )
 
         # XML declaration and comments.
