@@ -82,32 +82,25 @@ class PreXMLGenerator:
         return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
     def generate_elements_xml(
-        self, role_data, presentation_links, presentation_link, line_item
+        self,
+        role_data,
+        presentation_links,
+        presentation_link,
+        line_item,
+        dimension=False,
     ):
-        # main elements
-        elements_list: list = []
+        initial_record = role_data[0]
+
+        root_level_abstract = initial_record.get("RootLevelAbstract")
+        _pre_element_parent: str = initial_record.get("PreElementParent")
         pre_element_parent_created = False
 
-        for index, record in enumerate(role_data, start=1):
+        # root level abstract and pre element parent is same don't create pre element parent
+        # consider root level abstract as a pre element parent
 
-            root_level_abstract = record.get("RootLevelAbstract")
-            _element: str = record.get("Element")
-            element = _element.replace("--", "_")
-
-            label_type = record.get("PreferredLabelType")
-            preferred_label = self.get_preferred_label(label_type)
-
-            _pre_element_parent: str = record.get("PreElementParent")
-            pre_element_parent = _pre_element_parent.replace("--", "_")
-
-            # _line_item: str = record.get("LineItem")
-            # line_item = _line_item.replace("--", "_")
-
-            if (
-                pre_element_parent_created is False
-                and root_level_abstract != _pre_element_parent
-            ):
-                # pre parent element
+        # pre parent element
+        if root_level_abstract != _pre_element_parent:
+            if pre_element_parent_created is False:
                 pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
                 pre_element_parent_loc = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
@@ -125,6 +118,22 @@ class PreXMLGenerator:
                 )
 
                 pre_element_parent_created = True
+
+        # main elements
+        elements_list: list = []
+        element_occurrences: dict = {}
+
+        for index, record in enumerate(role_data, start=1):
+
+            _element: str = record.get("Element")
+            element = _element.replace("--", "_")
+
+            label_type = record.get("PreferredLabelType")
+            preferred_label = self.get_preferred_label(label_type)
+
+            _pre_element_parent: str = record.get("PreElementParent")
+            pre_element_parent = _pre_element_parent.replace("--", "_")
+
             if element not in elements_list:
                 # main elements
                 if element.startswith("custom"):
@@ -143,18 +152,34 @@ class PreXMLGenerator:
                         xlink_href=f"{href_url}#{element}",
                     )
 
+                if dimension:
+                    xlink_from = (
+                        pre_element_parent if pre_element_parent_created else line_item
+                    )
+                else:
+                    xlink_from = pre_element_parent
+
+                # calculate xlink from element element occurrence
+                if xlink_from not in element_occurrences:
+                    element_occurrences[xlink_from] = 1
+                else:
+                    element_occurrences[xlink_from] = (
+                        element_occurrences[xlink_from] + 1
+                    )
+
                 # Common arguments for create_presentation_arc_element
                 arc_args = {
                     "parent_tag": presentation_link,
-                    "order": str(index),
+                    "order": str(element_occurrences.get(xlink_from)),
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                    "xlink_from": f"loc_{pre_element_parent if pre_element_parent_created else line_item}",
+                    "xlink_from": f"loc_{xlink_from}",
                     "xlink_to": f"loc_{element}",
                     "preferred_label": preferred_label,
                 }
 
                 # Create presentationArc element and append it to presentation_links list.
                 presentation_arc = self.create_presentation_arc_element(**arc_args)
+
                 # add element into elements list
                 elements_list.append(element)
 
@@ -305,10 +330,14 @@ class PreXMLGenerator:
                 # Create presentationArc element and append it to presentation_links list.
                 presentation_arc = self.create_presentation_arc_element(**arc_args)
 
-        # generate mail element xml
-        self.generate_elements_xml(
-            role_data, presentation_links, presentation_link, line_item
-        )
+            # generate mail element xml
+            self.generate_elements_xml(
+                role_data,
+                presentation_links,
+                presentation_link,
+                line_item,
+                dimension=True,
+            )
 
     def check_role_is_dimension_or_not(self, role_data):
         # Flag variable to track if any Axis_Member has a value
@@ -393,8 +422,8 @@ class PreXMLGenerator:
                         presentation_links,
                         root_level_abstract,
                     )
-                # if role is not dimension
                 else:
+                    # if role is not dimension
                     self.generate_elements_xml(
                         role_data,
                         presentation_links,

@@ -214,8 +214,7 @@ class XSDGenerator:
 
                             if member.startswith("custom"):
                                 custom_elements.append(member)
-                        else:
-                            print("====[Axis Member is empty]====")
+
                 _role = role.replace("(", "").replace(")", "")
                 role_without_spaces = re.sub(r"\s+", "", _role)
 
