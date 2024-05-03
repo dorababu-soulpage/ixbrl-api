@@ -198,154 +198,176 @@ class DefXMLGenerator:
 
                     axis_members: str = record.get("Axis_Member")
 
-                    if line_item not in line_items_list:
-                        # line item location
-                        line_item_xlink_href = self.get_href_url(line_item)
-                        line_item_loc = self.create_definition_loc_element(
-                            parent_tag=definition_link,
-                            label=f"loc_{line_item}",
-                            xlink_href=f"{line_item_xlink_href}#{line_item}",
-                        )
-                        line_items_list.append(line_item)
-
-                    if table not in tables_list:
-                        # table
-                        table_xlink_href = self.get_href_url(table)
-                        table_loc = self.create_definition_loc_element(
-                            parent_tag=definition_link,
-                            label=f"loc_{table}",
-                            xlink_href=f"{table_xlink_href}#{table}",
-                        )
-
-                        # Common arguments for create_presentation_arc_element
-                        arc_args = {
-                            "parent_tag": definition_link,
-                            "arc_role": "http://xbrl.org/int/dim/arcrole/all",
-                            "xlink_from": f"loc_{line_item}",
-                            "xlink_to": f"loc_{table}",
-                            "order": order,
-                        }
-
-                        # Add definition arc elements
-                        definition_arc = self.create_definition_arc_element(**arc_args)
-                        tables_list.append(table)
-
+                    # if Axis_Member exists create entry in def XML
                     if axis_members:
-                        splitted = axis_members.split("__")
+                        if line_item not in line_items_list:
+                            # line item location
+                            line_item_xlink_href = self.get_href_url(line_item)
+                            line_item_loc = self.create_definition_loc_element(
+                                parent_tag=definition_link,
+                                label=f"loc_{line_item}",
+                                xlink_href=f"{line_item_xlink_href}#{line_item}",
+                            )
+                            line_items_list.append(line_item)
 
-                        # Group by 3
-                        groups = [
-                            splitted[i : i + 3] for i in range(0, len(splitted), 3)
-                        ]
-                        for group in groups:
-                            _axis, _domain, _member = group
-                            axis = _axis.replace("--", "_")
-                            domain = _domain.replace("--", "_")
-                            member = _member.replace("--", "_")
+                        if table not in tables_list:
+                            # table
+                            table_xlink_href = self.get_href_url(table)
+                            table_loc = self.create_definition_loc_element(
+                                parent_tag=definition_link,
+                                label=f"loc_{table}",
+                                xlink_href=f"{table_xlink_href}#{table}",
+                            )
 
-                            dimension_record = (axis, domain, member)
-                            if dimension_record not in dimension_records_list:
+                            # Common arguments for create_presentation_arc_element
+                            arc_args = {
+                                "parent_tag": definition_link,
+                                "arc_role": "http://xbrl.org/int/dim/arcrole/all",
+                                "xlink_from": f"loc_{line_item}",
+                                "xlink_to": f"loc_{table}",
+                                "order": order,
+                            }
 
-                                # axis
-                                axis_xlink_href = self.get_href_url(axis)
-                                axis_loc = self.create_definition_loc_element(
-                                    parent_tag=definition_link,
-                                    label=f"loc_{axis}",
-                                    xlink_href=f"{axis_xlink_href}#{axis}",
-                                )
+                            # Add definition arc elements
+                            definition_arc = self.create_definition_arc_element(
+                                **arc_args
+                            )
+                            tables_list.append(table)
 
-                                # Common arguments for create_presentation_arc_element
-                                arc_args = {
-                                    "parent_tag": definition_link,
-                                    "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
-                                    "xlink_from": f"loc_{line_item}",
-                                    "xlink_to": f"loc_{axis}",
-                                    "order": order,
-                                }
+                            splitted = axis_members.split("__")
 
-                                # Add definition arc elements
-                                definition_arc = self.create_definition_arc_element(
-                                    **arc_args
-                                )
+                            # Group by 3
+                            groups = [
+                                splitted[i : i + 3] for i in range(0, len(splitted), 3)
+                            ]
+                            for group in groups:
+                                _axis, _domain, _member = group
+                                axis = _axis.replace("--", "_")
+                                domain = _domain.replace("--", "_")
+                                member = _member.replace("--", "_")
 
-                                # domain dimension-default
-                                domain_xlink_href = self.get_href_url(domain)
-                                domain_loc = self.create_definition_loc_element(
-                                    parent_tag=definition_link,
-                                    label=f"loc_{domain}_1",
-                                    xlink_href=f"{domain_xlink_href}#{domain}",
-                                )
+                                dimension_record = (axis, domain, member)
+                                if dimension_record not in dimension_records_list:
 
-                                # Common arguments for create_presentation_arc_element
-                                arc_args = {
-                                    "parent_tag": definition_link,
-                                    "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
-                                    "xlink_from": f"loc_{axis}",
-                                    "xlink_to": f"loc_{domain}",
-                                    "order": order,
-                                }
+                                    # axis
+                                    axis_xlink_href = self.get_href_url(axis)
+                                    axis_loc = self.create_definition_loc_element(
+                                        parent_tag=definition_link,
+                                        label=f"loc_{axis}",
+                                        xlink_href=f"{axis_xlink_href}#{axis}",
+                                    )
 
-                                # Add definition arc elements
-                                definition_arc = self.create_definition_arc_element(
-                                    **arc_args
-                                )
+                                    # Common arguments for create_presentation_arc_element
+                                    arc_args = {
+                                        "parent_tag": definition_link,
+                                        "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
+                                        "xlink_from": f"loc_{line_item}",
+                                        "xlink_to": f"loc_{axis}",
+                                        "order": order,
+                                    }
 
-                                # domain dimension-domain
-                                domain_xlink_href = self.get_href_url(domain)
-                                domain_loc = self.create_definition_loc_element(
-                                    parent_tag=definition_link,
-                                    label=f"loc_{domain}",
-                                    xlink_href=f"{domain_xlink_href}#{domain}",
-                                )
+                                    # Add definition arc elements
+                                    definition_arc = self.create_definition_arc_element(
+                                        **arc_args
+                                    )
 
-                                # Common arguments for create_presentation_arc_element
-                                arc_args = {
-                                    "parent_tag": definition_link,
-                                    "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-domain",
-                                    "xlink_from": f"loc_{axis}",
-                                    "xlink_to": f"loc_{domain}",
-                                    "order": order,
-                                }
+                                    # domain dimension-default
+                                    domain_xlink_href = self.get_href_url(domain)
+                                    domain_loc = self.create_definition_loc_element(
+                                        parent_tag=definition_link,
+                                        label=f"loc_{domain}_1",
+                                        xlink_href=f"{domain_xlink_href}#{domain}",
+                                    )
 
-                                # Add definition arc elements
-                                definition_arc = self.create_definition_arc_element(
-                                    **arc_args
-                                )
+                                    # Common arguments for create_presentation_arc_element
+                                    arc_args = {
+                                        "parent_tag": definition_link,
+                                        "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
+                                        "xlink_from": f"loc_{axis}",
+                                        "xlink_to": f"loc_{domain}",
+                                        "order": order,
+                                    }
 
-                                # member
-                                member_xlink_href = self.get_href_url(member)
-                                member_loc = self.create_definition_loc_element(
-                                    parent_tag=definition_link,
-                                    label=f"loc_{member}",
-                                    xlink_href=f"{member_xlink_href}#{member}",
-                                )
+                                    # Add definition arc elements
+                                    definition_arc = self.create_definition_arc_element(
+                                        **arc_args
+                                    )
 
-                                # Common arguments for create_presentation_arc_element
-                                arc_args = {
-                                    "parent_tag": definition_link,
-                                    "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
-                                    "xlink_from": f"loc_{domain}",
-                                    "xlink_to": f"loc_{member}",
-                                    "order": order,
-                                }
+                                    # domain dimension-domain
+                                    domain_xlink_href = self.get_href_url(domain)
+                                    domain_loc = self.create_definition_loc_element(
+                                        parent_tag=definition_link,
+                                        label=f"loc_{domain}",
+                                        xlink_href=f"{domain_xlink_href}#{domain}",
+                                    )
 
-                                # Add definition arc elements
-                                definition_arc = self.create_definition_arc_element(
-                                    **arc_args
-                                )
+                                    # Common arguments for create_presentation_arc_element
+                                    arc_args = {
+                                        "parent_tag": definition_link,
+                                        "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-domain",
+                                        "xlink_from": f"loc_{axis}",
+                                        "xlink_to": f"loc_{domain}",
+                                        "order": order,
+                                    }
 
-                                dimension_records_list.append(dimension_record)
+                                    # Add definition arc elements
+                                    definition_arc = self.create_definition_arc_element(
+                                        **arc_args
+                                    )
 
-                    # check pre element parent is created or not
-                    if pre_element_parent_created is False:
-                        # pre parent element
-                        pre_element_parent_xlink_href = self.get_href_url(
-                            pre_element_parent
-                        )
-                        pre_element_parent_loc = self.create_definition_loc_element(
+                                    # member
+                                    member_xlink_href = self.get_href_url(member)
+                                    member_loc = self.create_definition_loc_element(
+                                        parent_tag=definition_link,
+                                        label=f"loc_{member}",
+                                        xlink_href=f"{member_xlink_href}#{member}",
+                                    )
+
+                                    # Common arguments for create_presentation_arc_element
+                                    arc_args = {
+                                        "parent_tag": definition_link,
+                                        "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
+                                        "xlink_from": f"loc_{domain}",
+                                        "xlink_to": f"loc_{member}",
+                                        "order": order,
+                                    }
+
+                                    # Add definition arc elements
+                                    definition_arc = self.create_definition_arc_element(
+                                        **arc_args
+                                    )
+
+                                    dimension_records_list.append(dimension_record)
+
+                        # check pre element parent is created or not
+                        if pre_element_parent_created is False:
+                            # pre parent element
+                            pre_element_parent_xlink_href = self.get_href_url(
+                                pre_element_parent
+                            )
+                            pre_element_parent_loc = self.create_definition_loc_element(
+                                parent_tag=definition_link,
+                                label=f"loc_{pre_element_parent}",
+                                xlink_href=f"{pre_element_parent_xlink_href}#{pre_element_parent}",
+                            )
+
+                            # Add definition arc elements
+                            definition_arc = self.create_definition_arc_element(
+                                parent_tag=definition_link,
+                                order=str(index),
+                                arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                                xlink_from=f"loc_{line_item}",
+                                xlink_to=f"loc_{pre_element_parent}",
+                            )
+
+                            pre_element_parent_created = True
+
+                        # main elements
+                        element_xlink_href = self.get_href_url(element)
+                        element_loc = self.create_definition_loc_element(
                             parent_tag=definition_link,
-                            label=f"loc_{pre_element_parent}",
-                            xlink_href=f"{pre_element_parent_xlink_href}#{pre_element_parent}",
+                            label=f"loc_{element}",
+                            xlink_href=f"{element_xlink_href}#{element}",
                         )
 
                         # Add definition arc elements
@@ -353,30 +375,11 @@ class DefXMLGenerator:
                             parent_tag=definition_link,
                             order=str(index),
                             arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
-                            xlink_from=f"loc_{line_item}",
-                            xlink_to=f"loc_{pre_element_parent}",
+                            xlink_from=f"loc_{pre_element_parent}",
+                            xlink_to=f"loc_{element}",
                         )
 
-                        pre_element_parent_created = True
-
-                    # main elements
-                    element_xlink_href = self.get_href_url(element)
-                    element_loc = self.create_definition_loc_element(
-                        parent_tag=definition_link,
-                        label=f"loc_{element}",
-                        xlink_href=f"{element_xlink_href}#{element}",
-                    )
-
-                    # Add definition arc elements
-                    definition_arc = self.create_definition_arc_element(
-                        parent_tag=definition_link,
-                        order=str(index),
-                        arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
-                        xlink_from=f"loc_{pre_element_parent}",
-                        xlink_to=f"loc_{element}",
-                    )
-
-                definition_links.append(definition_link)
+                    definition_links.append(definition_link)
 
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
