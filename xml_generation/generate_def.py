@@ -132,6 +132,7 @@ class DefXMLGenerator:
         line_items_list = []
         dimension_records_list = []
         pre_element_parent_created = False
+        main_element_list = []
 
         # Create the root linkbase element with namespaces
         linkbase_element = ET.Element(
@@ -225,7 +226,7 @@ class DefXMLGenerator:
                                 "arc_role": "http://xbrl.org/int/dim/arcrole/all",
                                 "xlink_from": f"loc_{line_item}",
                                 "xlink_to": f"loc_{table}",
-                                "order": order,
+                                "order": "1",
                             }
 
                             # Add definition arc elements
@@ -263,7 +264,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
                                         "xlink_from": f"loc_{line_item}",
                                         "xlink_to": f"loc_{axis}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -285,7 +286,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
                                         "xlink_from": f"loc_{axis}",
                                         "xlink_to": f"loc_{domain}_1",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -307,7 +308,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-domain",
                                         "xlink_from": f"loc_{axis}",
                                         "xlink_to": f"loc_{domain}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -329,7 +330,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
                                         "xlink_from": f"loc_{domain}",
                                         "xlink_to": f"loc_{member}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -362,24 +363,53 @@ class DefXMLGenerator:
 
                             pre_element_parent_created = True
 
-                        # main elements
+                        # add dimension record
+                        main_element_list.append(record)
+
+                    else:
+                        main_element_list.append(record)
+
+                element_occurrences = {}
+                # add main element to def XML
+                for record in main_element_list:
+                    _element = record.get("Element")
+                    element = _element.replace("--", "_")
+
+                    _pre_element_parent: str = record.get("PreElementParent")
+                    pre_element_parent = _pre_element_parent.replace("--", "_")
+
+                    if element.startswith("custom"):
+                        element = element.replace("custom", self.ticker)
+                        element_loc = self.create_definition_loc_element(
+                            parent_tag=definition_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
+                        )
+                    else:
                         element_xlink_href = self.get_href_url(element)
                         element_loc = self.create_definition_loc_element(
                             parent_tag=definition_link,
                             label=f"loc_{element}",
                             xlink_href=f"{element_xlink_href}#{element}",
                         )
-
-                        # Add definition arc elements
-                        definition_arc = self.create_definition_arc_element(
-                            parent_tag=definition_link,
-                            order=str(index),
-                            arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
-                            xlink_from=f"loc_{pre_element_parent}",
-                            xlink_to=f"loc_{element}",
+                    xlink_from = pre_element_parent
+                    # calculate xlink from element element occurrence
+                    if xlink_from not in element_occurrences:
+                        element_occurrences[xlink_from] = 1
+                    else:
+                        element_occurrences[xlink_from] = (
+                            element_occurrences[xlink_from] + 1
                         )
 
-                    definition_links.append(definition_link)
+                    # Add definition arc elements
+                    definition_arc = self.create_definition_arc_element(
+                        parent_tag=definition_link,
+                        order=str(element_occurrences.get(xlink_from)),
+                        arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                        xlink_from=f"loc_{xlink_from}",
+                        xlink_to=f"loc_{element}",
+                    )
+                definition_links.append(definition_link)
 
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'

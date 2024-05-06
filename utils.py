@@ -234,14 +234,13 @@ presentation_df = pd.read_excel(taxonomy_file, sheet_name="Presentation")
 
 
 def get_taxonomy_values(element):
-    filtered_record = presentation_df[presentation_df["name"] == element].to_dict(
-        orient="records"
-    )[0]
-    filtered_df = element_df[
-        element_df["name"] == filtered_record.get("name", None)
-    ].to_dict(orient="records")[0]
-    filtered_record.update(filtered_df)
-    return filtered_record
+    try:
+        filtered_df = element_df[element_df["name"] == element].to_dict(
+            orient="records"
+        )[0]
+        return filtered_df
+    except Exception as e:
+        return None
 
 
 def extract_html_elements(file, only_id=False) -> list[dict]:
@@ -1147,5 +1146,3 @@ def get_definitions(file):
             definitions.append({"definition": definition, "role": role})
 
     return definitions
-
-
