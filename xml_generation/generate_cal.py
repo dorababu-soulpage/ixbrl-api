@@ -1,3 +1,4 @@
+import re
 from itertools import groupby
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
@@ -26,7 +27,9 @@ class CalXMLGenerator:
         cal_parent_grouped_data = {}
         # Group the data by RoleName using itertools groupby and store it in grouped_data.
         for key, group in groupby(data, key=lambda x: x["CalculationParent"]):
-            cal_parent_grouped_data[key] = list(group)
+            cal_parent_grouped_data[key] = [
+                dict(t) for t in {tuple(d.items()) for d in list(group)}
+            ]
         return cal_parent_grouped_data
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
@@ -34,7 +37,7 @@ class CalXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": role_uri,
+                "roleURI": f"http://{role_uri}",
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -89,6 +92,14 @@ class CalXMLGenerator:
         role_ref_element = self.create_role_ref_element(parent, role_uri, xlink_href)
         self.role_ref_elements.append(role_ref_element)
 
+        # Function to check if all Axis_Member are empty
+
+    def are_all_cal_parents_empty(self, json_data):
+        for item in json_data:
+            if item["CalculationParent"] != "":
+                return False
+        return True
+
     def generate_cal_xml(self):
         linkbase_element = ET.Element(
             "link:linkbase",
@@ -110,72 +121,107 @@ class CalXMLGenerator:
         for role_index, (role_name, role_data) in enumerate(
             self.grouped_data.items(), start=1
         ):
+            # Check if all cal parents are empty
+            all_empty = self.are_all_cal_parents_empty(role_data)
+            if all_empty:
+                pass
+            else:
+                if role_name:
+                    role_without_spaces = re.sub(r"\s+", "", role_name)
 
-            # Create roleRef element and append it to role_ref_elements list.
-            role_ref_element = self.create_role_ref_element(
-                parent=linkbase_element,
-                role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name}",
-                xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name}",
-            )
-            role_ref_elements.append(role_ref_element)
+                    # Create roleRef element and append it to role_ref_elements list.
+                    role_ref_element = self.create_role_ref_element(
+                        parent=linkbase_element,
+                        role_uri=f"{self.company_website}/{self.filing_date}/role/{role_without_spaces}",
+                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_without_spaces}",
+                    )
+                    role_ref_elements.append(role_ref_element)
 
-            calculation_link = ET.SubElement(
-                linkbase_element,
-                "link:calculationLink",
-                attrib={
-                    "xlink:role": f"{self.company_website}/role/{role_name}",
-                    "xlink:type": "extended",
-                },
-            )
-
-            # group the by role data based on the calculation parent
-            data = self.group_data_by_cal_parent(role_data)
-
-            calculation_parents = []
-            for cp_index, (cal_parent, children) in enumerate(data.items(), start=1):
-
-                _calculation_parent = cal_parent
-                calculation_parent = _calculation_parent.replace("--", "_")
-
-                # calculation parent
-                calculation_parent_href = self.get_href_url(calculation_parent)
-                calculation_parent_loc = self.create_calculation_loc_element(
-                    parent_tag=calculation_link,
-                    label=f"loc_{calculation_parent}_{role_index}",
-                    xlink_href=f"{calculation_parent_href}#{calculation_parent}",
-                )
-
-                # loop all cal parent children and create loc, and arc elements
-                for index, record in enumerate(children, start=1):
-
-                    _element = record.get("Element")
-                    element = _element.replace("--", "_")
-
-                    if element in calculation_parents:
-                        element_label = f"loc_{element}_{index+1}"
-                    else:
-                        element_label = f"loc_{element}"
-
-                    # element
-                    element_href = self.get_href_url(element)
-                    element_loc = self.create_calculation_loc_element(
-                        parent_tag=calculation_link,
-                        label=element_label,
-                        xlink_href=f"{element_href}#{element}",
+                    calculation_link = ET.SubElement(
+                        linkbase_element,
+                        "link:calculationLink",
+                        attrib={
+                            "xlink:role": f"http://{self.company_website}/role/{role_without_spaces}",
+                            "xlink:type": "extended",
+                        },
                     )
 
-                    # Add calculation arc elements
-                    calculation_arc = self.create_calculation_arc_element(
-                        parent_tag=calculation_link,
-                        order=str(index),
-                        weight="1",
-                        arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
-                        xlink_from=f"loc_{calculation_parent}_{role_index}",
-                        xlink_to=element_label,
-                    )
-                    calculation_parents.append(calculation_parent)
+                    # group the by role data based on the calculation parent
+                    data = self.group_data_by_cal_parent(role_data)
 
-            calculation_links.append(calculation_link)
+                    calculation_parents = []
+                    cal_parent_Children = []
+                    element_occurrences = {}
+
+                    parent_index = 1
+                    for cp_index, (cal_parent, children) in enumerate(
+                        data.items(), start=1
+                    ):
+                        # if calculation is exits create entry in cal XML
+                        if cal_parent:
+
+                            _calculation_parent = cal_parent
+                            calculation_parent = _calculation_parent.replace("--", "_")
+
+                            # calculation parent
+                            calculation_parent_href = self.get_href_url(
+                                calculation_parent
+                            )
+                            calculation_parent_loc = self.create_calculation_loc_element(
+                                parent_tag=calculation_link,
+                                label=f"loc_{calculation_parent}_{role_index}",
+                                xlink_href=f"{calculation_parent_href}#{calculation_parent}_{role_index}",
+                            )
+                            # loop all cal parent children and create loc, and arc elements
+                            children_index = 1
+                            for index, record in enumerate(children, start=1):
+
+                                _element = record.get("Element")
+                                element = _element.replace("--", "_")
+
+                                if element not in cal_parent_Children:
+
+                                    if element in calculation_parents:
+                                        element_label = f"loc_{element}_{index+1}"
+                                    else:
+                                        element_label = f"loc_{element}"
+
+                                    # element
+                                    element_href = self.get_href_url(element)
+                                    element_loc = self.create_calculation_loc_element(
+                                        parent_tag=calculation_link,
+                                        label=element_label,
+                                        xlink_href=f"{element_href}#{element_label}",
+                                    )
+
+                                    xlink_from = f"{calculation_parent}_{parent_index}"
+
+                                    # calculate xlink from element element occurrence
+                                    if xlink_from not in element_occurrences:
+                                        element_occurrences[xlink_from] = 1
+                                    else:
+                                        element_occurrences[xlink_from] = (
+                                            element_occurrences[xlink_from] + 1
+                                        )
+
+                                    # Add calculation arc elements
+                                    calculation_arc = self.create_calculation_arc_element(
+                                        parent_tag=calculation_link,
+                                        order=str(element_occurrences.get(xlink_from)),
+                                        weight="1",
+                                        arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
+                                        xlink_from=f"loc_{xlink_from}",
+                                        xlink_to=element_label,
+                                    )
+                                    calculation_parents.append(calculation_parent)
+                                    cal_parent_Children.append(element)
+                                    # increment the children index
+                                    children_index += 1
+
+                            calculation_links.append(calculation_link)
+
+                        # increment the parent index
+                        parent_index += 1
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'

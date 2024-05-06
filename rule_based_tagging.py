@@ -68,8 +68,15 @@ class RuleBasedTagging:
             "font", style=lambda value: value and "font-weight:bold" in value.lower()
         )
 
+        # Find the paragraph with bold font using lambda function
+        bold_paragraph = soup.find_all(
+            lambda tag: tag.name == "p"
+            and tag.get("style")
+            and "font: bold" in tag.get("style").lower()
+        )
+
         # Combine both lists
-        bold_tags = bold_tags_b + bold_tags_font
+        bold_tags = bold_tags_b + bold_tags_font + bold_paragraph
 
         # Function to clean and format text
         def clean_text(text):
@@ -260,10 +267,10 @@ class RuleBasedTagging:
 
 
 # if __name__ == "__main__":
-#     html_file_path = "sfb35772717-10k_1709205766138.htm"
-#     xlsx_file = "https://deeplobe.s3.ap-south-1.amazonaws.com/Rule_Based_Tagging_OG_1709111231656.xlsx"
+#     html_file_path = "cps_10k-123119_1714817379130.htm"
+#     xlsx_file = "https://ixbrl-tool.s3.amazonaws.com/Rule_Based_Tagging_OG_1stMay2024_1714786538119.xlsx"
 #     file_id = 55
-#     cik = "0001090009"
+#     cik = "0000889609"
 #     form_type = "10-K"
 #     rbt = RuleBasedTagging(html_file_path, xlsx_file, file_id, cik, form_type)
 #     rbt.start()

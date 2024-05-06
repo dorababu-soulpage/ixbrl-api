@@ -34,7 +34,12 @@ class LabXMLGenerator:
         )
 
     def create_label_element(
-        self, parent_tag=None, id=None, xlink_label=None, xlink_role=None
+        self,
+        parent_tag=None,
+        id=None,
+        xlink_label=None,
+        xlink_role=None,
+        label_text=None,
     ):
         if xlink_role is None:
             xlink_role = "http://www.xbrl.org/2003/role/label"
@@ -49,7 +54,7 @@ class LabXMLGenerator:
                 "xml:lang": "en-US",
             },
         )
-        label_element.text = xlink_label
+        label_element.text = label_text
         return label_element
 
     def create_label_loc_element(self, parent_tag=None, label=None, xlink_href=None):
@@ -139,6 +144,15 @@ class LabXMLGenerator:
         pre_element_parents_list: list[str] = []
         calculation_parents_list: list[str] = []
 
+        label_link = ET.SubElement(
+            linkbase_element,
+            "link:labelLink",
+            attrib={
+                "xlink:role": "http://www.xbrl.org/2003/role/link",
+                "xlink:type": "extended",
+            },
+        )
+
         # Iterate through grouped data and create roleRef and presentationLink elements.
         for role_name, role_data in self.grouped_data.items():
             record: dict = role_data[0] | {}
@@ -151,15 +165,8 @@ class LabXMLGenerator:
 
             _line_item: str = record.get("LineItem", "")
             line_item = _line_item.replace("--", "_")
+            label_text = record.get("LabelText", "")
 
-            label_link = ET.SubElement(
-                linkbase_element,
-                "link:labelLink",
-                attrib={
-                    "xlink:role": "http://www.xbrl.org/2003/role/link",
-                    "xlink:type": "extended",
-                },
-            )
             # root level abstract
 
             # Create label loc elements for root_level_abstract and element.
@@ -187,6 +194,7 @@ class LabXMLGenerator:
                 parent_tag=label_link,
                 id=f"lab_{root_level_abstract}_label_en-US",
                 xlink_label=root_level_abstract,
+                label_text=label_text,
             )
 
             # table
@@ -251,6 +259,7 @@ class LabXMLGenerator:
                 axis_ember = record.get("Axis_Member", "")
                 preElement_parent = record.get("PreElementParent", "")
                 calculation_parent = record.get("CalculationParent", "")
+                label_text = record.get("LabelText", "")
 
                 href_url = self.get_href_url(element)
                 element_loc = self.create_label_loc_element(
@@ -276,14 +285,16 @@ class LabXMLGenerator:
                     parent_tag=label_link,
                     id=f"lab_{element}_1_label_en-US",
                     xlink_label=element,
+                    label_text=label_text,
                 )
 
                 # create terseLabel
                 self.create_label_element(
                     parent_tag=label_link,
                     id=f"lab_{element}_2_label_en-US",
-                    xlink_label=element,
+                    xlink_label=label_text,
                     xlink_role="http://www.xbrl.org/2003/role/terseLabel",
+                    label_text=label_text,
                 )
                 elements.append(element)
                 axis_members_list.append(axis_ember)
@@ -320,6 +331,7 @@ class LabXMLGenerator:
                     parent_tag=label_link,
                     id=f"lab_{cal_parent}_1_label_en-US",
                     xlink_label=cal_parent,
+                    label_text=label_text,
                 )
 
                 # create terseLabel
@@ -328,6 +340,7 @@ class LabXMLGenerator:
                     id=f"lab_{cal_parent}_2_label_en-US",
                     xlink_label=cal_parent,
                     xlink_role="http://www.xbrl.org/2003/role/terseLabel",
+                    label_text=label_text,
                 )
 
         # add pre element parents
@@ -358,95 +371,100 @@ class LabXMLGenerator:
                 parent_tag=label_link,
                 id=f"lab_{pre_element_parent}_label_en-US",
                 xlink_label=pre_element_parent,
+                label_text=label_text,
             )
         if list(filter(None, axis_members_list)):
             # add axis, domain, member
             for axis_member in set(axis_members_list):
-                _axis, _domain, _member = axis_member.split("__")
-                axis = _axis.replace("--", "_")
-                domain = _domain.replace("--", "_")
-                member = _member.replace("--", "_")
+                if axis_member:
+                    _axis, _domain, _member = axis_member.split("__")
+                    axis = _axis.replace("--", "_")
+                    domain = _domain.replace("--", "_")
+                    member = _member.replace("--", "_")
 
-                # axis
-                href_url = self.get_href_url(axis)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_{axis}",
-                    xlink_href=f"{href_url}#{axis}",
-                )
+                    # axis
+                    href_url = self.get_href_url(axis)
+                    element_loc = self.create_label_loc_element(
+                        parent_tag=label_link,
+                        label=f"loc_{axis}",
+                        xlink_href=f"{href_url}#{axis}",
+                    )
 
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_{axis}",
-                    "xlink_to": f"lab_{axis}",
-                }
+                    # Common arguments for create_label_arc_element
+                    arc_args = {
+                        "parent_tag": label_link,
+                        "order": "1",
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                        "xlink_from": f"loc_{axis}",
+                        "xlink_to": f"lab_{axis}",
+                    }
 
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
+                    # Create presentationArc element and append it to presentation_links list.
+                    label_arc = self.create_label_arc_element(**arc_args)
 
-                # create label
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{axis}_label_en-US",
-                    xlink_label=axis,
-                )
+                    # create label
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_{axis}_label_en-US",
+                        xlink_label=axis,
+                        label_text=label_text,
+                    )
 
-                # domain
-                href_url = self.get_href_url(domain)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_{domain}",
-                    xlink_href=f"{href_url}#{domain}",
-                )
+                    # domain
+                    href_url = self.get_href_url(domain)
+                    element_loc = self.create_label_loc_element(
+                        parent_tag=label_link,
+                        label=f"loc_{domain}",
+                        xlink_href=f"{href_url}#{domain}",
+                    )
 
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_{domain}",
-                    "xlink_to": f"lab_{domain}",
-                }
+                    # Common arguments for create_label_arc_element
+                    arc_args = {
+                        "parent_tag": label_link,
+                        "order": "1",
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                        "xlink_from": f"loc_{domain}",
+                        "xlink_to": f"lab_{domain}",
+                    }
 
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
+                    # Create presentationArc element and append it to presentation_links list.
+                    label_arc = self.create_label_arc_element(**arc_args)
 
-                # create label
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{domain}_label_en-US",
-                    xlink_label=domain,
-                )
+                    # create label
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_{domain}_label_en-US",
+                        xlink_label=domain,
+                        label_text=label_text,
+                    )
 
-                # member
-                href_url = self.get_href_url(member)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_{member}",
-                    xlink_href=f"{href_url}#{member}",
-                )
+                    # member
+                    href_url = self.get_href_url(member)
+                    element_loc = self.create_label_loc_element(
+                        parent_tag=label_link,
+                        label=f"loc_{member}",
+                        xlink_href=f"{href_url}#{member}",
+                    )
 
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_{member}",
-                    "xlink_to": f"lab_{member}",
-                }
+                    # Common arguments for create_label_arc_element
+                    arc_args = {
+                        "parent_tag": label_link,
+                        "order": "1",
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                        "xlink_from": f"loc_{member}",
+                        "xlink_to": f"lab_{member}",
+                    }
 
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
+                    # Create presentationArc element and append it to presentation_links list.
+                    label_arc = self.create_label_arc_element(**arc_args)
 
-                # create label
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{member}_label_en-US",
-                    xlink_label=member,
-                )
+                    # create label
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_{member}_label_en-US",
+                        xlink_label=member,
+                        label_text=label_text,
+                    )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
