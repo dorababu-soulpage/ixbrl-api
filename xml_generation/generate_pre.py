@@ -137,11 +137,11 @@ class PreXMLGenerator:
             if element not in elements_list:
                 # main elements
                 if element.startswith("custom"):
-                    element_name = element.replace("custom", self.ticker)
+                    element = element.replace("custom", self.ticker)
                     element_loc = self.create_presentation_loc_element(
                         parent_tag=presentation_link,
-                        label=f"loc_{element_name}",
-                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element_name}",
+                        label=f"loc_{element}",
+                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
                     )
 
                 else:

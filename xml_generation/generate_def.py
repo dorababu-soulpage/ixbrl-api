@@ -284,7 +284,7 @@ class DefXMLGenerator:
                                         "parent_tag": definition_link,
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
                                         "xlink_from": f"loc_{axis}",
-                                        "xlink_to": f"loc_{domain}",
+                                        "xlink_to": f"loc_{domain}_1",
                                         "order": order,
                                     }
 

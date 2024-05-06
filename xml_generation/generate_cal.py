@@ -151,6 +151,7 @@ class CalXMLGenerator:
 
                     calculation_parents = []
                     cal_parent_Children = []
+                    element_occurrences = {}
 
                     parent_index = 1
                     for cp_index, (cal_parent, children) in enumerate(
@@ -169,7 +170,7 @@ class CalXMLGenerator:
                             calculation_parent_loc = self.create_calculation_loc_element(
                                 parent_tag=calculation_link,
                                 label=f"loc_{calculation_parent}_{role_index}",
-                                xlink_href=f"{calculation_parent_href}#{calculation_parent}",
+                                xlink_href=f"{calculation_parent_href}#{calculation_parent}_{role_index}",
                             )
                             # loop all cal parent children and create loc, and arc elements
                             children_index = 1
@@ -190,16 +191,26 @@ class CalXMLGenerator:
                                     element_loc = self.create_calculation_loc_element(
                                         parent_tag=calculation_link,
                                         label=element_label,
-                                        xlink_href=f"{element_href}#{element}",
+                                        xlink_href=f"{element_href}#{element_label}",
                                     )
+
+                                    xlink_from = f"{calculation_parent}_{parent_index}"
+
+                                    # calculate xlink from element element occurrence
+                                    if xlink_from not in element_occurrences:
+                                        element_occurrences[xlink_from] = 1
+                                    else:
+                                        element_occurrences[xlink_from] = (
+                                            element_occurrences[xlink_from] + 1
+                                        )
 
                                     # Add calculation arc elements
                                     calculation_arc = self.create_calculation_arc_element(
                                         parent_tag=calculation_link,
-                                        order=str(index),
+                                        order=str(element_occurrences.get(xlink_from)),
                                         weight="1",
                                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
-                                        xlink_from=f"loc_{calculation_parent}_{children_index}",
+                                        xlink_from=f"loc_{xlink_from}",
                                         xlink_to=element_label,
                                     )
                                     calculation_parents.append(calculation_parent)
