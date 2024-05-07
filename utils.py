@@ -1146,3 +1146,30 @@ def get_definitions(file):
             definitions.append({"definition": definition, "role": role})
 
     return definitions
+
+
+def get_custom_element_record(client_id, element):
+    import psycopg2
+
+    db_url = f"postgresql://{username}:{password}@{host}:5432/{db}"
+    try:
+        # Attempt to connect and execute queries
+        connection = psycopg2.connect(db_url)
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM custom_elements WHERE name = %s;", (element,))
+        rows = cursor.fetchall()
+        columns = [column[0] for column in cursor.description]
+        for row in rows:
+            record = dict(zip(columns, row))
+            name = record.get("name")
+            client_id = record.get("clientId")
+            if element == name and client_id == client_id:
+                return record
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

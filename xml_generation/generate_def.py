@@ -4,12 +4,13 @@ import xml.etree.ElementTree as ET
 
 
 class DefXMLGenerator:
-    def __init__(self, data, ticker, filing_date, company_website):
+    def __init__(self, data, ticker, filing_date, company_website, client_id):
         # Initialize the DefXMLGenerator with provided data and metadata
         self.data = data
         self.ticker = ticker
         self.filing_date = filing_date
         self.company_website = company_website
+        self.client_id = client_id
         self.grouped_data = self.group_data_by_role()
 
     def group_data_by_role(self):

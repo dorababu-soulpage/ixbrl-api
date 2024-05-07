@@ -5,12 +5,13 @@ from xml_generation.labels import labels_dict
 
 
 class CalXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website):
+    def __init__(self, data, filing_date, ticker, company_website, client_id):
         # Initialize the CalXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
         self.ticker = ticker
         self.company_website = company_website
+        self.client_id = client_id
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
 
     def get_preferred_label(self, label: str):

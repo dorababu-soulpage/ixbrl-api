@@ -3,15 +3,17 @@ from itertools import groupby
 import xml.etree.ElementTree as ET
 from utils import get_taxonomy_values
 from xml_generation.labels import labels_dict
+from utils import get_custom_element_record
 
 
 class LabXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website):
+    def __init__(self, data, filing_date, ticker, company_website, client_id):
         # Initialize the LabXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
         self.ticker = ticker
         self.company_website = company_website
+        self.client_id = client_id
         self.element_data = []
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
@@ -235,7 +237,11 @@ class LabXMLGenerator:
             label_created = False
             for index, label_type in enumerate(label_types, start=1):
                 if element.startswith(self.ticker):
-                    label_text = element
+                    _, name = element.split("_")
+                    custom_element_data = get_custom_element_record(
+                        self.client_id, name
+                    )
+                    label_text = custom_element_data.get("label", "")
                 else:
                     _, name = element.split("_")
                     element_value: dict = get_taxonomy_values(name)
@@ -259,7 +265,7 @@ class LabXMLGenerator:
                     # create terseLabel
                     self.create_label_element(
                         parent_tag=label_link,
-                        id=f"lab_{element}_{index}_label_en-US",
+                        id=f"lab_{element}_{index}_{label_type}_en-US",
                         xlink_label=element,
                         xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
                         label_text=label_text,
