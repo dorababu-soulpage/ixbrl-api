@@ -76,11 +76,11 @@ class HtmlTagParser:
             formatted_data = self.get_formatted_data(tag_id)
             formatted_data["RoleName"] = tag.get("role")
             formatted_data["PreferredLabel"] = tag.get("label")
-            root_level_abstract: str = formatted_data.get("RootLevelAbstract")
-            if root_level_abstract:
-                _, name = root_level_abstract.split("--")
-                element_value: dict = get_taxonomy_values(name)
-                formatted_data["LabelText"] = element_value.get("label", "")
+            # root_level_abstract: str = formatted_data.get("RootLevelAbstract")
+            # if root_level_abstract:
+            # _, name = root_level_abstract.split("--")
+            # element_value: dict = get_taxonomy_values(name)
+            # formatted_data["LabelText"] = element_value.get("label", "")
             formatted_tags.append(formatted_data)
         return formatted_tags
 

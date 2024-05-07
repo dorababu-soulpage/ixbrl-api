@@ -12,17 +12,7 @@ class LabXMLGenerator:
         self.filing_date = filing_date
         self.ticker = ticker
         self.company_website = company_website
-        self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
-
-    def get_preferred_label(self, label: str):
-        for key, value in labels_dict.items():
-            if key.replace(" ", "").lower() == label.replace(" ", "").lower():
-                return value
-
-    def group_data_by_role(self):
-        # Group the data by RoleName using itertools groupby and store it in grouped_data.
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            self.grouped_data[key] = list(group)
+        self.element_data = []
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         return ET.SubElement(
@@ -124,25 +114,71 @@ class LabXMLGenerator:
 
         return role_ref_elements
 
-    def update_element_types(self, elements_types, record, key, value):
-        if value:
-            if key == "Element":
-                elements_types.setdefault(value, []).append(
-                    record.get("PreferredLabelType", "")
-                )
-            elif key in ["PreElementParent", "RootLevelAbstract"]:
-                elements_types.setdefault(value, []).append("label")
-            elif key in ["Axis_Member", "Table", "LineItem"]:
-                elements = [v.replace("--", "_") for v in value.split("__")]
-                for element in elements:
-                    elements_types.setdefault(element, []).append("label")
+    def get_preferred_label(self, element: str):
+        label_text = None
+        if element.startswith("custom"):
+            label_text = element
+        else:
+            _, name = element.split("--")
+            element_value: dict = get_taxonomy_values(name)
+            if element_value:
+                label_text = element_value.get("label", "")
+
+        return label_text
+
+    def find_element(self, element_data, element_name):
+        for item in element_data:
+            if item["element"] == element_name:
+                return item
+        return None
+
+    def update_element_data(self, element, label_type, preferred_label=None):
+        element_record = self.find_element(self.element_data, element)
+        if not element_record:
+            element_dict = {
+                "element": element,
+                "label_types": [label_type],
+                "main_element": True,
+                "preferred_label": (
+                    preferred_label
+                    if preferred_label
+                    else self.get_preferred_label(element)
+                ),
+            }
+            self.element_data.append(element_dict)
+        else:
+            label_types: list = element_record.get("label_types")
+            if label_type not in label_types:
+                label_types.append(label_type)
 
     def get_element_and_types(self):
-        elements_types = {}
         for record in self.data:
             for key, value in record.items():
-                self.update_element_types(elements_types, record, key, value)
-        return elements_types
+                if key == "Element":
+                    element = record.get("Element", "")
+                    preferred_label = record.get("PreferredLabel", "")
+                    if element:
+                        self.update_element_data(
+                            element,
+                            record.get("PreferredLabelType", ""),
+                            preferred_label,
+                        )
+
+                elif key in [
+                    "PreElementParent",
+                    "RootLevelAbstract",
+                    "Axis_Member",
+                    "Table",
+                    "LineItem",
+                ]:
+                    item = record.get(key, "")
+                    if item:
+                        items = item.split("__")
+                        for item in items:
+                            # item = item.replace("--", "_")
+                            self.update_element_data(item, "label")
+
+        return self.element_data
 
     def generate_lab_xml(self):
         linkbase_element = ET.Element(
@@ -154,9 +190,6 @@ class LabXMLGenerator:
                 "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
             },
         )
-
-        # Group data by RoleName.
-        self.group_data_by_role()
 
         # add role ref elements
         role_ref_elements = self.add_role_ref_elements(parent=linkbase_element)
@@ -172,9 +205,9 @@ class LabXMLGenerator:
             },
         )
         main_elements_data = self.get_element_and_types()
-
-        for main_element, label_types in main_elements_data.items():
-            element: str = main_element.replace("--", "_")
+        for main_element in main_elements_data:
+            element: str = main_element.get("element")
+            element: str = element.replace("--", "_")
             if element.startswith("custom"):
                 element = element.replace("custom", self.ticker)
 
@@ -198,24 +231,39 @@ class LabXMLGenerator:
             # Create presentationArc element and append it to presentation_links list.
             label_arc = self.create_label_arc_element(**arc_args)
 
-            for index, label_type in enumerate(set(label_types), start=1):
+            label_types: list = main_element.get("label_types")
+            label_created = False
+            for index, label_type in enumerate(label_types, start=1):
                 if element.startswith(self.ticker):
                     label_text = element
-
                 else:
                     _, name = element.split("_")
                     element_value: dict = get_taxonomy_values(name)
                     if element_value:
-                        label_text = element_value.get("label", "")
+                        label_text = main_element.get("preferred_label", "")
 
-                # create terseLabel
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{element}_{index}_label_en-US",
-                    xlink_label=element,
-                    xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
-                    label_text=label_text,
-                )
+                if label_created is False:
+                    # create label
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_{element}_1_label_en-US",
+                        xlink_label=element,
+                        xlink_role=f"http://www.xbrl.org/2003/role/label",
+                        label_text=label_text,
+                    )
+                    label_created = True
+
+                # create remaining lables
+                if label_type and label_type != "label":
+
+                    # create terseLabel
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_{element}_{index}_label_en-US",
+                        xlink_label=element,
+                        xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
+                        label_text=label_text,
+                    )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'

@@ -79,7 +79,7 @@
     "Axis_Member": "us-gaap--StatementClassOfStockAxis__us-gaap--ClassOfStockDomain__us-gaap--CommonClassAMember",
     "PreferredLabelType": "label",
     "Table": "us-gaap--StatementTable",
-    "LineItem": "us-gaap--StatementLineitem",
+    "LineItem": "us-gaap--StatementLineItems",
     "RootLevelAbstract": "dei--CoverAbstract",
     "RoleType": "document",
     "UniqueId": "bymWo00goZ76jcCU",
