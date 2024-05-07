@@ -29,7 +29,7 @@ class PreXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": f"http://{role_uri}",
+                "roleURI": role_uri,
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -380,11 +380,15 @@ class PreXMLGenerator:
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
                 role_name_without_spaces = re.sub(r"\s+", "", role_name)
+                role = role_name_without_spaces.replace("(", "").replace(")", "")
                 # Create roleRef element and append it to role_ref_elements list.
+                role_uri = (
+                    f"http://{self.company_website}/{self.filing_date}/role/{role}"
+                )
                 role_ref_element = self.create_role_ref_element(
                     linkbase_element,
-                    role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name_without_spaces}",
-                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name_without_spaces}",
+                    role_uri=role_uri,
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role}",
                 )
 
                 _line_item: str = record.get("LineItem")
@@ -397,7 +401,7 @@ class PreXMLGenerator:
                     linkbase_element,
                     "link:presentationLink",
                     attrib={
-                        "xlink:role": f"http://{self.company_website}/role/{role_name_without_spaces}",
+                        "xlink:role": role_uri,
                         "xlink:type": "extended",
                     },
                 )

@@ -37,7 +37,7 @@ class CalXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": f"http://{role_uri}",
+                "roleURI": role_uri,
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -130,9 +130,10 @@ class CalXMLGenerator:
                     role_without_spaces = re.sub(r"\s+", "", role_name)
 
                     # Create roleRef element and append it to role_ref_elements list.
+                    role_uri = f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}"
                     role_ref_element = self.create_role_ref_element(
                         parent=linkbase_element,
-                        role_uri=f"{self.company_website}/{self.filing_date}/role/{role_without_spaces}",
+                        role_uri=role_uri,
                         xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_without_spaces}",
                     )
                     role_ref_elements.append(role_ref_element)
@@ -141,7 +142,7 @@ class CalXMLGenerator:
                         linkbase_element,
                         "link:calculationLink",
                         attrib={
-                            "xlink:role": f"http://{self.company_website}/role/{role_without_spaces}",
+                            "xlink:role": role_uri,
                             "xlink:type": "extended",
                         },
                     )
@@ -170,7 +171,7 @@ class CalXMLGenerator:
                             calculation_parent_loc = self.create_calculation_loc_element(
                                 parent_tag=calculation_link,
                                 label=f"loc_{calculation_parent}_{role_index}",
-                                xlink_href=f"{calculation_parent_href}#{calculation_parent}_{role_index}",
+                                xlink_href=f"{calculation_parent_href}#{calculation_parent}",
                             )
                             # loop all cal parent children and create loc, and arc elements
                             children_index = 1
@@ -181,17 +182,17 @@ class CalXMLGenerator:
 
                                 if element not in cal_parent_Children:
 
-                                    if element in calculation_parents:
-                                        element_label = f"loc_{element}_{index+1}"
-                                    else:
-                                        element_label = f"loc_{element}"
+                                    # if element in calculation_parents:
+                                    #     element_label = f"loc_{element}_{index+1}"
+                                    # else:
+                                    #     element_label = f"loc_{element}"
 
                                     # element
                                     element_href = self.get_href_url(element)
                                     element_loc = self.create_calculation_loc_element(
                                         parent_tag=calculation_link,
-                                        label=element_label,
-                                        xlink_href=f"{element_href}#{element_label}",
+                                        label=f"loc_{element}_{index+1}",
+                                        xlink_href=f"{element_href}#{element}",
                                     )
 
                                     xlink_from = f"{calculation_parent}_{parent_index}"
@@ -211,7 +212,7 @@ class CalXMLGenerator:
                                         weight="1",
                                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
                                         xlink_from=f"loc_{xlink_from}",
-                                        xlink_to=element_label,
+                                        xlink_to=f"loc_{element}_{index+1}",
                                     )
                                     calculation_parents.append(calculation_parent)
                                     cal_parent_Children.append(element)

@@ -25,7 +25,7 @@ class DefXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": f"http://{role_uri}",
+                "roleURI": role_uri,
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -158,9 +158,10 @@ class DefXMLGenerator:
             else:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
                 # Create roleRef element and append it to role_ref_elements list.
+                role_uri = f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}"
                 role_ref_element = self.create_role_ref_element(
                     parent=linkbase_element,
-                    role_uri=f"{self.company_website}/{self.filing_date}/role/{role_without_spaces}",
+                    role_uri=role_uri,
                     xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_without_spaces}",
                 )
 
@@ -171,7 +172,7 @@ class DefXMLGenerator:
                     linkbase_element,
                     "link:definitionLink",
                     attrib={
-                        "xlink:role": f"http://{self.company_website}/role/{role_without_spaces}",
+                        "xlink:role": role_uri,
                         "xlink:type": "extended",
                     },
                 )
