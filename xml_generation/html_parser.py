@@ -4,9 +4,6 @@ from utils import get_taxonomy_values
 
 
 class HtmlTagParser:
-    def __init__(self, html_tags):
-        # Initialize the class with a list of HTML tags
-        self.html_tags = html_tags
 
     def extract_field(self, data, prefix):
         # Extract a specific field from the data based on the provided prefix
@@ -68,10 +65,10 @@ class HtmlTagParser:
             "UniqueId": data[-1],
         }
 
-    def process_tags(self):
+    def process_tags(self, html_tags):
         # Process all HTML tags in the list
         formatted_tags = []
-        for tag in self.html_tags:
+        for tag in html_tags:
             tag_id = tag.get("id")
             formatted_data = self.get_formatted_data(tag_id)
             formatted_data["RoleName"] = tag.get("role")
@@ -83,6 +80,10 @@ class HtmlTagParser:
             # formatted_data["LabelText"] = element_value.get("label", "")
             formatted_tags.append(formatted_data)
         return formatted_tags
+
+    def process_tag(self, tag_id):
+        formatted_data = self.get_formatted_data(tag_id)
+        return formatted_data
 
 
 # # Example usage:

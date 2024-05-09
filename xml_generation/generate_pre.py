@@ -101,6 +101,7 @@ class PreXMLGenerator:
 
         # pre parent element
         if root_level_abstract != _pre_element_parent:
+            pre_element_parent = _pre_element_parent
             if pre_element_parent_created is False:
                 pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
                 pre_element_parent_loc = self.create_presentation_loc_element(
@@ -112,7 +113,7 @@ class PreXMLGenerator:
                 # Add definition arc elements
                 definition_arc = self.create_presentation_arc_element(
                     parent_tag=presentation_link,
-                    order=str(index),
+                    order="1",
                     arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
                     xlink_from=f"loc_{line_item}",
                     xlink_to=f"loc_{pre_element_parent}",

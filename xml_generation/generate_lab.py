@@ -121,10 +121,11 @@ class LabXMLGenerator:
         if element.startswith("custom"):
             label_text = element
         else:
-            _, name = element.split("--")
-            element_value: dict = get_taxonomy_values(name)
-            if element_value:
-                label_text = element_value.get("label", "")
+            if "--" in element:
+                _, name = element.split("--")
+                element_value: dict = get_taxonomy_values(name)
+                if element_value:
+                    label_text = element_value.get("label", "")
 
         return label_text
 
@@ -243,10 +244,11 @@ class LabXMLGenerator:
                     )
                     label_text = custom_element_data.get("label", "")
                 else:
-                    _, name = element.split("_")
-                    element_value: dict = get_taxonomy_values(name)
-                    if element_value:
-                        label_text = main_element.get("preferred_label", "")
+                    if "_" in element:
+                        _, name = element.split("_")
+                        element_value: dict = get_taxonomy_values(name)
+                        if element_value:
+                            label_text = main_element.get("preferred_label", "")
 
                 if label_created is False:
                     # create label
