@@ -36,7 +36,7 @@ from utils import (
     generate_xml_comments,
     add_datatype_tags,
     remove_ix_namespaces,
-    add_html_attributes,
+    # add_html_attributes,
     get_definitions,
     get_client_record,
 )

@@ -3,14 +3,7 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-from utils import (
-    get_cik,
-    get_db_record,
-    extract_html_elements,
-    add_datatype_tags,
-    remove_ix_namespaces,
-    add_html_attributes,
-)
+from utils import get_db_record, extract_html_elements, remove_ix_namespaces
 
 from lxml import etree
 from constants import namespace
@@ -29,6 +22,42 @@ class XHTMLGenerator:
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
         # Extract HTML elements from the provided HTML file
         self.html_elements = extract_html_elements(html_file, only_id=True)
+
+    def add_html_attributes(self):
+        # Create a BeautifulSoup object
+        soup = BeautifulSoup("", "html.parser")
+
+        # Create the html tag
+        html_tag = soup.new_tag("html")
+
+        # Add attributes to the html tag
+        html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
+        html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+        html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+        html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
+        html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
+        html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
+        html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+        html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
+        html_tag["xmlns:ixt"] = (
+            "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+        )
+        html_tag["xmlns:ixt-sec"] = (
+            "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+        )
+        html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
+        html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
+        html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
+        html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
+        html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
+        html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
+        html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
+        html_tag["xmlns:fult"] = "http://fult.com/20230516"
+        html_tag["xml:lang"] = "en-US"
+        html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+        html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+
+        return str(html_tag).replace("</html>", "")
 
     def get_period_axis_unique_records(slef, data):
         unique_entries = {}
@@ -207,6 +236,35 @@ class XHTMLGenerator:
                 if record.get("datatype") == data_type:
                     return record
 
+    def find_note_section(self, html_content, start_id, end_id):
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        # Find the first <p> tag with the specified ID
+        first_id_tag = soup.find("p", id=start_id)
+
+        # Find the second <p> tag with the specified ID
+        second_id_tag = soup.find("p", id=end_id)
+
+        output_html = ""
+
+        if first_id_tag and second_id_tag:
+            # Find all tags between the first and second IDs
+            current_tag = first_id_tag.find_next_sibling()
+
+            while current_tag and current_tag != second_id_tag:
+                output_html += str(current_tag)
+                current_tag = current_tag.find_next_sibling()
+
+            # Include the IDs in the output HTML string
+            output_html = str(first_id_tag) + output_html + str(second_id_tag)
+
+            # Convert the concatenated HTML string back to BeautifulSoup for further processing if needed
+            output_soup = BeautifulSoup(output_html, "html.parser")
+
+            # Print the HTML string
+            note_section = output_soup.prettify()
+            return note_section
+
     def get_context_id(self, data):
         context_id = None
         # Extract Period and Axis_Member data from the input dictionary
@@ -329,6 +387,29 @@ class XHTMLGenerator:
             # Update the output file with the new soup data
             with open(self.output_file, "w", encoding="utf-8") as f:
                 f.write(str(soup))
+
+    def ixt_continuation(self):
+        # Parse HTML content to BeautifulSoup object and add datatype tags
+        with open(self.output_file, "r", encoding="utf-8") as f:
+            html_content = f.read()
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+            tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+
+            start_tag_ids = []
+            end_tag_ids = []
+            for tag in tags:
+                tag_id: str = tag.get("id", "")
+                # notes start section
+                if tag_id.startswith("apex_80"):
+                    start_tag_ids.append(tag_id)
+                # notes end section
+                if tag_id.startswith("apex_81"):
+                    end_tag_ids.append(tag_id)
+
+            for start_id, end_id in zip(start_tag_ids, end_tag_ids):
+                note_section = self.find_note_section(html_content, start_id, end_id)
 
     def generate_ix_header(self):
         record = get_db_record(file_id=self.file_id)
@@ -468,6 +549,7 @@ class XHTMLGenerator:
 
             self.save_html_file(prettified_html)
             self.generate_datatypes_tags()
+            self.ixt_continuation()
 
             # # Process the output file to remove namespaces and add/modify HTML attributes
             # with open(self.output_file, "r", encoding="utf-8") as f:
