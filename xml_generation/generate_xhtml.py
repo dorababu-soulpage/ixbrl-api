@@ -466,7 +466,6 @@ class XHTMLGenerator:
             data = parser.process_tag(tag_id)
             is_footnote: list = data.get("have_footnote")
             if is_footnote:
-                print(is_footnote)
                 from_ref = is_footnote[0]
                 to_ref = footnote_id_dict.get(from_ref)
                 self.add_footnote_ix_header(soup, from_ref, to_ref)
