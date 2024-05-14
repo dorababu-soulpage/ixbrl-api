@@ -324,69 +324,70 @@ class XHTMLGenerator:
 
         return datatypes_dict.get(element, "dei:submissionTypeItemType")
 
-    def generate_datatypes_tags(self):
-        # Parse HTML content to BeautifulSoup object and add datatype tags
-        with open(self.output_file, "r", encoding="utf-8") as f:
-            html_content = f.read()
-            soup = BeautifulSoup(html_content, "html.parser")
+    def create_datatype_tag(self, soup, data):
+        # data_type = data.get("DataType")
+        data_type = self.get_datatype(data.get("Element"))
+        data_type_record = self.get_datatype_data(data_type)
 
-            # Find all tags with attributes that start with "id" and have a value starting with "apex_"
-            tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+        datatype_element = data_type_record.get("element", "")
+        datatype_attributes = data_type_record.get("attributes", "")
+        # Create new nonNumeric or Numeric tag
+        non_numeric_tag = soup.new_tag(datatype_element)
 
-            parser = HtmlTagParser()
-            for tag in tags:
-                tag_id = tag.get("id", "")
-                data = parser.process_tag(tag_id)
+        for attribute in datatype_attributes:
+            if attribute == "contextRef":
+                context_id = self.get_context_id(data)
+                non_numeric_tag["contextRef"] = context_id
 
-                # data_type = data.get("DataType")
-                data_type = self.get_datatype(data.get("Element"))
+            if attribute == "unitRef":
+                unit: str = data.get("Unit", "")
+                non_numeric_tag["unitRef"] = unit
 
-                data_type_record = self.get_datatype_data(data_type)
-                datatype_element = data_type_record.get("element", "")
-                datatype_attributes = data_type_record.get("attributes", "")
+            if attribute == "name":
+                element: str = data.get("Element", "")
+                non_numeric_tag["name"] = element.replace("--", ":")
 
-                # Create new nonNumeric or Numeric tag
-                non_numeric_tag = soup.new_tag(datatype_element)
+            if attribute == "decimals":
+                precision: str = data.get("Precision", "")
+                non_numeric_tag["decimals"] = precision
 
-                for attribute in datatype_attributes:
-                    if attribute == "contextRef":
-                        context_id = self.get_context_id(data)
-                        non_numeric_tag["contextRef"] = context_id
+            if attribute == "scale":
+                counted_as: str = data.get("CountedAs", "")
+                non_numeric_tag["scale"] = counted_as
 
-                    if attribute == "unitRef":
-                        unit: str = data.get("Unit", "")
-                        non_numeric_tag["unitRef"] = unit
+            if attribute == "format":
+                non_numeric_tag["format"] = ""
 
-                    if attribute == "name":
-                        element: str = data.get("Element", "")
-                        non_numeric_tag["name"] = element.replace("--", ":")
+            if attribute == "id":
+                is_footnote = data.get("have_footnote")
+                if is_footnote:
+                    uniq_id = is_footnote[0]
+                else:
+                    uniq_id = data.get("UniqueId", "")
+                non_numeric_tag["id"] = uniq_id
 
-                    if attribute == "decimals":
-                        precision: str = data.get("Precision", "")
-                        non_numeric_tag["decimals"] = precision
+        return non_numeric_tag
 
-                    if attribute == "scale":
-                        counted_as: str = data.get("CountedAs", "")
-                        non_numeric_tag["scale"] = counted_as
+    def generate_datatypes_tags(self, soup):
 
-                    if attribute == "format":
-                        non_numeric_tag["format"] = ""
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
 
-                    if attribute == "id":
-                        uniq_id = data.get("UniqueId", "")
-                        non_numeric_tag["id"] = uniq_id
+        parser = HtmlTagParser()
+        for tag in tags:
+            tag_id = tag.get("id", "")
+            data = parser.process_tag(tag_id)
 
-                non_numeric_tag.string = tag.text
+            # create new Numeric or nonNumeric tag
+            datatype_tag = self.create_datatype_tag(soup, data)
 
-                # Replace original font tag with new Numeric or nonNumeric tag
-                font_tag = soup.find("font", id=tag_id)
+            # Replace original font tag with new Numeric or nonNumeric tag
+            font_tag = soup.find("font", id=tag_id)
 
-                if font_tag:
-                    font_tag.replace_with(non_numeric_tag)
+            if font_tag:
+                font_tag.replace_with(datatype_tag)
 
-            # Update the output file with the new soup data
-            with open(self.output_file, "w", encoding="utf-8") as f:
-                f.write(str(soup))
+        return soup
 
     def ixt_continuation(self):
         # Parse HTML content to BeautifulSoup object and add datatype tags
@@ -410,6 +411,67 @@ class XHTMLGenerator:
 
             for start_id, end_id in zip(start_tag_ids, end_tag_ids):
                 note_section = self.find_note_section(html_content, start_id, end_id)
+
+    def add_footnote_ix_header(self, soup: BeautifulSoup, from_ref, to_ref):
+        # Find the ix:resources element
+        resources = soup.find("ix:resources")
+
+        # Define the relationships
+        relationship = soup.new_tag("ix:relationship", fromRefs=from_ref, toRefs=to_ref)
+
+        # Find the last xbrli:unit element if it exists
+        last_unit = (
+            resources.find_all("xbrli:unit")[-1]
+            if resources.find_all("xbrli:unit")
+            else None
+        )
+
+        # Insert relationships after the last xbrli:unit element if it exists, otherwise append to resources
+        if last_unit:
+            if relationship not in resources:
+                last_unit.insert_after(relationship)
+        else:
+            if relationship not in resources:
+                resources.append(relationship)
+
+    def foot_notes(self, soup: BeautifulSoup):
+
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+
+        foot_note_tag_ids: list = []
+        footnote_id_dict: dict = {}
+        # Find all foot note tags and crated ix:footnote tag for that"
+        for index, tag in enumerate(tags, start=100):
+            parser = HtmlTagParser()
+            tag_id: str = tag.get("id", "")
+            # notes start section
+            if tag_id.startswith("apex_F0"):
+                foot_note_tag_ids.append(tag_id)
+                # Create new footnote tag
+                footnote_id = f"Footnote{index}"
+                ix_footnote_tag = soup.new_tag("ix:footnote")
+                ix_footnote_tag["id"] = footnote_id
+                ix_footnote_tag["xml:lang"] = "en-US"
+
+                ix_footnote_tag.string = tag.text
+                tag.replace_with(ix_footnote_tag)
+
+                splitted = tag_id.split("_")
+                footnote_id_dict[splitted[-1]] = footnote_id
+
+        # add footnotes relationship to ix header
+        for tag in tags:
+            tag_id: str = tag.get("id", "")
+            data = parser.process_tag(tag_id)
+            is_footnote: list = data.get("have_footnote")
+            if is_footnote:
+                print(is_footnote)
+                from_ref = is_footnote[0]
+                to_ref = footnote_id_dict.get(from_ref)
+                self.add_footnote_ix_header(soup, from_ref, to_ref)
+
+        return soup
 
     def generate_ix_header(self):
         record = get_db_record(file_id=self.file_id)
@@ -548,32 +610,38 @@ class XHTMLGenerator:
             prettified_html = soup.prettify("ascii", formatter="html")
 
             self.save_html_file(prettified_html)
-            self.generate_datatypes_tags()
+            # update the footnote to soup object
+            soup = self.foot_notes(soup)
+            soup = self.generate_datatypes_tags(soup)
             self.ixt_continuation()
 
-            # # Process the output file to remove namespaces and add/modify HTML attributes
-            # with open(self.output_file, "r", encoding="utf-8") as f:
-            #     html_content = f.read()
-            #     # Remove XBRL namespaces from the HTML content
-            #     html_content = remove_ix_namespaces(html_content)
+            # Update the output file with the new soup data
+            with open(self.output_file, "w", encoding="utf-8") as f:
+                f.write(str(soup))
 
-            #     # Add or modify HTML attributes
-            #     html_attributes = add_html_attributes()
-            #     print(html_attributes)
+        # # Process the output file to remove namespaces and add/modify HTML attributes
+        # with open(self.output_file, "r", encoding="utf-8") as f:
+        #     html_content = f.read()
+        #     # Remove XBRL namespaces from the HTML content
+        #     html_content = remove_ix_namespaces(html_content)
 
-            #     # Replace font tags with span tags and append HTML attributes
-            #     html_content = (
-            #         html_content.replace("&nbsp;", "&#160;")
-            #         .replace("&rsquo;", "&#180;")
-            #         .replace("&sect;", "&#167;")
-            #         .replace("&ndash;", "&#8211;")
-            #         .replace("&ldquo;", "&#8220;")
-            #         .replace("&rdquo;", "&#8221;")
-            #         .replace("<font", "<span>")
-            #         .replace("</font>", "</span>")
-            #         .replace("<html>", html_attributes)
-            #     )
+        #     # Add or modify HTML attributes
+        #     html_attributes = add_html_attributes()
+        #     print(html_attributes)
 
-            #     # Write the modified HTML content back to the output file
-            #     with open(self.output_file, "w", encoding="utf-8") as output_file:
-            #         output_file.write(html_content)
+        #     # Replace font tags with span tags and append HTML attributes
+        #     html_content = (
+        #         html_content.replace("&nbsp;", "&#160;")
+        #         .replace("&rsquo;", "&#180;")
+        #         .replace("&sect;", "&#167;")
+        #         .replace("&ndash;", "&#8211;")
+        #         .replace("&ldquo;", "&#8220;")
+        #         .replace("&rdquo;", "&#8221;")
+        #         .replace("<font", "<span>")
+        #         .replace("</font>", "</span>")
+        #         .replace("<html>", html_attributes)
+        #     )
+
+        #     # Write the modified HTML content back to the output file
+        #     with open(self.output_file, "w", encoding="utf-8") as output_file:
+        #         output_file.write(html_content)

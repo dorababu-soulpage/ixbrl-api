@@ -1,6 +1,7 @@
 import re
 import json
-from utils import get_taxonomy_values
+
+# from utils import get_taxonomy_values
 
 
 class HtmlTagParser:
@@ -42,6 +43,13 @@ class HtmlTagParser:
                 return cal_parent
         return ""
 
+    def check_foot_note(self, data):
+        footnotes_list: list = []
+        for item in data[1:-1]:
+            if item.startswith("f"):
+                footnotes_list.append(item.lstrip("f"))
+        return footnotes_list
+
     def get_formatted_data(self, html_tag):
         # Process a single HTML tag and return formatted data
         data = re.findall(r"[^_]+(?:__[^_]+)*|__", html_tag)
@@ -62,6 +70,7 @@ class HtmlTagParser:
             "LineItem": self.extract_field(data, "l"),
             "RootLevelAbstract": self.extract_field(data, "a"),
             "RoleType": self.extract_field(data, "r"),
+            "have_footnote": self.check_foot_note(data),
             "UniqueId": data[-1],
         }
 
@@ -93,11 +102,13 @@ class HtmlTagParser:
 #     # Add more HTML tags here
 # ]
 
+# html_tag = "apex_90C_eus-gaap--Cash_bdebit_dxbrli:monetaryItemType_uUSD_pn3n3_ylabel_c20230630_hsrt--RestatementAxis__srt--RestatementDomain__srt--ScenarioPreviouslyReportedMember_ma9xEtShfjXOnQUa2J__us-gaap--AssetsCurrent"
+
 # # Create an instance of HtmlTagParser
-# parser = HtmlTagParser(html_tags_list)
+# parser = HtmlTagParser()
 
 # # Get the formatted data for all tags
-# formatted_tags = parser.process_tags()
+# formatted_tags = parser.process_tag(html_tag)
 
 # # Print the formatted data
 # print(json.dumps(formatted_tags, indent=4))
