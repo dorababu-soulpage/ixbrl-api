@@ -446,26 +446,26 @@ def generate_xml_schema_files():
     with open("data.json", "r") as file:
         data = json.load(file)
 
-    # args = data, ticker, filing_date, company_website, client_id
-    # # Initialize XMLGenerators and generate the pre.xml file.
-    # xsd_generator = XSDGenerator(*args)
-    # xsd_generator.generate_xsd_schema()
+    args = data, ticker, filing_date, company_website, client_id
+    # Initialize XMLGenerators and generate the pre.xml file.
+    xsd_generator = XSDGenerator(*args)
+    xsd_generator.generate_xsd_schema()
 
-    # args = data, filing_date, ticker, company_website, client_id
-    # pre_generator = PreXMLGenerator(*args)
-    # pre_generator.generate_pre_xml()
+    args = data, filing_date, ticker, company_website, client_id
+    pre_generator = PreXMLGenerator(*args)
+    pre_generator.generate_pre_xml()
 
-    # args = data, ticker, filing_date, company_website, client_id
-    # def_generator = DefXMLGenerator(*args)
-    # def_generator.generate_def_xml()
+    args = data, ticker, filing_date, company_website, client_id
+    def_generator = DefXMLGenerator(*args)
+    def_generator.generate_def_xml()
 
-    # args = data, filing_date, ticker, company_website, client_id
-    # cal_generator = CalXMLGenerator(*args)
-    # cal_generator.generate_cal_xml()
+    args = data, filing_date, ticker, company_website, client_id
+    cal_generator = CalXMLGenerator(*args)
+    cal_generator.generate_cal_xml()
 
-    # args = data, filing_date, ticker, company_website, client_id
-    # lab_generator = LabXMLGenerator(*args)
-    # lab_generator.generate_lab_xml()
+    args = data, filing_date, ticker, company_website, client_id
+    lab_generator = LabXMLGenerator(*args)
+    lab_generator.generate_lab_xml()
 
     # generate xHTML file
     xhtml_generator = XHTMLGenerator(data, filing_date, ticker, cik, file_id, html_file)
