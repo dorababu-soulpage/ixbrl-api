@@ -215,20 +215,39 @@ class XHTMLGenerator:
                 measure_denominator = etree.SubElement(unitDenominator, "measure")
                 measure_denominator.text = name
 
-    def save_html_file(self, prettified_html):
+    def save_html_file(self, soup):
+        # Update the output file with the new soup data
         with open(self.output_file, "wb") as out_file:
+            html_content: str = soup.prettify()
+            html_content = html_content.replace(
+                "<continuation />", "</ix:continuation >"
+            )
+            html_content = html_content.replace(" <continuation", " <ix:continuation")
+            html_content = html_content.replace("/>", ">")
+            html_content = html_content.replace(
+                "<ix:continuation>", "</ix:continuation>"
+            )
+            # add HTML attributes in the html
+            html_attributes = self.add_html_attributes()
+            html_content = html_content.replace("<html>", html_attributes)
+
             # Write XML declaration to the output file
             xml_declaration = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->
-            <!-- Creation Date : -->
-            <!-- Copyright (c) Apex CoVantage All Rights Reserved. -->
-            \n"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->
+                <!-- Creation Date : -->
+                <!-- Copyright (c) Apex CoVantage All Rights Reserved. -->
+                \n"""
+
+            # Encode XML declaration to bytes and write to file
             xml_declaration_bytes = xml_declaration.encode("utf-8")
             out_file.write(xml_declaration_bytes)
 
+            # Encode prettified HTML content to bytes and write to file
+            html_content_bytes = html_content.encode("utf-8")
+
             # Write prettified HTML content to the output file
-            out_file.write(prettified_html)
+            out_file.write(html_content_bytes)
 
     def get_datatype_data(self, data_type):
         with open("assets/elements.json", "r") as json_file:
@@ -348,6 +367,22 @@ class XHTMLGenerator:
 
         return datatypes_dict.get(element, "dei:submissionTypeItemType")
 
+    def get_format_value(self, data_type, input_text):
+
+        with open("assets/format.json", "r") as json_file:
+            data = json.load(json_file)
+            for record in data:
+                if (
+                    record.get("Datatype 1") == data_type
+                    or record.get("Datatype 2") == data_type
+                    or record.get("Datatype 3") == data_type
+                    or record.get("Datatype 4") == data_type
+                ):
+                    formate_value = record.get("Format Code", "")
+                    return formate_value
+            else:
+                return ""
+
     def create_datatype_tag(self, soup, data, tag):
         # data_type = data.get("DataType")
         data_type = self.get_datatype(data.get("Element"))
@@ -380,7 +415,9 @@ class XHTMLGenerator:
                 non_numeric_tag["scale"] = counted_as
 
             if attribute == "format":
-                non_numeric_tag["format"] = ""
+                data_type = self.get_datatype(data.get("Element"))
+                format_value = self.get_format_value(data_type, tag.text)
+                non_numeric_tag["format"] = format_value
 
             if attribute == "id":
                 is_footnote = data.get("have_footnote")
@@ -629,30 +666,13 @@ class XHTMLGenerator:
             except Exception as e:
                 print("Body Element Not found")
 
-            # Prettify the HTML content and write it to the output file
-            prettified_html = soup.prettify("ascii", formatter="html")
-
-            self.save_html_file(prettified_html)
             # update the footnote to soup object
             soup = self.foot_notes(soup)
             soup = self.generate_datatypes_tags(soup)
             soup = self.ixt_continuation(soup)
 
-            # Update the output file with the new soup data
-            with open(self.output_file, "w", encoding="utf-8") as f:
-                html_content = soup.prettify()
-                html_content = html_content.replace(
-                    "<continuation />", "</ix:continuation >"
-                )
-                html_content = html_content.replace(
-                    " <continuation", " <ix:continuation"
-                )
-                html_content = html_content.replace("/>", ">")
-                html_content = html_content.replace(
-                    "<ix:continuation>", "</ix:continuation>"
-                )
-
-                f.write(html_content)
+            # finally save the html file
+            self.save_html_file(soup)
 
         # # Process the output file to remove namespaces and add/modify HTML attributes
         # with open(self.output_file, "r", encoding="utf-8") as f:
