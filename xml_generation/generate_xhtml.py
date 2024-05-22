@@ -303,8 +303,17 @@ class XHTMLGenerator:
         parser = HtmlTagParser()
         data = parser.process_tag(start_id)
         # create new Numeric or nonNumeric tag
-        datatype_tag = self.create_datatype_tag(soup, data, first_id_tag)
+        datatype_tag = self.create_datatype_tag(
+            soup, data, first_id_tag, note_section=True
+        )
+        if first_id_tag.find_all():
+            # Add all contents from the specific <p> tag to the new tag
+            for inner_tag in first_id_tag.find_all():
+                datatype_tag.append(inner_tag)
         datatype_tag["id"] = f"f-{random_number}"
+        style = first_id_tag.get("style")
+        datatype_tag["id"] = f"f-{random_number}"
+        datatype_tag["style"] = style
         first_id_tag.replace_with(datatype_tag)
         return soup
 
@@ -383,7 +392,7 @@ class XHTMLGenerator:
             else:
                 return ""
 
-    def create_datatype_tag(self, soup, data, tag):
+    def create_datatype_tag(self, soup, data, tag, note_section=None):
         # data_type = data.get("DataType")
         data_type = self.get_datatype(data.get("Element"))
         data_type_record = self.get_datatype_data(data_type)
@@ -427,9 +436,11 @@ class XHTMLGenerator:
                     uniq_id = data.get("UniqueId", "")
                 non_numeric_tag["id"] = uniq_id
 
-        non_numeric_tag.string = tag.text
-
-        return non_numeric_tag
+        if note_section:
+            return non_numeric_tag
+        else:
+            non_numeric_tag.string = tag.text
+            return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
 

@@ -34,6 +34,13 @@ class HtmlTagParser:
                 result["P"] = item[1:]
                 result["Precision"] = item[1] if item[1] in ["d", "i"] else item[1:3]
                 result["CountedAs"] = item.replace("p" + result["Precision"], "", 1)
+
+        precision: str = result.get("Precision")
+        counted_as: str = result.get("CountedAs")
+
+        result["Precision"] = precision.replace("n", "-")
+        result["CountedAs"] = counted_as.replace("n", "-")
+
         return result.get(prefix).lstrip("d")
 
     def get_calculation_parent(self, data):
@@ -70,6 +77,8 @@ class HtmlTagParser:
             "LineItem": self.extract_field(data, "l"),
             "RootLevelAbstract": self.extract_field(data, "a"),
             "RoleType": self.extract_field(data, "r"),
+            "DataType": self.extract_field(data, "d"),
+            "Balance": self.extract_field(data, "b"),
             "have_footnote": self.check_foot_note(data),
             "UniqueId": data[-1],
         }
