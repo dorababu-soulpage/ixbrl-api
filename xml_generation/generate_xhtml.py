@@ -1,4 +1,4 @@
-import json
+import json, os
 import random
 import requests
 from datetime import datetime
@@ -19,7 +19,7 @@ class XHTMLGenerator:
         self.ticker = ticker
         self.file_id = file_id
         self.html_file = html_file
-        self.output_file = f"{ticker}-{filing_date}.htm"  # Output file name
+        self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
         # Extract HTML elements from the provided HTML file
         self.html_elements = extract_html_elements(html_file, only_id=True)
@@ -216,6 +216,13 @@ class XHTMLGenerator:
                 measure_denominator.text = name
 
     def save_html_file(self, soup):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Update the output file with the new soup data
         with open(self.output_file, "wb") as out_file:
             html_content: str = soup.prettify()

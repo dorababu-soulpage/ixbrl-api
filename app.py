@@ -471,7 +471,29 @@ def generate_xml_schema_files():
     xhtml_generator = XHTMLGenerator(data, filing_date, ticker, cik, file_id, html_file)
     xhtml_generator.generate_xhtml_file()
 
-    return {"messages": "XML Files generated successfully."}
+    file_path = f"data/{ticker}-{filing_date}"
+
+    # crate zip
+    shutil.make_archive(file_path, "zip", file_path)
+
+    # Upload the zip file to S3
+    zip_file_path = f"{file_path}.zip"
+
+    # Parse the URL
+    parsed_url = urlparse(zip_file_path)
+
+    # Extract the path component and create a Path object
+    path = Path(parsed_url.path)
+
+    # Get the filename
+    filename = path.name
+    s3_url = upload_zip_to_s3(filename, zip_file_path)
+
+    # Remove the file, zip directory
+    # shutil.rmtree(file)
+    os.remove(zip_file_path)
+
+    return {"messages": "XML Files generated successfully.", "url": s3_url}
 
 
 if __name__ == "__main__":

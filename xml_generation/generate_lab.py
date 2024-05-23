@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 from itertools import groupby
 import xml.etree.ElementTree as ET
@@ -14,6 +15,7 @@ class LabXMLGenerator:
         self.ticker = ticker
         self.company_website = company_website
         self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_lab.xml"
         self.element_data = []
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
@@ -291,9 +293,15 @@ class LabXMLGenerator:
         self.save_xml_data(xml_data)
 
     def save_xml_data(self, xml_data):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Save the XML data into the pre.xml file.
-        filename = f"{self.ticker}-{self.filing_date}_lab.xml"
-        with open(filename, "w", encoding="utf-8") as file:
+        with open(self.output_file, "w", encoding="utf-8") as file:
             file.write(xml_data)
 
 

@@ -1,4 +1,4 @@
-import re
+import re, os
 from itertools import groupby
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
@@ -12,6 +12,7 @@ class PreXMLGenerator:
         self.ticker = ticker
         self.company_website = company_website
         self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_pre.xml"
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
 
     def get_preferred_label(self, label: str):
@@ -455,9 +456,15 @@ class PreXMLGenerator:
         self.save_xml_data(xml_data)
 
     def save_xml_data(self, xml_data):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Save the XML data into the pre.xml file.
-        filename = f"{self.ticker}-{self.filing_date}_pre.xml"
-        with open(filename, "w", encoding="utf-8") as file:
+        with open(self.output_file, "w", encoding="utf-8") as file:
             file.write(xml_data)
 
 
