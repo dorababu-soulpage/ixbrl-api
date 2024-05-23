@@ -605,6 +605,28 @@ def get_db_record(file_id):
             connection.close()
 
 
+def get_split_file_record(file_id):
+    import psycopg2
+
+    db_url = f"postgresql://{username}:{password}@{host}:5432/{db}"
+    try:
+        # Attempt to connect and execute queries
+        connection = psycopg2.connect(db_url)
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM splitfiles where id={file_id}")
+        row = cursor.fetchone()
+        columns = [column[0] for column in cursor.description]
+        return dict(zip(columns, row))
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 def get_client_record(client_id):
     import psycopg2
 

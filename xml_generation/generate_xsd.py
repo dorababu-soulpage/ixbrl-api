@@ -1,4 +1,4 @@
-import re
+import re, os
 from itertools import groupby
 import xml.etree.ElementTree as ET
 from utils import get_custom_element_record
@@ -12,6 +12,7 @@ class XSDGenerator:
         self.filing_date = filing_date
         self.company_website = company_website
         self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}.xsd"
         # self.definitions = definitions
         self.grouped_data = self.group_data_by_role()
 
@@ -305,9 +306,16 @@ class XSDGenerator:
     def save_xml_data(self, xml_data):
         # Serialize only the root element and its children
         xml_data += ET.tostring(self.root, encoding="US-ASCII").decode("utf-8")
-        filename = f"{self.ticker}-{self.filing_date}.xsd"
+
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Optionally, write the XML to a file
-        with open(filename, "w", encoding="US-ASCII") as file:
+        with open(self.output_file, "w", encoding="US-ASCII") as file:
             file.write(xml_data)
 
 
