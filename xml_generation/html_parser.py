@@ -1,12 +1,10 @@
 import re
 import json
-from utils import get_taxonomy_values
+
+# from utils import get_taxonomy_values
 
 
 class HtmlTagParser:
-    def __init__(self, html_tags):
-        # Initialize the class with a list of HTML tags
-        self.html_tags = html_tags
 
     def extract_field(self, data, prefix):
         # Extract a specific field from the data based on the provided prefix
@@ -36,6 +34,13 @@ class HtmlTagParser:
                 result["P"] = item[1:]
                 result["Precision"] = item[1] if item[1] in ["d", "i"] else item[1:3]
                 result["CountedAs"] = item.replace("p" + result["Precision"], "", 1)
+
+        precision: str = result.get("Precision")
+        counted_as: str = result.get("CountedAs")
+
+        result["Precision"] = precision.replace("n", "-")
+        result["CountedAs"] = counted_as.replace("n", "-")
+
         return result.get(prefix).lstrip("d")
 
     def get_calculation_parent(self, data):
@@ -44,6 +49,13 @@ class HtmlTagParser:
                 _, cal_parent = item.split("__")
                 return cal_parent
         return ""
+
+    def check_foot_note(self, data):
+        footnotes_list: list = []
+        for item in data[1:-1]:
+            if item.startswith("f"):
+                footnotes_list.append(item.lstrip("f"))
+        return footnotes_list
 
     def get_formatted_data(self, html_tag):
         # Process a single HTML tag and return formatted data
@@ -65,24 +77,31 @@ class HtmlTagParser:
             "LineItem": self.extract_field(data, "l"),
             "RootLevelAbstract": self.extract_field(data, "a"),
             "RoleType": self.extract_field(data, "r"),
+            "DataType": self.extract_field(data, "d"),
+            "Balance": self.extract_field(data, "b"),
+            "have_footnote": self.check_foot_note(data),
             "UniqueId": data[-1],
         }
 
-    def process_tags(self):
+    def process_tags(self, html_tags):
         # Process all HTML tags in the list
         formatted_tags = []
-        for tag in self.html_tags:
+        for tag in html_tags:
             tag_id = tag.get("id")
             formatted_data = self.get_formatted_data(tag_id)
             formatted_data["RoleName"] = tag.get("role")
             formatted_data["PreferredLabel"] = tag.get("label")
-            root_level_abstract: str = formatted_data.get("RootLevelAbstract")
-            if root_level_abstract:
-                _, name = root_level_abstract.split("--")
-                element_value: dict = get_taxonomy_values(name)
-                formatted_data["LabelText"] = element_value.get("label", "")
+            # root_level_abstract: str = formatted_data.get("RootLevelAbstract")
+            # if root_level_abstract:
+            # _, name = root_level_abstract.split("--")
+            # element_value: dict = get_taxonomy_values(name)
+            # formatted_data["LabelText"] = element_value.get("label", "")
             formatted_tags.append(formatted_data)
         return formatted_tags
+
+    def process_tag(self, tag_id):
+        formatted_data = self.get_formatted_data(tag_id)
+        return formatted_data
 
 
 # # Example usage:
@@ -92,11 +111,13 @@ class HtmlTagParser:
 #     # Add more HTML tags here
 # ]
 
+# html_tag = "apex_90C_eus-gaap--Cash_bdebit_dxbrli:monetaryItemType_uUSD_pn3n3_ylabel_c20230630_hsrt--RestatementAxis__srt--RestatementDomain__srt--ScenarioPreviouslyReportedMember_ma9xEtShfjXOnQUa2J__us-gaap--AssetsCurrent"
+
 # # Create an instance of HtmlTagParser
-# parser = HtmlTagParser(html_tags_list)
+# parser = HtmlTagParser()
 
 # # Get the formatted data for all tags
-# formatted_tags = parser.process_tags()
+# formatted_tags = parser.process_tag(html_tag)
 
 # # Print the formatted data
 # print(json.dumps(formatted_tags, indent=4))

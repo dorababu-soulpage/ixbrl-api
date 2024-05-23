@@ -27,7 +27,7 @@ from utils import (
     add_html_elements_to_concept,
     extract_html_elements,
     generate_concepts_dts_sheet,
-    generate_ix_header,
+    # generate_ix_header,
     get_db_record,
     get_client_record,
     get_filename,
@@ -36,7 +36,7 @@ from utils import (
     generate_xml_comments,
     add_datatype_tags,
     remove_ix_namespaces,
-    add_html_attributes,
+    # add_html_attributes,
     get_definitions,
     get_client_record,
 )
@@ -408,6 +408,7 @@ def generate_xml_schema_files():
     client_id = record.get("clientId")
     client_data = get_client_record(client_id=client_id)
 
+    cik = client_data.get("cik", "")
     ticker = client_data.get("ticker", "")
 
     period_end = record.get("periodTo", "")
@@ -427,16 +428,16 @@ def generate_xml_schema_files():
     if extra is not None:
         html_file = extra.get("url")
 
-    # html_elements = extract_html_elements(html_file)
+    html_elements = extract_html_elements(html_file)
 
     # for html_element in html_elements:
     #     print(html_element.get("id", ""))
 
     # # Create an instance of HtmlTagParser
-    # parser = HtmlTagParser(html_elements)
+    # parser = HtmlTagParser()
 
     # # Get the formatted data for all tags
-    # data = parser.process_tags()
+    # data = parser.process_tags(html_elements)
 
     # with open("output.json", "w") as output:
     #     output.write(json.dumps(data))
@@ -445,27 +446,54 @@ def generate_xml_schema_files():
     with open("data.json", "r") as file:
         data = json.load(file)
 
+    args = data, ticker, filing_date, company_website, client_id
     # Initialize XMLGenerators and generate the pre.xml file.
-    xsd_generator = XSDGenerator(data, ticker, filing_date, company_website)
+    xsd_generator = XSDGenerator(*args)
     xsd_generator.generate_xsd_schema()
 
-    pre_generator = PreXMLGenerator(data, filing_date, ticker, company_website)
+    args = data, filing_date, ticker, company_website, client_id
+    pre_generator = PreXMLGenerator(*args)
     pre_generator.generate_pre_xml()
 
-    def_generator = DefXMLGenerator(data, ticker, filing_date, company_website)
+    args = data, ticker, filing_date, company_website, client_id
+    def_generator = DefXMLGenerator(*args)
     def_generator.generate_def_xml()
 
-    cal_generator = CalXMLGenerator(data, filing_date, ticker, company_website)
+    args = data, filing_date, ticker, company_website, client_id
+    cal_generator = CalXMLGenerator(*args)
     cal_generator.generate_cal_xml()
 
-    lab_generator = LabXMLGenerator(data, filing_date, ticker, company_website)
+    args = data, filing_date, ticker, company_website, client_id
+    lab_generator = LabXMLGenerator(*args)
     lab_generator.generate_lab_xml()
 
     # generate xHTML file
-    # xhtml_generator = XHTMLGenerator(filing_date, ticker, file_id, html_file)
-    # xhtml_generator.generate_xhtml_file()
+    xhtml_generator = XHTMLGenerator(data, filing_date, ticker, cik, file_id, html_file)
+    xhtml_generator.generate_xhtml_file()
 
-    return {"messages": "XML Files generated successfully."}
+    file_path = f"data/{ticker}-{filing_date}"
+
+    # crate zip
+    shutil.make_archive(file_path, "zip", file_path)
+
+    # Upload the zip file to S3
+    zip_file_path = f"{file_path}.zip"
+
+    # Parse the URL
+    parsed_url = urlparse(zip_file_path)
+
+    # Extract the path component and create a Path object
+    path = Path(parsed_url.path)
+
+    # Get the filename
+    filename = path.name
+    s3_url = upload_zip_to_s3(filename, zip_file_path)
+
+    # Remove the file, zip directory
+    # shutil.rmtree(file)
+    os.remove(zip_file_path)
+
+    return {"messages": "XML Files generated successfully.", "url": s3_url}
 
 
 if __name__ == "__main__":

@@ -1,15 +1,17 @@
 import re
 from itertools import groupby
 import xml.etree.ElementTree as ET
+from utils import get_custom_element_record
 
 
 class XSDGenerator:
-    def __init__(self, data, ticker, filing_date, company_website):
+    def __init__(self, data, ticker, filing_date, company_website, client_id):
         self.root = None
         self.data = data
         self.ticker = ticker
         self.filing_date = filing_date
         self.company_website = company_website
+        self.client_id = client_id
         # self.definitions = definitions
         self.grouped_data = self.group_data_by_role()
 
@@ -253,6 +255,11 @@ class XSDGenerator:
 
         # custom elements
         for custom_element in set(custom_elements):
+            _, element_name = custom_element.split("--")
+            custom_element_data = get_custom_element_record(
+                self.client_id, element_name
+            )
+            data_type = custom_element_data.get("dataType", "")
             custom_element = ET.Element(
                 "xsd:element",
                 {
@@ -260,11 +267,11 @@ class XSDGenerator:
                         "--", "_"
                     ),
                     "abstract": "true",
-                    "name": f"{custom_element}".lstrip(f"custom--"),
+                    "name": f"{element_name}",
                     "nillable": "true",
                     "xbrli:periodType": "duration",
                     "substitutionGroup": "xbrli:item",
-                    "type": "dtr-types:domainItemType",
+                    "type": data_type,
                 },
             )
             self.root.append(custom_element)

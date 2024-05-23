@@ -1,26 +1,22 @@
+import os
+from typing import Dict
 from itertools import groupby
 import xml.etree.ElementTree as ET
+from utils import get_taxonomy_values
 from xml_generation.labels import labels_dict
+from utils import get_custom_element_record
 
 
 class LabXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website):
+    def __init__(self, data, filing_date, ticker, company_website, client_id):
         # Initialize the LabXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
         self.ticker = ticker
         self.company_website = company_website
-        self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
-
-    def get_preferred_label(self, label: str):
-        for key, value in labels_dict.items():
-            if key.replace(" ", "").lower() == label.replace(" ", "").lower():
-                return value
-
-    def group_data_by_role(self):
-        # Group the data by RoleName using itertools groupby and store it in grouped_data.
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            self.grouped_data[key] = list(group)
+        self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_lab.xml"
+        self.element_data = []
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         return ET.SubElement(
@@ -122,6 +118,73 @@ class LabXMLGenerator:
 
         return role_ref_elements
 
+    def get_preferred_label(self, element: str):
+        label_text = None
+        if element.startswith("custom"):
+            label_text = element
+        else:
+            if "--" in element:
+                _, name = element.split("--")
+                element_value: dict = get_taxonomy_values(name)
+                if element_value:
+                    label_text = element_value.get("label", "")
+
+        return label_text
+
+    def find_element(self, element_data, element_name):
+        for item in element_data:
+            if item["element"] == element_name:
+                return item
+        return None
+
+    def update_element_data(self, element, label_type, preferred_label=None):
+        element_record = self.find_element(self.element_data, element)
+        if not element_record:
+            element_dict = {
+                "element": element,
+                "label_types": [label_type],
+                "main_element": True,
+                "preferred_label": (
+                    preferred_label
+                    if preferred_label
+                    else self.get_preferred_label(element)
+                ),
+            }
+            self.element_data.append(element_dict)
+        else:
+            label_types: list = element_record.get("label_types")
+            if label_type not in label_types:
+                label_types.append(label_type)
+
+    def get_element_and_types(self):
+        for record in self.data:
+            for key, value in record.items():
+                if key == "Element":
+                    element = record.get("Element", "")
+                    preferred_label = record.get("PreferredLabel", "")
+                    if element:
+                        self.update_element_data(
+                            element,
+                            record.get("PreferredLabelType", ""),
+                            preferred_label,
+                        )
+
+                elif key in [
+                    "PreElementParent",
+                    "RootLevelAbstract",
+                    "Axis_Member",
+                    "Table",
+                    "LineItem",
+                ]:
+                    item = record.get(key, "")
+                    if item:
+                        items = item.split("__")
+                        for item in items:
+                            # item = item.replace("--", "_")
+                            self.update_element_data(item, "label")
+
+        return self.element_data
+
     def generate_lab_xml(self):
         linkbase_element = ET.Element(
             "link:linkbase",
@@ -133,16 +196,10 @@ class LabXMLGenerator:
             },
         )
 
-        # Group data by RoleName.
-        self.group_data_by_role()
-
         # add role ref elements
         role_ref_elements = self.add_role_ref_elements(parent=linkbase_element)
 
-        elements: list[str] = []
-        axis_members_list: list[str] = []
-        pre_element_parents_list: list[str] = []
-        calculation_parents_list: list[str] = []
+        elements_types: Dict[str, list] = {}
 
         label_link = ET.SubElement(
             linkbase_element,
@@ -152,206 +209,19 @@ class LabXMLGenerator:
                 "xlink:type": "extended",
             },
         )
+        main_elements_data = self.get_element_and_types()
+        for main_element in main_elements_data:
+            element: str = main_element.get("element")
+            element: str = element.replace("--", "_")
+            if element.startswith("custom"):
+                element = element.replace("custom", self.ticker)
 
-        # Iterate through grouped data and create roleRef and presentationLink elements.
-        for role_name, role_data in self.grouped_data.items():
-            record: dict = role_data[0] | {}
-
-            _root_level_abstract: str = record.get("RootLevelAbstract", "")
-            root_level_abstract = _root_level_abstract.replace("--", "_")
-
-            _table = record.get("Table", "")
-            table = _table.replace("--", "_")
-
-            _line_item: str = record.get("LineItem", "")
-            line_item = _line_item.replace("--", "_")
-            label_text = record.get("LabelText", "")
-
-            # root level abstract
-
-            # Create label loc elements for root_level_abstract and element.
-            href_url = self.get_href_url(root_level_abstract)
-            root_level_abstract_loc = self.create_label_loc_element(
-                parent_tag=label_link,
-                label=f"loc_{root_level_abstract}",
-                xlink_href=f"{href_url}#{root_level_abstract}",
-            )
-
-            # Common arguments for create_label_arc_element
-            arc_args = {
-                "parent_tag": label_link,
-                "order": "1",
-                "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                "xlink_from": f"loc_{root_level_abstract}",
-                "xlink_to": f"lab_{root_level_abstract}",
-            }
-
-            # Create presentationArc element and append it to presentation_links list.
-            label_arc = self.create_label_arc_element(**arc_args)
-
-            # create label
-            self.create_label_element(
-                parent_tag=label_link,
-                id=f"lab_{root_level_abstract}_label_en-US",
-                xlink_label=root_level_abstract,
-                label_text=label_text,
-            )
-
-            # table
-            href_url = self.get_href_url(table)
-            table_loc = self.create_label_loc_element(
-                parent_tag=label_link,
-                label=f"loc_{table}",
-                xlink_href=f"{href_url}#{table}",
-            )
-
-            # Common arguments for create_label_arc_element
-            arc_args = {
-                "parent_tag": label_link,
-                "order": "1",
-                "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                "xlink_from": f"loc_{table}",
-                "xlink_to": f"lab_{table}",
-            }
-
-            # Create presentationArc element and append it to presentation_links list.
-            label_arc = self.create_label_arc_element(**arc_args)
-
-            # create label
-            self.create_label_element(
-                parent_tag=label_link,
-                id=f"lab_{table}_label_en-US",
-                xlink_label=table,
-            )
-
-            # line item
-            href_url = self.get_href_url(line_item)
-            line_item_loc = self.create_label_loc_element(
-                parent_tag=label_link,
-                label=f"loc_{line_item}",
-                xlink_href=f"{href_url}#{line_item}",
-            )
-
-            # Common arguments for create_label_arc_element
-            arc_args = {
-                "parent_tag": label_link,
-                "order": "1",
-                "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                "xlink_from": f"loc_{line_item}",
-                "xlink_to": f"lab_{line_item}",
-            }
-
-            # Create presentationArc element and append it to presentation_links list.
-            label_arc = self.create_label_arc_element(**arc_args)
-
-            # create label
-            self.create_label_element(
-                parent_tag=label_link,
-                id=f"lab_{line_item}_label_en-US",
-                xlink_label=line_item,
-            )
-
-            # loop through the main elements
-            for record in role_data:
-                _element = record.get("Element", "")
-                element = _element.replace("--", "_")
-
-                axis_ember = record.get("Axis_Member", "")
-                preElement_parent = record.get("PreElementParent", "")
-                calculation_parent = record.get("CalculationParent", "")
-                label_text = record.get("LabelText", "")
-
-                href_url = self.get_href_url(element)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_{element}",
-                    xlink_href=f"{href_url}#{element}",
-                )
-
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_{element}",
-                    "xlink_to": f"lab_{element}",
-                }
-
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
-
-                # create label
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{element}_1_label_en-US",
-                    xlink_label=element,
-                    label_text=label_text,
-                )
-
-                # create terseLabel
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{element}_2_label_en-US",
-                    xlink_label=label_text,
-                    xlink_role="http://www.xbrl.org/2003/role/terseLabel",
-                    label_text=label_text,
-                )
-                elements.append(element)
-                axis_members_list.append(axis_ember)
-                calculation_parents_list.append(calculation_parent)
-                pre_element_parents_list.append(preElement_parent)
-
-        # add calculation parents
-        for calculation_parent in calculation_parents_list:
-
-            cal_parent = calculation_parent.replace("--", "_")
-
-            if cal_parent not in elements:
-                href_url = self.get_href_url(cal_parent)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_{cal_parent}",
-                    xlink_href=f"{href_url}#{cal_parent}",
-                )
-
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_{cal_parent}",
-                    "xlink_to": f"lab_{cal_parent}",
-                }
-
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
-
-                # create label
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{cal_parent}_1_label_en-US",
-                    xlink_label=cal_parent,
-                    label_text=label_text,
-                )
-
-                # create terseLabel
-                self.create_label_element(
-                    parent_tag=label_link,
-                    id=f"lab_{cal_parent}_2_label_en-US",
-                    xlink_label=cal_parent,
-                    xlink_role="http://www.xbrl.org/2003/role/terseLabel",
-                    label_text=label_text,
-                )
-
-        # add pre element parents
-        for pre_element_parent in set(pre_element_parents_list):
-            pre_element_parent = pre_element_parent.replace("--", "_")
-
-            href_url = self.get_href_url(pre_element_parent)
+            # Create location for elements.
+            href_url = self.get_href_url(element)
             element_loc = self.create_label_loc_element(
                 parent_tag=label_link,
-                label=f"loc_{pre_element_parent}",
-                xlink_href=f"{href_url}#{pre_element_parent}",
+                label=f"loc_{element}",
+                xlink_href=f"{href_url}#{element}",
             )
 
             # Common arguments for create_label_arc_element
@@ -359,110 +229,49 @@ class LabXMLGenerator:
                 "parent_tag": label_link,
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                "xlink_from": f"loc_{pre_element_parent}",
-                "xlink_to": f"lab_{pre_element_parent}",
+                "xlink_from": f"loc_{element}",
+                "xlink_to": f"lab_{element}",
             }
 
             # Create presentationArc element and append it to presentation_links list.
             label_arc = self.create_label_arc_element(**arc_args)
 
-            # create label
-            self.create_label_element(
-                parent_tag=label_link,
-                id=f"lab_{pre_element_parent}_label_en-US",
-                xlink_label=pre_element_parent,
-                label_text=label_text,
-            )
-        if list(filter(None, axis_members_list)):
-            # add axis, domain, member
-            for axis_member in set(axis_members_list):
-                if axis_member:
-                    _axis, _domain, _member = axis_member.split("__")
-                    axis = _axis.replace("--", "_")
-                    domain = _domain.replace("--", "_")
-                    member = _member.replace("--", "_")
-
-                    # axis
-                    href_url = self.get_href_url(axis)
-                    element_loc = self.create_label_loc_element(
-                        parent_tag=label_link,
-                        label=f"loc_{axis}",
-                        xlink_href=f"{href_url}#{axis}",
+            label_types: list = main_element.get("label_types")
+            label_created = False
+            for index, label_type in enumerate(label_types, start=1):
+                if element.startswith(self.ticker):
+                    _, name = element.split("_")
+                    custom_element_data = get_custom_element_record(
+                        self.client_id, name
                     )
+                    label_text = custom_element_data.get("label", "")
+                else:
+                    if "_" in element:
+                        _, name = element.split("_")
+                        element_value: dict = get_taxonomy_values(name)
+                        if element_value:
+                            label_text = main_element.get("preferred_label", "")
 
-                    # Common arguments for create_label_arc_element
-                    arc_args = {
-                        "parent_tag": label_link,
-                        "order": "1",
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                        "xlink_from": f"loc_{axis}",
-                        "xlink_to": f"lab_{axis}",
-                    }
-
-                    # Create presentationArc element and append it to presentation_links list.
-                    label_arc = self.create_label_arc_element(**arc_args)
-
+                if label_created is False:
                     # create label
                     self.create_label_element(
                         parent_tag=label_link,
-                        id=f"lab_{axis}_label_en-US",
-                        xlink_label=axis,
+                        id=f"lab_{element}_1_label_en-US",
+                        xlink_label=element,
+                        xlink_role=f"http://www.xbrl.org/2003/role/label",
                         label_text=label_text,
                     )
+                    label_created = True
 
-                    # domain
-                    href_url = self.get_href_url(domain)
-                    element_loc = self.create_label_loc_element(
-                        parent_tag=label_link,
-                        label=f"loc_{domain}",
-                        xlink_href=f"{href_url}#{domain}",
-                    )
+                # create remaining lables
+                if label_type and label_type != "label":
 
-                    # Common arguments for create_label_arc_element
-                    arc_args = {
-                        "parent_tag": label_link,
-                        "order": "1",
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                        "xlink_from": f"loc_{domain}",
-                        "xlink_to": f"lab_{domain}",
-                    }
-
-                    # Create presentationArc element and append it to presentation_links list.
-                    label_arc = self.create_label_arc_element(**arc_args)
-
-                    # create label
+                    # create terseLabel
                     self.create_label_element(
                         parent_tag=label_link,
-                        id=f"lab_{domain}_label_en-US",
-                        xlink_label=domain,
-                        label_text=label_text,
-                    )
-
-                    # member
-                    href_url = self.get_href_url(member)
-                    element_loc = self.create_label_loc_element(
-                        parent_tag=label_link,
-                        label=f"loc_{member}",
-                        xlink_href=f"{href_url}#{member}",
-                    )
-
-                    # Common arguments for create_label_arc_element
-                    arc_args = {
-                        "parent_tag": label_link,
-                        "order": "1",
-                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                        "xlink_from": f"loc_{member}",
-                        "xlink_to": f"lab_{member}",
-                    }
-
-                    # Create presentationArc element and append it to presentation_links list.
-                    label_arc = self.create_label_arc_element(**arc_args)
-
-                    # create label
-                    self.create_label_element(
-                        parent_tag=label_link,
-                        id=f"lab_{member}_label_en-US",
-                        xlink_label=member,
+                        id=f"lab_{element}_{index}_{label_type}_en-US",
+                        xlink_label=element,
+                        xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
                         label_text=label_text,
                     )
 
@@ -484,9 +293,15 @@ class LabXMLGenerator:
         self.save_xml_data(xml_data)
 
     def save_xml_data(self, xml_data):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Save the XML data into the pre.xml file.
-        filename = f"{self.ticker}-{self.filing_date}_lab.xml"
-        with open(filename, "w", encoding="utf-8") as file:
+        with open(self.output_file, "w", encoding="utf-8") as file:
             file.write(xml_data)
 
 

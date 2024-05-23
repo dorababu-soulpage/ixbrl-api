@@ -19,7 +19,8 @@
     "UniqueId": "IDB3XTVMJt7ssjdN",
     "RoleName": "Cover",
     "PreferredLabel": "Document Type",
-    "RootLevelLabelText": "Cover [Abstract]"
+    "RootLevelLabelText": "Cover [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
   {
     "Type": "90O",
@@ -41,7 +42,8 @@
     "UniqueId": "GGsts8rn95TwoMCp",
     "RoleName": "Cover",
     "PreferredLabel": "Document Period End Date",
-    "RootLevelLabelText": "Cover [Abstract]"
+    "RootLevelLabelText": "Cover [Abstract]",
+    "DataType":"xbrli:dateItemType"
   },
   {
     "Type": "90P",
@@ -63,7 +65,8 @@
     "UniqueId": "7WeMdatycYcvtkVv",
     "RoleName": "Cover",
     "PreferredLabel": "Number of pages",
-    "RootLevelLabelText": "Cover [Abstract]"
+    "RootLevelLabelText": "Cover [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
   {
     "Type": "90Z",
@@ -79,13 +82,14 @@
     "Axis_Member": "us-gaap--StatementClassOfStockAxis__us-gaap--ClassOfStockDomain__us-gaap--CommonClassAMember",
     "PreferredLabelType": "label",
     "Table": "us-gaap--StatementTable",
-    "LineItem": "us-gaap--StatementLineitem",
+    "LineItem": "us-gaap--StatementLineItems",
     "RootLevelAbstract": "dei--CoverAbstract",
     "RoleType": "document",
     "UniqueId": "bymWo00goZ76jcCU",
     "RoleName": "Cover",
     "PreferredLabel": "Entity Common Stock, Shares Outstanding",
-    "RootLevelLabelText": "Cover [Abstract]"
+    "RootLevelLabelText": "Cover [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
 
   {
@@ -108,7 +112,8 @@
     "UniqueId": "fDiZzGDyDELASYMy",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "ASSETS",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:stringItemType"
   },
   {
     "Type": "902",
@@ -130,7 +135,8 @@
     "UniqueId": "RB0vRAVwi0fwx09n",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "CURRENT ASSETS:",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:stringItemType"
   },
   {
     "Type": "901",
@@ -152,7 +158,8 @@
     "UniqueId": "BQpNNqeYKBJK6wTf",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Cash",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "902",
@@ -174,7 +181,8 @@
     "UniqueId": "ZwTRD6rgl6OnNEfo",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Accounts receivable, net",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "90N",
@@ -196,7 +204,8 @@
     "UniqueId": "HaLuaOwAHhr2dsz3",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Accounts receivable, net",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "901",
@@ -218,7 +227,8 @@
     "UniqueId": "XmYvGIRbaA7VhuOg",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Inventory, net",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "90G",
@@ -240,7 +250,8 @@
     "UniqueId": "SlHovZ7OFXAeu88k",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Inventory, net",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "90F",
@@ -262,7 +273,8 @@
     "UniqueId": "51P4JI7PqPdAt8ju",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Prepaid expenses and other current assets",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "90B",
@@ -284,7 +296,8 @@
     "UniqueId": "H8EzIlCHoyrun6ga",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "Prepaid expenses and other current assets",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"xbrli:monetaryItemType"
   },
   {
     "Type": "90T",
@@ -306,7 +319,8 @@
     "UniqueId": "VC5a6dhnufU1hIPS",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "TOTAL CURRENT ASSETS",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
   {
     "Type": "90Z",
@@ -328,7 +342,8 @@
     "UniqueId": "QP1KTq0F3ORfV0dk",
     "RoleName": "Consolidated Balance Sheets",
     "PreferredLabel": "TOTAL CURRENT ASSETS",
-    "RootLevelLabelText": "Statement of Financial Position [Abstract]"
+    "RootLevelLabelText": "Statement of Finan,cial Position [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
   {
     "Type": "808",
@@ -350,7 +365,8 @@
     "UniqueId": "9h6ifyuvQlMIx21t",
     "RoleName": "Organization and Basic of Presentation",
     "PreferredLabel": "",
-    "RootLevelLabelText": "Organization, Consolidation and Presentation of Financial Statements [Abstract]"
+    "RootLevelLabelText": "Organization, Cons,olidation and Presentation of Financial Statements [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   },
   {
     "Type": "90P",
@@ -372,6 +388,8 @@
     "UniqueId": "2tCLnljbbCmWnI7Z",
     "RoleName": "Organization and Basic of Presentation (Details 1)",
     "PreferredLabel": "Roshan Cash",
-    "RootLevelLabelText": "Organization, Consolidation and Presentation of Financial Statements [Abstract]"
+    "RootLevelLabelText": "Organization, Consolidation and Presentation of Financial Statements [Abstract]",
+    "DataType":"dei:submissionTypeItemType"
   }
 ]
+

@@ -1,16 +1,18 @@
-import re
+import re, os
 from itertools import groupby
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
 
 
 class PreXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website):
+    def __init__(self, data, filing_date, ticker, company_website, client_id):
         # Initialize the PreXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
         self.ticker = ticker
         self.company_website = company_website
+        self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_pre.xml"
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
 
     def get_preferred_label(self, label: str):
@@ -29,7 +31,7 @@ class PreXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": f"http://{role_uri}",
+                "roleURI": role_uri,
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -100,6 +102,7 @@ class PreXMLGenerator:
 
         # pre parent element
         if root_level_abstract != _pre_element_parent:
+            pre_element_parent = _pre_element_parent
             if pre_element_parent_created is False:
                 pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
                 pre_element_parent_loc = self.create_presentation_loc_element(
@@ -111,7 +114,7 @@ class PreXMLGenerator:
                 # Add definition arc elements
                 definition_arc = self.create_presentation_arc_element(
                     parent_tag=presentation_link,
-                    order=str(index),
+                    order="1",
                     arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
                     xlink_from=f"loc_{line_item}",
                     xlink_to=f"loc_{pre_element_parent}",
@@ -380,11 +383,15 @@ class PreXMLGenerator:
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
                 role_name_without_spaces = re.sub(r"\s+", "", role_name)
+                role = role_name_without_spaces.replace("(", "").replace(")", "")
                 # Create roleRef element and append it to role_ref_elements list.
+                role_uri = (
+                    f"http://{self.company_website}/{self.filing_date}/role/{role}"
+                )
                 role_ref_element = self.create_role_ref_element(
                     linkbase_element,
-                    role_uri=f"{self.company_website}/{self.filing_date}/role/{role_name_without_spaces}",
-                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_name_without_spaces}",
+                    role_uri=role_uri,
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role}",
                 )
 
                 _line_item: str = record.get("LineItem")
@@ -397,7 +404,7 @@ class PreXMLGenerator:
                     linkbase_element,
                     "link:presentationLink",
                     attrib={
-                        "xlink:role": f"http://{self.company_website}/role/{role_name_without_spaces}",
+                        "xlink:role": role_uri,
                         "xlink:type": "extended",
                     },
                 )
@@ -449,9 +456,15 @@ class PreXMLGenerator:
         self.save_xml_data(xml_data)
 
     def save_xml_data(self, xml_data):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Save the XML data into the pre.xml file.
-        filename = f"{self.ticker}-{self.filing_date}_pre.xml"
-        with open(filename, "w", encoding="utf-8") as file:
+        with open(self.output_file, "w", encoding="utf-8") as file:
             file.write(xml_data)
 
 

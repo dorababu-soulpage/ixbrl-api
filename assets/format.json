@@ -1,14 +1,244 @@
 [
   {
-    "Datatype 1": "us-types:yesNoItemType",
-    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 1": "xbrli:stringItemType",
+    "Datatype 2": null,
     "Datatype 3": null,
     "Datatype 4": null,
-    "Format Code": "ixt-sec:boolballotbox",
+    "Format Code": "ixt:booleanfalse",
+    "Description": "Any string",
+    "Input format": "*",
+    "Output format": false
+  },
+  {
+    "Datatype 1": "xbrli:stringItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:booleantrue",
+    "Description": "Any string",
+    "Input format": "*",
+    "Output format": true
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": "xbrli:gMonthDayItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:datedaymonth",
+    "Description": "Numeric date recurring day and month",
+    "Input format": "DDMM",
+    "Output format": "--MM-DD"
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:datedaymonthyear",
+    "Description": "Numeric date day month and year",
+    "Input format": "DDMMYYYY",
+    "Output format": "YYYY-MM-DD"
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": "xbrli:gMonthDayItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:datemonthday",
+    "Description": "Numeric date recurring month and day",
+    "Input format": "MMDD",
+    "Output format": "--MM-DD"
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:datemonthdayyear",
+    "Description": "Numeric date month day and year",
+    "Input format": "MMDDYYYY",
+    "Output format": "YYYY-MM-DD"
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": "xbrli:gYearMonthItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:datemonthyear",
+    "Description": "Numeric date month and year",
+    "Input format": "MMYYYY",
+    "Output format": "YYYY-MM"
+  },
+  {
+    "Datatype 1": "xbrli:dateItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:dateyearmonthday",
+    "Description": "Numeric date year month and day",
+    "Input format": "YYYYMMDD",
+    "Output format": "YYYY-MM-DD"
+  },
+  {
+    "Datatype 1": "xbrli:stringItemType",
+    "Datatype 2": "dtr-types:textBlockItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt:nocontent",
+    "Description": "Any string",
+    "Input format": "*",
+    "Output format": null
+  },
+  {
+    "Datatype 1": "xbrli:monetaryItemType",
+    "Datatype 2": "xbrli:sharesItemType",
+    "Datatype 3": "xbrli:integerItemType",
+    "Datatype 4": null,
+    "Format Code": "ixt:num-comma-decimal",
+    "Description": "Number with comma fraction separator",
+    "Input format": "nnn*nnn*nnn,n",
+    "Output format": "nnnnnnnnn.n"
+  },
+  {
+    "Datatype 1": "xbrli:monetaryItemType",
+    "Datatype 2": "xbrli:sharesItemType",
+    "Datatype 3": "xbrli:integerItemType",
+    "Datatype 4": null,
+    "Format Code": "ixt:num-dot-decimal",
+    "Description": "Number with dot fraction separator",
+    "Input format": "nnn*nnn*nnn.n",
+    "Output format": "nnnnnnnnn.n"
+  },
+  {
+    "Datatype 1": "xbrli:monetaryItemType",
+    "Datatype 2": "xbrli:sharesItemType",
+    "Datatype 3": "xbrli:integerItemType",
+    "Datatype 4": "srt-types:perUnitItemType",
+    "Format Code": "ixt:num-unit-decimal",
+    "Description": "Number with unit strings",
+    "Input format": "nnn*nnn Unit nn (Unit)",
+    "Output format": "nnnnnnnnn.n"
+  },
+  {
+    "Datatype 1": "xbrli:monetaryItemType",
+    "Datatype 2": "xbrli:sharesItemType",
+    "Datatype 3": "xbrli:integerItemType",
+    "Datatype 4": null,
+    "Format Code": "ixt:zerodash",
+    "Description": "Zero dash",
+    "Input format": "-",
+    "Output format": 0,
+    "Comments": "This need to hardcore front end. We have to provide checkbox"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:duryear",
     "Description": null,
-    "Input format": "&#9744;",
-    "Output format": false,
-    "Comments": null
+    "Input format": -22.3456,
+    "Output format": "-P22Y4M4D"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durmonth",
+    "Description": null,
+    "Input format": 22.3456,
+    "Output format": "P22M10D"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durweek",
+    "Description": null,
+    "Input format": 0,
+    "Output format": "P0D"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durday",
+    "Description": null,
+    "Input format": 1e-06,
+    "Output format": "P0D"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durhour",
+    "Description": null,
+    "Input format": 1000,
+    "Output format": "PT1000H"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durwordsen",
+    "Description": null,
+    "Input format": "Five years, two months",
+    "Output format": "P5Y2M"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:durwordsen",
+    "Description": null,
+    "Input format": "9 years, 2 months",
+    "Output format": "P9Y2M"
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:numwordsen",
+    "Description": null,
+    "Input format": "nineteen hundred forty-four",
+    "Output format": 1944
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": null,
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:numwordsen",
+    "Description": null,
+    "Input format": "Seventy Thousand and one",
+    "Output format": 70001
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": "xbrli:stringItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:numwordsen",
+    "Description": null,
+    "Input format": "no",
+    "Output format": 0
+  },
+  {
+    "Datatype 1": "xbrli:durationItemType",
+    "Datatype 2": "xbrli:stringItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:numwordsen",
+    "Description": null,
+    "Input format": "None",
+    "Output format": 0
   },
   {
     "Datatype 1": "us-types:yesNoItemType",
@@ -17,9 +247,8 @@
     "Datatype 4": null,
     "Format Code": "ixt-sec:boolballotbox",
     "Description": null,
-    "Input format": "&#9745;",
-    "Output format": true,
-    "Comments": null
+    "Input format": "&#9744; (displays as \u2610 )",
+    "Output format": false
   },
   {
     "Datatype 1": "us-types:yesNoItemType",
@@ -28,9 +257,18 @@
     "Datatype 4": null,
     "Format Code": "ixt-sec:boolballotbox",
     "Description": null,
-    "Input format": "&#9746;",
-    "Output format": true,
-    "Comments": null
+    "Input format": "&#9745; (displays as \u2611)",
+    "Output format": true
+  },
+  {
+    "Datatype 1": "us-types:yesNoItemType",
+    "Datatype 2": "xbrli:booleanItemType",
+    "Datatype 3": null,
+    "Datatype 4": null,
+    "Format Code": "ixt-sec:boolballotbox",
+    "Description": null,
+    "Input format": "&#9746; (displays as \u2612)",
+    "Output format": true
   },
   {
     "Datatype 1": "us-types:yesNoItemType",
@@ -39,9 +277,8 @@
     "Datatype 4": null,
     "Format Code": "ixt-sec:yesnoballotbox",
     "Description": null,
-    "Input format": "&#9744;",
-    "Output format": "No",
-    "Comments": null
+    "Input format": "&#9744; (displays as \u2610 )",
+    "Output format": "No"
   },
   {
     "Datatype 1": "us-types:yesNoItemType",
@@ -50,9 +287,8 @@
     "Datatype 4": null,
     "Format Code": "ixt-sec:yesnoballotbox",
     "Description": null,
-    "Input format": "&#9745;",
-    "Output format": "Yes",
-    "Comments": null
+    "Input format": "&#9745; (displays as \u2611)",
+    "Output format": "Yes"
   },
   {
     "Datatype 1": "us-types:yesNoItemType",
@@ -61,9 +297,8 @@
     "Datatype 4": null,
     "Format Code": "ixt-sec:yesnoballotbox",
     "Description": null,
-    "Input format": "&#9746;",
-    "Output format": "Yes",
-    "Comments": null
+    "Input format": "&#9746; (displays as \u2612)",
+    "Output format": "Yes"
   },
   {
     "Datatype 1": "dei:edgarExchangeCodeItemType",
@@ -161,8 +396,7 @@
     "Format Code": "ixt-sec:entityfilercategoryen",
     "Description": null,
     "Input format": "Large accelerated filer",
-    "Output format": "Large Accelerated Filer",
-    "Comments": null
+    "Output format": "Large Accelerated Filer"
   },
   {
     "Datatype 1": "dei:filerCategoryItemType",
@@ -172,8 +406,7 @@
     "Format Code": "ixt-sec:entityfilercategoryen",
     "Description": null,
     "Input format": "accelerated filer",
-    "Output format": "Accelerated Filer",
-    "Comments": null
+    "Output format": "Accelerated Filer"
   },
   {
     "Datatype 1": "dei:filerCategoryItemType",
@@ -183,7 +416,6 @@
     "Format Code": "ixt-sec:entityfilercategoryen",
     "Description": null,
     "Input format": "Non-Accelerated Filer",
-    "Output format": "Non-accelerated Filer",
-    "Comments": null
+    "Output format": "Non-accelerated Filer"
   }
 ]

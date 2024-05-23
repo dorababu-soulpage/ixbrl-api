@@ -1,15 +1,17 @@
-import re
+import re, os
 from itertools import groupby
 import xml.etree.ElementTree as ET
 
 
 class DefXMLGenerator:
-    def __init__(self, data, ticker, filing_date, company_website):
+    def __init__(self, data, ticker, filing_date, company_website, client_id):
         # Initialize the DefXMLGenerator with provided data and metadata
         self.data = data
         self.ticker = ticker
         self.filing_date = filing_date
         self.company_website = company_website
+        self.client_id = client_id
+        self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_def.xml"
         self.grouped_data = self.group_data_by_role()
 
     def group_data_by_role(self):
@@ -25,7 +27,7 @@ class DefXMLGenerator:
             parent,
             "link:roleRef",
             attrib={
-                "roleURI": f"http://{role_uri}",
+                "roleURI": role_uri,
                 "xlink:href": xlink_href,
                 "xlink:type": "simple",
             },
@@ -132,6 +134,7 @@ class DefXMLGenerator:
         line_items_list = []
         dimension_records_list = []
         pre_element_parent_created = False
+        main_element_list = []
 
         # Create the root linkbase element with namespaces
         linkbase_element = ET.Element(
@@ -157,9 +160,10 @@ class DefXMLGenerator:
             else:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
                 # Create roleRef element and append it to role_ref_elements list.
+                role_uri = f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}"
                 role_ref_element = self.create_role_ref_element(
                     parent=linkbase_element,
-                    role_uri=f"{self.company_website}/{self.filing_date}/role/{role_without_spaces}",
+                    role_uri=role_uri,
                     xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_without_spaces}",
                 )
 
@@ -170,7 +174,7 @@ class DefXMLGenerator:
                     linkbase_element,
                     "link:definitionLink",
                     attrib={
-                        "xlink:role": f"http://{self.company_website}/role/{role_without_spaces}",
+                        "xlink:role": role_uri,
                         "xlink:type": "extended",
                     },
                 )
@@ -225,7 +229,7 @@ class DefXMLGenerator:
                                 "arc_role": "http://xbrl.org/int/dim/arcrole/all",
                                 "xlink_from": f"loc_{line_item}",
                                 "xlink_to": f"loc_{table}",
-                                "order": order,
+                                "order": "1",
                             }
 
                             # Add definition arc elements
@@ -263,7 +267,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/hypercube-dimension",
                                         "xlink_from": f"loc_{line_item}",
                                         "xlink_to": f"loc_{axis}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -285,7 +289,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-default",
                                         "xlink_from": f"loc_{axis}",
                                         "xlink_to": f"loc_{domain}_1",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -307,7 +311,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/dimension-domain",
                                         "xlink_from": f"loc_{axis}",
                                         "xlink_to": f"loc_{domain}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -329,7 +333,7 @@ class DefXMLGenerator:
                                         "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
                                         "xlink_from": f"loc_{domain}",
                                         "xlink_to": f"loc_{member}",
-                                        "order": order,
+                                        "order": "1",
                                     }
 
                                     # Add definition arc elements
@@ -362,24 +366,53 @@ class DefXMLGenerator:
 
                             pre_element_parent_created = True
 
-                        # main elements
+                        # add dimension record
+                        main_element_list.append(record)
+
+                    else:
+                        main_element_list.append(record)
+
+                element_occurrences = {}
+                # add main element to def XML
+                for record in main_element_list:
+                    _element = record.get("Element")
+                    element = _element.replace("--", "_")
+
+                    _pre_element_parent: str = record.get("PreElementParent")
+                    pre_element_parent = _pre_element_parent.replace("--", "_")
+
+                    if element.startswith("custom"):
+                        element = element.replace("custom", self.ticker)
+                        element_loc = self.create_definition_loc_element(
+                            parent_tag=definition_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
+                        )
+                    else:
                         element_xlink_href = self.get_href_url(element)
                         element_loc = self.create_definition_loc_element(
                             parent_tag=definition_link,
                             label=f"loc_{element}",
                             xlink_href=f"{element_xlink_href}#{element}",
                         )
-
-                        # Add definition arc elements
-                        definition_arc = self.create_definition_arc_element(
-                            parent_tag=definition_link,
-                            order=str(index),
-                            arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
-                            xlink_from=f"loc_{pre_element_parent}",
-                            xlink_to=f"loc_{element}",
+                    xlink_from = pre_element_parent
+                    # calculate xlink from element element occurrence
+                    if xlink_from not in element_occurrences:
+                        element_occurrences[xlink_from] = 1
+                    else:
+                        element_occurrences[xlink_from] = (
+                            element_occurrences[xlink_from] + 1
                         )
 
-                    definition_links.append(definition_link)
+                    # Add definition arc elements
+                    definition_arc = self.create_definition_arc_element(
+                        parent_tag=definition_link,
+                        order=str(element_occurrences.get(xlink_from)),
+                        arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                        xlink_from=f"loc_{xlink_from}",
+                        xlink_to=f"loc_{element}",
+                    )
+                definition_links.append(definition_link)
 
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
@@ -402,9 +435,15 @@ class DefXMLGenerator:
         self.save_xml_data(xml_data)
 
     def save_xml_data(self, xml_data):
+        # Extract the directory from the output file path
+        directory = os.path.dirname(self.output_file)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         # Save the XML data into the pre.xml file.
-        filename = f"{self.ticker}-{self.filing_date}_def.xml"
-        with open(filename, "w", encoding="utf-8") as file:
+        with open(self.output_file, "w", encoding="utf-8") as file:
             file.write(xml_data)
 
 
