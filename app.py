@@ -1,4 +1,4 @@
-import json
+import json, io
 import os, shutil
 import subprocess
 from pathlib import Path
@@ -40,6 +40,7 @@ from utils import (
     # add_html_attributes,
     get_definitions,
     get_client_record,
+    s3_uploader,
 )
 from rule_based_tagging import RuleBasedTagging
 
@@ -518,45 +519,36 @@ def generate_xml_schema_files():
 def upload():
     from boto3 import Session
 
-    if "file" not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+    url = request.json.get("url")
+    filename = os.path.basename(url).replace(".htm", ".txt")
 
-    file = request.files["file"]
-    filename = request.form.get("filename")
+    response = requests.get(url)
 
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+    access_key = config("AWS_S3_ACCESS_KEY_ID")
+    secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
+    region = config("AWS_S3_REGION")
+    bucket = config("AWS_S3_BUCKET_NAME")
 
-    try:
-        file_content = file.read()
+    session = Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
+    )
 
-        access_key = config("AWS_S3_ACCESS_KEY_ID")
-        secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
-        region = config("AWS_S3_REGION")
-        bucket = config("AWS_S3_BUCKET_NAME")
+    s3 = session.resource("s3")
 
-        session = Session(
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-            region_name=region,
-        )
+    # Upload the file
+    s3.Bucket(bucket).put_object(
+        Key=filename,
+        Body=response.content,
+        ACL="public-read",
+        ContentType="application/octet-stream",
+    )
 
-        s3 = session.resource("s3")
+    # Generate and return the URL
+    response_url = f"https://{bucket}.s3.amazonaws.com/{filename}"
 
-        # Upload the file
-        s3.Bucket(bucket).put_object(
-            Key=filename,
-            Body=file_content,
-            ACL="public-read",
-            ContentType="application/octet-stream",
-        )
-
-        # Generate and return the URL
-        response_url = f"https://{bucket}.s3.amazonaws.com/{filename}"
-        return jsonify({"url": response_url})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return {"url": response_url}
 
 
 if __name__ == "__main__":
