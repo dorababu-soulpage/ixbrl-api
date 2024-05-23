@@ -522,6 +522,7 @@ def upload():
         return jsonify({"error": "No file part in the request"}), 400
 
     file = request.files["file"]
+    filename = request.form.get("filename")
 
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
@@ -541,18 +542,17 @@ def upload():
         )
 
         s3 = session.resource("s3")
-        file_name = file.filename
 
         # Upload the file
         s3.Bucket(bucket).put_object(
-            Key=file_name,
+            Key=filename,
             Body=file_content,
             ACL="public-read",
             ContentType="application/octet-stream",
         )
 
         # Generate and return the URL
-        response_url = f"https://{bucket}.s3.amazonaws.com/{file_name}"
+        response_url = f"https://{bucket}.s3.amazonaws.com/{filename}"
         return jsonify({"url": response_url})
 
     except Exception as e:
