@@ -64,7 +64,7 @@ class HtmlTagParser:
             "Type": data[1],
             "Element": self.extract_field(data, "e"),
             "Unit": self.extract_field(data, "u"),
-            "PreElementParent": self.extract_field(data, "b"),
+            "PreElementParent": self.extract_field(data, "w"),
             "Heading": self.check_heading_or_not(data),
             "Indenting": self.get_indenting(data),
             "Precision": self.get_precision_counted_as(data, "Precision"),
