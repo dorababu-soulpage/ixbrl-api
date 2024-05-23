@@ -29,6 +29,7 @@ from utils import (
     generate_concepts_dts_sheet,
     # generate_ix_header,
     get_db_record,
+    get_split_file_record,
     get_client_record,
     get_filename,
     initialize_concepts_dts,
@@ -401,9 +402,31 @@ def rule_based_tagging_view():
 
 @app.route("/api/xml-generation", methods=["GET", "POST"])
 def generate_xml_schema_files():
+    split_file = False
+    if "file_id" in request.json.keys():
+        file_id = request.json.get("file_id")
+        record = get_db_record(file_id=file_id)
 
-    file_id = request.json.get("file_id")
-    record = get_db_record(file_id=file_id)
+        extra = record.get("extra", None)
+        if extra is not None:
+            html_file = extra.get("url")
+        else:
+            html_file = record.get("url")
+
+    if "split_file_id" in request.json.keys():
+        split_file_id = request.json.get("split_file_id")
+        split_file_record = get_split_file_record(file_id=split_file_id)
+
+        file_id = split_file_record.get("id")
+        record = get_db_record(file_id=split_file_record.get("fileId"))
+
+        extra = split_file_record.get("extra", None)
+        if extra is not None:
+            html_file = extra.get("url")
+        else:
+            html_file = split_file_record.get("url")
+
+        split_file = True
 
     client_id = record.get("clientId")
     client_data = get_client_record(client_id=client_id)
@@ -424,27 +447,21 @@ def generate_xml_schema_files():
 
     company_website = client_data.get("website", "")
 
-    extra = record.get("extra", None)
-    if extra is not None:
-        html_file = extra.get("url")
-
     html_elements = extract_html_elements(html_file)
 
-    # for html_element in html_elements:
-    #     print(html_element.get("id", ""))
+    # Create an instance of HtmlTagParser
+    parser = HtmlTagParser()
 
-    # # Create an instance of HtmlTagParser
-    # parser = HtmlTagParser()
+    # Get the formatted data for all tags
+    data = parser.process_tags(html_elements)
 
-    # # Get the formatted data for all tags
-    # data = parser.process_tags(html_elements)
-
+    # # write data into output.json file
     # with open("output.json", "w") as output:
     #     output.write(json.dumps(data))
 
-    # read json data from data.json file
-    with open("data.json", "r") as file:
-        data = json.load(file)
+    # # read json data from data.json file
+    # with open("data.json", "r") as file:
+    #     data = json.load(file)
 
     args = data, ticker, filing_date, company_website, client_id
     # Initialize XMLGenerators and generate the pre.xml file.
@@ -468,7 +485,8 @@ def generate_xml_schema_files():
     lab_generator.generate_lab_xml()
 
     # generate xHTML file
-    xhtml_generator = XHTMLGenerator(data, filing_date, ticker, cik, file_id, html_file)
+    args = data, filing_date, ticker, cik, file_id, html_file, split_file
+    xhtml_generator = XHTMLGenerator(*args)
     xhtml_generator.generate_xhtml_file()
 
     file_path = f"data/{ticker}-{filing_date}"

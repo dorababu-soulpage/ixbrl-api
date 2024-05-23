@@ -4,7 +4,12 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup, Comment
 
-from utils import get_db_record, extract_html_elements, remove_ix_namespaces
+from utils import (
+    get_db_record,
+    get_split_file_record,
+    extract_html_elements,
+    remove_ix_namespaces,
+)
 
 from lxml import etree
 from constants import namespace
@@ -12,13 +17,14 @@ from xml_generation.html_parser import HtmlTagParser
 
 
 class XHTMLGenerator:
-    def __init__(self, data, filing_date, ticker, cik, file_id, html_file):
+    def __init__(self, data, filing_date, ticker, cik, file_id, html_file, split_file):
         # Initialize class attributes
         self.cik = cik
         self.data = data
         self.ticker = ticker
         self.file_id = file_id
         self.html_file = html_file
+        self.split_file = split_file
         self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
         # Extract HTML elements from the provided HTML file
@@ -552,7 +558,13 @@ class XHTMLGenerator:
         return soup
 
     def generate_ix_header(self):
-        record = get_db_record(file_id=self.file_id)
+        if self.split_file:
+            split_file_record = get_split_file_record(file_id=self.file_id)
+            file_id = split_file_record.get("fileId")
+            record = get_db_record(file_id=file_id)
+        else:
+
+            record = get_db_record(file_id=self.file_id)
 
         period_from_ = record.get("periodFrom", None)
         period_to_ = record.get("periodTo", None)
