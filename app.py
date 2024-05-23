@@ -22,7 +22,7 @@ from xml_generation.generate_lab import LabXMLGenerator
 from xml_generation.generate_xhtml import XHTMLGenerator
 
 # from auto_tagging.tagging import auto_tagging
-from flask import Flask, redirect, request, url_for
+from flask import Flask, redirect, request, url_for, jsonify
 from utils import (
     add_html_elements_to_concept,
     extract_html_elements,
@@ -512,6 +512,51 @@ def generate_xml_schema_files():
     os.remove(zip_file_path)
 
     return {"messages": "XML Files generated successfully.", "url": s3_url}
+
+
+@app.route("/api/upload-file", methods=["POST"])
+def upload():
+    from boto3 import Session
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        file_content = file.read()
+
+        access_key = config("AWS_S3_ACCESS_KEY_ID")
+        secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
+        region = config("AWS_S3_REGION")
+        bucket = config("AWS_S3_BUCKET_NAME")
+
+        session = Session(
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            region_name=region,
+        )
+
+        s3 = session.resource("s3")
+        file_name = file.filename
+
+        # Upload the file
+        s3.Bucket(bucket).put_object(
+            Key=file_name,
+            Body=file_content,
+            ACL="public-read",
+            ContentType="application/octet-stream",
+        )
+
+        # Generate and return the URL
+        response_url = f"https://{bucket}.s3.amazonaws.com/{file_name}"
+        return jsonify({"url": response_url})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
