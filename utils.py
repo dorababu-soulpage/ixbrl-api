@@ -908,3 +908,37 @@ def get_custom_element_record(client_id, element):
             cursor.close()
         if connection:
             connection.close()
+
+
+def get_element_record(name, prefix, taxonomy_id):
+    import psycopg2
+
+    db_url = f"postgresql://{username}:{password}@{host}:5432/{db}"
+    try:
+        # Attempt to connect and execute queries
+        connection = psycopg2.connect(db_url)
+        cursor = connection.cursor()
+
+        query = """
+        SELECT * FROM elements
+        WHERE name = %s AND prefix = %s AND "taxonomyId" = %s
+        """
+
+        cursor.execute(query, (name, prefix, taxonomy_id))
+
+        row = cursor.fetchone()
+        columns = [column[0] for column in cursor.description]
+        record = dict(zip(columns, row))
+        return record
+
+        # for row in rows:
+        #     record = dict(zip(columns, row))
+        #     print(record)
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

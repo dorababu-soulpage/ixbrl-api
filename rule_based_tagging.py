@@ -3,7 +3,7 @@ import requests
 import re, io, uuid
 import pandas as pd
 from bs4 import BeautifulSoup
-from utils import s3_uploader, update_db_record
+from utils import s3_uploader, get_db_record, update_db_record, get_element_record
 
 
 class RuleBasedTagging:
@@ -144,6 +144,13 @@ class RuleBasedTagging:
 
         return element_occurrences
 
+    def check_deprecated(self, name, prefix):
+        file_data = get_db_record(self.file_id)
+        taxonomy_id = file_data.get("taxonomyId")
+        element_record = get_element_record(name, prefix, taxonomy_id)
+        data: dict = element_record.get("data")
+        return data.get("deprecated")
+
     def find_element_add_id_attribute(self, filtered_mappings, target_table):
         element_occurrences = self.get_element_occurrences(filtered_mappings)
 
@@ -180,41 +187,44 @@ class RuleBasedTagging:
             for i, index in enumerate(item_index):
                 try:
                     tag = value.get("tags")[i]
-                    row = total_rows[index]
-                    for td in row.find_all("td"):
-                        if td.text:
-                            formatted_text = (
-                                td.text.replace(",", "")
-                                .replace("(", "")
-                                .replace(")", "")
-                            )
-
-                            # Converting to integer
-                            try:
-                                number_int = int(formatted_text)
-
-                                inner_array = (
-                                    str(td)
-                                    .replace("</td>", "")
-                                    .replace("<td", "")
-                                    .split(">")
+                    prefix, name = tag.split("--")
+                    is_deprecated = self.check_deprecated(name, prefix)
+                    if is_deprecated == "false":
+                        row = total_rows[index]
+                        for td in row.find_all("td"):
+                            if td.text:
+                                formatted_text = (
+                                    td.text.replace(",", "")
+                                    .replace("(", "")
+                                    .replace(")", "")
                                 )
-                                inner_array_string = ">".join(inner_array[1:])
 
-                                inner_html = inner_array_string
+                                # Converting to integer
+                                try:
+                                    number_int = int(formatted_text)
 
-                                td.string = ""
-                                for tag in td.find_all():
-                                    tag.decompose()
+                                    inner_array = (
+                                        str(td)
+                                        .replace("</td>", "")
+                                        .replace("<td", "")
+                                        .split(">")
+                                    )
+                                    inner_array_string = ">".join(inner_array[1:])
 
-                                formatted_string = f'<div id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</div>'
+                                    inner_html = inner_array_string
 
-                                # Replace the contents of the td element with the new HTML content
-                                td.append(
-                                    BeautifulSoup(formatted_string, "html.parser")
-                                )
-                            except Exception as e:
-                                pass
+                                    td.string = ""
+                                    for tag in td.find_all():
+                                        tag.decompose()
+
+                                    formatted_string = f'<div id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</div>'
+
+                                    # Replace the contents of the td element with the new HTML content
+                                    td.append(
+                                        BeautifulSoup(formatted_string, "html.parser")
+                                    )
+                                except Exception as e:
+                                    pass
 
                 except Exception as e:
                     pass
