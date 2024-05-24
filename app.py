@@ -199,17 +199,20 @@ def upload_zip_to_s3(name, zip_file):
         return None
 
 
-@app.route("/api/ixbrl-viewer")
-def ixbrl_viewer_file_generation():
-    file = request.args.get("file_path", None)
+def ixbrl_viewer_file_generation(file):
+
+    ixbrl_file_url = None
 
     # create viewer folder
     Path(f"{file}/viewer").mkdir(parents=True, exist_ok=True)
+
     logs_path = f"{file}/logs"
+    Path(logs_path).mkdir(parents=True, exist_ok=True)
 
     # ixbrl-file-generation
     plugin = f"{base_dir}/ixbrl-viewer/iXBRLViewerPlugin"
-    output_html = f"{file}/viewer/{Path(file).name}-ixbrl-report-viewer.html"
+
+    output_html = f"{file}/viewer/{Path(file).name}-ixbrl-viewer.html"
     viewer_url = "https://cdn.jsdelivr.net/npm/ixbrl-viewer/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
 
     print("\n===============[ixbrl viewer file generation started]===============\n")
@@ -217,10 +220,9 @@ def ixbrl_viewer_file_generation():
     ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_path}/iXBRLViewer.logs"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
 
-    validation_logs = validation(file)
+    # validation_logs = validation(file)
 
     # Zip the folder
-
     shutil.make_archive(file, "zip", file)
 
     # Upload the zip file to S3
@@ -234,13 +236,27 @@ def ixbrl_viewer_file_generation():
 
     # Get the filename
     filename = path.name
-    s3_url = upload_zip_to_s3(filename, zip_file_path)
+    ixbrl_package_url = upload_zip_to_s3(filename, zip_file_path)
+
+    try:
+        # Read the file content into memory
+        with open(output_html, "rb") as f:
+            file_content = f.read()
+
+        # Convert the file content to BytesIO
+        file_object = io.BytesIO(file_content)
+        ixbrl_filename = os.path.basename(output_html)
+
+        ixbrl_file_url = s3_uploader(ixbrl_filename, file_object)
+
+    except Exception as e:
+        print(str(e))
 
     # Remove the file, zip directory
     # shutil.rmtree(file)
     os.remove(zip_file_path)
 
-    return {"url": s3_url}
+    return ixbrl_package_url, ixbrl_file_url
 
 
 @app.route("/api/xml-files")
@@ -492,27 +508,13 @@ def generate_xml_schema_files():
 
     file_path = f"data/{ticker}-{filing_date}"
 
-    # crate zip
-    shutil.make_archive(file_path, "zip", file_path)
+    ixbrl_package_url, ixbrl_file_url = ixbrl_viewer_file_generation(file_path)
 
-    # Upload the zip file to S3
-    zip_file_path = f"{file_path}.zip"
-
-    # Parse the URL
-    parsed_url = urlparse(zip_file_path)
-
-    # Extract the path component and create a Path object
-    path = Path(parsed_url.path)
-
-    # Get the filename
-    filename = path.name
-    s3_url = upload_zip_to_s3(filename, zip_file_path)
-
-    # Remove the file, zip directory
-    # shutil.rmtree(file)
-    os.remove(zip_file_path)
-
-    return {"messages": "XML Files generated successfully.", "url": s3_url}
+    return {
+        "messages": "XML Files generated successfully.",
+        "ixbrl_package_url": ixbrl_package_url,
+        "ixbrl_file_url": ixbrl_file_url,
+    }
 
 
 @app.route("/api/upload-file", methods=["POST"])
