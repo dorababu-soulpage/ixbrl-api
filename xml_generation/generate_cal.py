@@ -1,5 +1,6 @@
 import re, os
 from itertools import groupby
+from operator import itemgetter
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
 
@@ -25,13 +26,24 @@ class CalXMLGenerator:
         for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
             self.grouped_data[key] = list(group)
 
+    def make_hashable(slef, d):
+        """Convert dictionary to a hashable type."""
+        return tuple((k, tuple(v) if isinstance(v, list) else v) for k, v in d.items())
+
     def group_data_by_cal_parent(self, data):
         cal_parent_grouped_data = {}
-        # Group the data by RoleName using itertools groupby and store it in grouped_data.
-        for key, group in groupby(data, key=lambda x: x["CalculationParent"]):
+
+        # First, sort the data by CalculationParent
+        sorted_data = sorted(data, key=itemgetter("CalculationParent"))
+
+        # Group the data by CalculationParent using itertools groupby and store it in grouped_data.
+        for key, group in groupby(sorted_data, key=itemgetter("CalculationParent")):
+            # We need to convert the group to a list to iterate multiple times
+            group_list = list(group)
             cal_parent_grouped_data[key] = [
-                dict(t) for t in {tuple(d.items()) for d in list(group)}
+                dict(t) for t in {self.make_hashable(d) for d in group_list}
             ]
+
         return cal_parent_grouped_data
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
