@@ -273,21 +273,22 @@ class XHTMLGenerator:
 
         # Find the first <p> tag with the specified ID
         first_id_tag = soup.find("p", id=start_id)
+
+        # Find the second <p> tag with the specified ID
+        second_id_tag = soup.find("p", id=end_id)
+
         random_number = random.randint(100, 999)
         count = 1
 
         continuation_start_tag = f'<ix:continuation id="f-{random_number}-{count}" continuedAt="f-{random_number}-{count+1}">'
         count += 1
 
-        first_id_tag.insert_after(BeautifulSoup(continuation_start_tag, "xml"))
-
-        # Find the second <p> tag with the specified ID
-        second_id_tag = soup.find("p", id=end_id)
-        second_id_tag.insert_after(BeautifulSoup("<ix:continuation>", "xml"))
-
         output_html = ""
 
         if first_id_tag and second_id_tag:
+            first_id_tag.insert_after(BeautifulSoup(continuation_start_tag, "xml"))
+            second_id_tag.insert_after(BeautifulSoup("<ix:continuation>", "xml"))
+
             # Find all tags, comments, and strings between the first and second IDs
             current_tag = first_id_tag.next_sibling
 
@@ -313,21 +314,26 @@ class XHTMLGenerator:
                     output_html += str(current_tag)
                 current_tag = current_tag.next_sibling
 
-        parser = HtmlTagParser()
-        data = parser.process_tag(start_id)
-        # create new Numeric or nonNumeric tag
-        datatype_tag = self.create_datatype_tag(
-            soup, data, first_id_tag, note_section=True
-        )
-        if first_id_tag.find_all():
-            # Add all contents from the specific <p> tag to the new tag
-            for inner_tag in first_id_tag.find_all():
-                datatype_tag.append(inner_tag)
-        datatype_tag["id"] = f"f-{random_number}"
-        style = first_id_tag.get("style")
-        datatype_tag["id"] = f"f-{random_number}"
-        datatype_tag["style"] = style
-        first_id_tag.replace_with(datatype_tag)
+            parser = HtmlTagParser()
+            data = parser.process_tag(start_id)
+            # create new Numeric or nonNumeric tag
+            datatype_tag = self.create_datatype_tag(
+                soup, data, first_id_tag, note_section=True
+            )
+
+            if first_id_tag.find_all():
+                # Add all contents from the specific <p> tag to the new tag
+                for inner_tag in first_id_tag.find_all():
+                    datatype_tag.append(inner_tag)
+
+            datatype_tag["id"] = f"f-{random_number}"
+            style = first_id_tag.get("style")
+            datatype_tag["id"] = f"f-{random_number}"
+            datatype_tag["style"] = style
+            first_id_tag.replace_with(datatype_tag)
+
+            return soup
+
         return soup
 
     def get_context_id(self, data):
