@@ -1,4 +1,5 @@
 import json, io
+import zipfile
 import os, shutil
 import subprocess
 from pathlib import Path
@@ -41,6 +42,8 @@ from utils import (
     get_definitions,
     get_client_record,
     s3_uploader,
+    read_images_from_folder,
+    upload_image_to_s3,
 )
 from rule_based_tagging import RuleBasedTagging
 
@@ -218,6 +221,7 @@ def ixbrl_viewer_file_generation(file):
     print("\n===============[ixbrl viewer file generation started]===============\n")
 
     ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_path}/iXBRLViewer.logs"
+    # ixbrl_file_gen_cmd = f"python arelleCmdLine.py -f {file} --plugins EdgarRenderer --disclosureSystem efm-pragmatic --validate -r out --report out"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
 
     # validation_logs = validation(file)
@@ -551,6 +555,64 @@ def upload():
     response_url = f"https://{bucket}.s3.amazonaws.com/{filename}"
 
     return {"url": response_url}
+
+
+@app.route("/api/upload-zip", methods=["POST"])
+def zip_upload():
+
+    html_url = None
+
+    uploaded_file = request.files["file"]
+    file_path = Path(uploaded_file.filename)
+    # Get the filename without extension
+    output_folder = file_path.stem
+    with zipfile.ZipFile(uploaded_file, "r") as zip_ref:
+        zip_ref.extractall(output_folder)
+
+    uploaded_images: dict = {}
+
+    images = read_images_from_folder(output_folder)
+
+    bucket_name = config("AWS_S3_BUCKET_NAME")
+    for filename, img_path in images:
+        uploaded_url = upload_image_to_s3(img_path, bucket_name, filename)
+        uploaded_images[filename] = uploaded_url
+
+    for filename in os.listdir(output_folder):
+        if filename.endswith((".htm", ".html")):
+            input_html_file = os.path.join(output_folder, filename)
+
+            with open(input_html_file, "r") as html_file:
+                soup = BeautifulSoup(html_file, "html.parser")
+                img_tags = soup.find_all("img")
+                for img in img_tags:
+                    img_url = img["src"]
+                    # Assuming img_url is a relative path, construct S3 URL
+                    s3_url = uploaded_images.get(img_url)
+                    img["src"] = s3_url
+
+            # Save modified HTML back
+            with open(input_html_file, "w") as modified_html:
+                modified_html.write(str(soup))
+
+            try:
+                # Read the file content into memory
+                with open(input_html_file, "rb") as f:
+                    file_content = f.read()
+
+                # Convert the file content to BytesIO
+                file_object = io.BytesIO(file_content)
+
+                html_url = s3_uploader(filename, file_object)
+
+            except Exception as e:
+                print(str(e))
+
+    # Remove the file, zip directory
+    shutil.rmtree(output_folder)
+    # os.remove(zip_file_path)
+
+    return {"html_url": html_url}
 
 
 if __name__ == "__main__":
