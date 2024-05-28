@@ -1,6 +1,8 @@
 import os
 import json
 
+import boto3
+from PIL import Image
 from boto3.session import Session
 
 import openpyxl
@@ -942,3 +944,46 @@ def get_element_record(name, prefix, taxonomy_id):
             cursor.close()
         if connection:
             connection.close()
+
+
+def read_images_from_folder(folder_path):
+    images = []
+    for filename in os.listdir(folder_path):
+        if filename.endswith(
+            (".png", ".jpg", ".jpeg", ".bmp", ".gif")
+        ):  # Add other extensions if needed
+            img_path = os.path.join(folder_path, filename)
+            img = Image.open(img_path)
+            images.append((filename, img_path))
+    return images
+
+
+def upload_image_to_s3(file_path, bucket, object_name=None):
+    """Upload a file to an S3 bucket and return the URL"""
+    access_key = config("AWS_S3_ACCESS_KEY_ID")
+    secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
+    region = config("AWS_S3_REGION")
+
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
+    )
+
+    s3 = session.resource("s3")
+
+    if object_name is None:
+        object_name = os.path.basename(file_path)
+
+    try:
+        s3.Bucket(bucket).put_object(
+            Key=object_name,
+            Body=open(file_path, "rb"),
+            ACL="public-read",
+            ContentType="application/octet-stream",
+        )
+    except Exception as e:
+        print(f"Error uploading {file_path}: {e}")
+        return None
+
+    return f"https://{bucket}.s3.amazonaws.com/{object_name}"
