@@ -265,21 +265,44 @@ def extract_html_elements(file, only_id=False) -> list[dict]:
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
 
-        # Extract and print the attribute values
-        for element in tags:
-            element_role = element.get("role", "")
-            element_label = element.get("title", "")
-            element_id = element.get("id", "")
-            if only_id:
-                html_tags_data.append(element_id)
-            else:
-                html_tags_data.append(
-                    {
-                        "role": element_role,
-                        "label": element_label,
-                        "id": element_id,
-                    }
-                )
+        for tag in tags:
+            # Find the <font> element by its ID
+            font_element = soup.find("font", id=tag["id"])
+
+            # Check if the <font> element exists
+            if font_element:
+                # Traverse up the DOM tree to find the parent <table> element
+                table = font_element.find_parent("table")
+
+                # Check if the table is found
+                if table and "id" in table.attrs:
+                    tag_id = tag["id"].split("_")
+                    table_id = table["id"].split("_")
+                    final_id = "_".join(tag_id[:-1] + table_id[2:])
+                    if only_id:
+                        html_tags_data.append(final_id)
+                    else:
+                        html_tags_data.append(
+                            {
+                                "role": table.get("role", ""),
+                                "label": table.get("title", ""),
+                                "id": final_id,
+                            }
+                        )
+                else:
+                    element_role = tag.get("role", "")
+                    element_label = tag.get("title", "")
+                    element_id = tag.get("id", "")
+                    if only_id:
+                        html_tags_data.append(element_id)
+                    else:
+                        html_tags_data.append(
+                            {
+                                "role": element_role,
+                                "label": element_label,
+                                "id": element_id,
+                            }
+                        )
 
     return html_tags_data
 
