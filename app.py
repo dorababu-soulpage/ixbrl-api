@@ -562,11 +562,21 @@ def zip_upload():
 
     html_url = None
 
-    uploaded_file = request.files["file"]
-    file_path = Path(uploaded_file.filename)
+    url = request.json.get("zip_url")
+    # Download the zip file
+    response = requests.get(url)
+    # Check if the download was successful
+    response.raise_for_status()
+
+    # Parse the URL to get the path
+    parsed_url = urlparse(url)
+
+    # Extract the filename from the path using pathlib
+    path = Path(parsed_url.path)
+
     # Get the filename without extension
-    output_folder = file_path.stem
-    with zipfile.ZipFile(uploaded_file, "r") as zip_ref:
+    output_folder = path.stem
+    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
         zip_ref.extractall(output_folder)
 
     uploaded_images: dict = {}
@@ -612,7 +622,7 @@ def zip_upload():
     shutil.rmtree(output_folder)
     # os.remove(zip_file_path)
 
-    return {"html_url": html_url}
+    return {"url": html_url}
 
 
 if __name__ == "__main__":
