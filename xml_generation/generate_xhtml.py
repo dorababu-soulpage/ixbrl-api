@@ -103,17 +103,25 @@ class XHTMLGenerator:
                 period_date_str = self.formatted_to_date(period_date)
 
                 # Create the root element
-                dimension_root = etree.SubElement(resources, "context")
+                dimension_root = etree.SubElement(
+                    resources, "{http://www.xbrl.org/2003/instance}context"
+                )
                 dimension_root.set("id", f"AsOf{period_date_str}_{member}")
 
                 # Create the entity element
-                entity = etree.SubElement(dimension_root, "entity")
-                identifier = etree.SubElement(entity, "identifier")
+                entity = etree.SubElement(
+                    dimension_root, "{http://www.xbrl.org/2003/instance}entity"
+                )
+                identifier = etree.SubElement(
+                    entity, "{http://www.xbrl.org/2003/instance}identifier"
+                )
                 identifier.set("scheme", "http://www.sec.gov/CIK")
                 identifier.text = self.cik
 
                 # Add the segment element
-                segment = etree.SubElement(entity, "segment")
+                segment = etree.SubElement(
+                    entity, "{http://www.xbrl.org/2003/instance}segment"
+                )
                 explicitMember = etree.SubElement(
                     segment,
                     "{http://xbrl.org/2006/xbrldi}explicitMember",
@@ -123,8 +131,12 @@ class XHTMLGenerator:
                 explicitMember.text = member.replace("_", ":")
 
                 # Add the period element
-                period = etree.SubElement(dimension_root, "period")
-                instant = etree.SubElement(period, "instant")
+                period = etree.SubElement(
+                    dimension_root, "{http://www.xbrl.org/2003/instance}period"
+                )
+                instant = etree.SubElement(
+                    period, "{http://www.xbrl.org/2003/instance}instant"
+                )
                 instant.text = period_date_str
 
             else:
@@ -135,38 +147,60 @@ class XHTMLGenerator:
                     to_date_str = self.formatted_to_date(to)
 
                     # Create the root element
-                    context_root = etree.SubElement(resources, "context")
+                    context_root = etree.SubElement(
+                        resources, "{http://www.xbrl.org/2003/instance}context"
+                    )
                     context_root.set("id", f"FROM{from_date_str}TO{to_date_str}")
 
                     # Create the entity element
-                    entity = etree.SubElement(context_root, "entity")
-                    identifier = etree.SubElement(entity, "identifier")
+                    entity = etree.SubElement(
+                        context_root, "{http://www.xbrl.org/2003/instance}entity"
+                    )
+                    identifier = etree.SubElement(
+                        entity, "{http://www.xbrl.org/2003/instance}identifier"
+                    )
                     identifier.set("scheme", "http://www.sec.gov/CIK")
                     identifier.text = self.cik
 
                     # Create the period element
-                    period = etree.SubElement(context_root, "period")
-                    startDate = etree.SubElement(period, "startDate")
+                    period = etree.SubElement(
+                        context_root, "{http://www.xbrl.org/2003/instance}period"
+                    )
+                    startDate = etree.SubElement(
+                        period, "{http://www.xbrl.org/2003/instance}startDate"
+                    )
                     startDate.text = from_date_str
-                    endDate = etree.SubElement(period, "endDate")
+                    endDate = etree.SubElement(
+                        period, "{http://www.xbrl.org/2003/instance}endDate"
+                    )
                     endDate.text = to_date_str
 
                 else:
                     period: str = record.get("Period")
                     period_date_str = self.formatted_to_date(period_date)
                     # Create the root element
-                    context_root = etree.SubElement(resources, "context")
+                    context_root = etree.SubElement(
+                        resources, "{http://www.xbrl.org/2003/instance}context"
+                    )
                     context_root.set("id", f"AsOf{period_date_str}")
 
                     # Create the entity element
-                    entity = etree.SubElement(context_root, "entity")
-                    identifier = etree.SubElement(entity, "identifier")
+                    entity = etree.SubElement(
+                        context_root, "{http://www.xbrl.org/2003/instance}entity"
+                    )
+                    identifier = etree.SubElement(
+                        entity, "{http://www.xbrl.org/2003/instance}identifier"
+                    )
                     identifier.set("scheme", "http://www.sec.gov/CIK")
                     identifier.text = self.cik
 
                     # Create the period element
-                    period = etree.SubElement(context_root, "period")
-                    instant = etree.SubElement(period, "instant")
+                    period = etree.SubElement(
+                        context_root, "{http://www.xbrl.org/2003/instance}period"
+                    )
+                    instant = etree.SubElement(
+                        period, "{http://www.xbrl.org/2003/instance}instant"
+                    )
                     instant.text = period_date_str
 
     def create_units(self, resources, units):
@@ -221,6 +255,12 @@ class XHTMLGenerator:
                 measure_denominator = etree.SubElement(unitDenominator, "measure")
                 measure_denominator.text = name
 
+    def remove_ix_namespaces(self, html_content: str):
+        for key, value in namespace.items():
+            namespace_format = f'xmlns:{key}="{value}"'
+            html_content = html_content.replace(namespace_format, "")
+        return html_content
+
     def save_html_file(self, soup):
         # Extract the directory from the output file path
         directory = os.path.dirname(self.output_file)
@@ -232,14 +272,36 @@ class XHTMLGenerator:
         # Update the output file with the new soup data
         with open(self.output_file, "wb") as out_file:
             html_content: str = soup.prettify()
+
+            # remove all the namespaces in the ix header
+            html_content = self.remove_ix_namespaces(html_content)
+
+            html_content = html_content.replace(
+                '<link:schemaRef xlink:href="soulpage-20240603.xsd" xlink:type="simple">',
+                '<link:schemaRef xlink:href="soulpage-20240603.xsd" xlink:type="simple" />',
+            )
+
             html_content = html_content.replace(
                 "<continuation />", "</ix:continuation >"
             )
-            html_content = html_content.replace(" <continuation", " <ix:continuation")
+            html_content = html_content.replace("<continuation", " <ix:continuation")
             html_content = html_content.replace("/>", ">")
             html_content = html_content.replace(
                 "<ix:continuation>", "</ix:continuation>"
             )
+            html_content = html_content.replace(
+                '<meta content="text/html" http-equiv="Content-Type">',
+                '<meta content="text/html" http-equiv="Content-Type"/>',
+            )
+            html_content = html_content.replace("<font", "<span")
+            html_content = html_content.replace("</font", "</span")
+            html_content = html_content.replace("<br>", "<br/>")
+
+            # replace html entities
+            html_content = html_content.replace("☐", "&#9744;")
+            html_content = html_content.replace("☑", "&#9745;")
+            html_content = html_content.replace("☒", "&#9746;")
+
             # add HTML attributes in the html
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
@@ -579,10 +641,10 @@ class XHTMLGenerator:
 
         units = record.get("unit", [])
 
-        non_numeric_1_contextRef = f"From{period_from}to{period_to}"
+        non_numeric_1_contextRef = f"FROM{period_from}TO{period_to}"
         non_numeric_1_text = self.cik
 
-        non_numeric_2_contextRef = f"From{period_from}to{period_to}"
+        non_numeric_2_contextRef = f"FROM{period_from}TO{period_to}"
 
         schema_ref_xlink_href = self.xsd_filename
 
@@ -617,7 +679,19 @@ class XHTMLGenerator:
             root, "{http://www.xbrl.org/2013/inlineXBRL}references"
         )
 
-        # Create the 'link:schemaRef' element within 'ix:references'
+        # Create the root element with the namespace map
+        references = etree.SubElement(
+            references,
+            "{http://www.xbrl.org/2013/inlineXBRL}references",
+            nsmap={
+                "ix": namespace.get("ix"),
+                "link": namespace.get("link"),
+                "xlink": namespace.get("xlink"),
+            },
+        )
+        references.set("{http://www.w3.org/XML/1998/namespace}lang", "en-US")
+
+        # Create the schemaRef element
         schema_ref = etree.SubElement(
             references,
             "{http://www.xbrl.org/2003/linkbase}schemaRef",
@@ -625,28 +699,28 @@ class XHTMLGenerator:
                 "{http://www.w3.org/1999/xlink}href": schema_ref_xlink_href,
                 "{http://www.w3.org/1999/xlink}type": "simple",
             },
-            nsmap={"link": namespace.get("link"), "xlink": namespace.get("xlink")},
         )
 
         # Create the 'ix:resources' element
         resources = etree.SubElement(
             root,
             "{http://www.xbrl.org/2013/inlineXBRL}resources",
-            nsmap={"ix": namespace.get("ix")},
+            nsmap={"ix": namespace.get("ix"), "xbrli": namespace.get("xbrli")},
         )
 
         self.created_context_ref(resources)
         self.create_units(resources, units)
 
         # # Create an ElementTree object and serialize it to a string
-        xml_str = etree.tostring(root, encoding="utf-8").decode("utf-8")
+        xml_str = etree.tostring(root).decode()
         return xml_str
 
     def generate_xhtml_file(self):
         # Retrieve HTML content from the provided URL
         response = requests.get(self.html_file)
         if response.status_code == 200:
-            html_content = response.text
+            # html_content = response.text
+            html_content = response.content
 
             # Parse HTML using Beautiful Soup
             soup = BeautifulSoup(html_content, "html.parser")
@@ -702,6 +776,13 @@ class XHTMLGenerator:
             except Exception as e:
                 print("Body Element Not found")
 
+            # Find the link:schemaRef tag
+            schema_ref_tag = soup.find("link:schemaRef")
+
+            if schema_ref_tag:
+                # Convert self-closing tag to a standard tag with a closing tag
+                schema_ref_tag.string = ""
+
             # update the footnote to soup object
             soup = self.foot_notes(soup)
             soup = self.generate_datatypes_tags(soup)
@@ -709,30 +790,3 @@ class XHTMLGenerator:
 
             # finally save the html file
             self.save_html_file(soup)
-
-        # # Process the output file to remove namespaces and add/modify HTML attributes
-        # with open(self.output_file, "r", encoding="utf-8") as f:
-        #     html_content = f.read()
-        #     # Remove XBRL namespaces from the HTML content
-        #     html_content = remove_ix_namespaces(html_content)
-
-        #     # Add or modify HTML attributes
-        #     html_attributes = add_html_attributes()
-        #     print(html_attributes)
-
-        #     # Replace font tags with span tags and append HTML attributes
-        #     html_content = (
-        #         html_content.replace("&nbsp;", "&#160;")
-        #         .replace("&rsquo;", "&#180;")
-        #         .replace("&sect;", "&#167;")
-        #         .replace("&ndash;", "&#8211;")
-        #         .replace("&ldquo;", "&#8220;")
-        #         .replace("&rdquo;", "&#8221;")
-        #         .replace("<font", "<span>")
-        #         .replace("</font>", "</span>")
-        #         .replace("<html>", html_attributes)
-        #     )
-
-        #     # Write the modified HTML content back to the output file
-        #     with open(self.output_file, "w", encoding="utf-8") as output_file:
-        #         output_file.write(html_content)
