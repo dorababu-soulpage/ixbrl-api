@@ -259,7 +259,9 @@ def extract_html_elements(file, only_id=False) -> list[dict]:
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
         # Parse the HTML content using BeautifulSoup
-        html_content = response.text
+        # html_content = response.text
+        html_content = response.content
+
         soup = BeautifulSoup(html_content, "html.parser")
 
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
