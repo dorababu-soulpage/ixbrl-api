@@ -549,6 +549,11 @@ class XHTMLGenerator:
         datatype_attributes = data_type_record.get("attributes", "")
         # Create new nonNumeric or Numeric tag
         non_numeric_tag = soup.new_tag(datatype_element)
+        fact = data.get("Fact", "")
+        if fact == "N":
+            non_numeric_tag["xs:nil"] = "true"
+            unit: str = data.get("Unit", "")
+            non_numeric_tag["unitRef"] = unit
 
         for attribute in datatype_attributes:
             if attribute == "contextRef":
@@ -572,9 +577,12 @@ class XHTMLGenerator:
                 non_numeric_tag["scale"] = counted_as
 
             if attribute == "format":
-                data_type = self.get_datatype(data.get("Element"))
-                format_value = self.get_format_value(data_type, tag.text)
-                non_numeric_tag["format"] = format_value
+                if fact == "Z":
+                    non_numeric_tag["format"] = "ixt:zerodash"
+                else:
+                    data_type = self.get_datatype(data.get("Element"))
+                    format_value = self.get_format_value(data_type, tag.text)
+                    non_numeric_tag["format"] = format_value
 
             if attribute == "id":
                 is_footnote = data.get("have_footnote")
@@ -722,16 +730,17 @@ class XHTMLGenerator:
 
         non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
 
-        # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-        for key, value in elements_data.items():
+        if elements_data:
+            # Create the 'ix:nonNumeric' elements within 'ix:hidden'
+            for key, value in elements_data.items():
 
-            non_numeric = etree.SubElement(
-                hidden,
-                "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
-                contextRef=non_numeric_contextRef,
-                name=f"dei:{key}",
-            )
-            non_numeric.text = value
+                non_numeric = etree.SubElement(
+                    hidden,
+                    "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
+                    contextRef=non_numeric_contextRef,
+                    name=f"dei:{key}",
+                )
+                non_numeric.text = value
 
         # Create the 'ix:references' element
         references = etree.SubElement(

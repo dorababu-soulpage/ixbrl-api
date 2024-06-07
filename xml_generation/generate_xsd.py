@@ -257,24 +257,25 @@ class XSDGenerator:
             custom_element_data = get_custom_element_record(
                 self.client_id, element_name
             )
-            data_type = custom_element_data.get("dataType", "")
-            custom_element = ET.Element(
-                "xsd:element",
-                {
-                    "id": f"{custom_element}".replace("custom", self.ticker).replace(
-                        "--", "_"
-                    ),
-                    "abstract": custom_element_data.get("abstract", ""),
-                    "name": f"{element_name}",
-                    "nillable": custom_element_data.get("nillable", ""),
-                    "xbrli:periodType": custom_element_data.get("period", ""),
-                    "substitutionGroup": custom_element_data.get(
-                        "substitutionGroup", ""
-                    ),
-                    "type": data_type,
-                },
-            )
-            self.root.append(custom_element)
+            if custom_element_data:
+                data_type = custom_element_data.get("dataType", "")
+                custom_element = ET.Element(
+                    "xsd:element",
+                    {
+                        "id": f"{custom_element}".replace(
+                            "custom", self.ticker
+                        ).replace("--", "_"),
+                        "abstract": custom_element_data.get("abstract", ""),
+                        "name": f"{element_name}",
+                        "nillable": custom_element_data.get("nillable", ""),
+                        "xbrli:periodType": custom_element_data.get("period", ""),
+                        "substitutionGroup": custom_element_data.get(
+                            "substitutionGroup", ""
+                        ),
+                        "type": data_type,
+                    },
+                )
+                self.root.append(custom_element)
 
     def generate_xsd_schema(self):
         # Create an XML declaration

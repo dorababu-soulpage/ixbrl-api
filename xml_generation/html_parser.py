@@ -79,6 +79,7 @@ class HtmlTagParser:
             "RoleType": self.extract_field(data, "r"),
             "DataType": self.extract_field(data, "d"),
             "Balance": self.extract_field(data, "b"),
+            "Fact": self.extract_field(data, "n"),
             "have_footnote": self.check_foot_note(data),
             "UniqueId": data[-1],
         }
