@@ -217,7 +217,7 @@ class RuleBasedTagging:
                                     for tag in td.find_all():
                                         tag.decompose()
 
-                                    formatted_string = f'<div id="apex_90N_e{tag}_{uuid.uuid4().hex}">{inner_html}</div>'
+                                    formatted_string = f'<font id="apex_90N_e{tag}_{uuid.uuid4().hex}" data-autotag="true">{inner_html}</font>'
 
                                     # Replace the contents of the td element with the new HTML content
                                     td.append(
