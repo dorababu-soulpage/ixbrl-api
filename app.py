@@ -205,12 +205,22 @@ def upload_zip_to_s3(name, zip_file):
 def ixbrl_viewer_file_generation(file):
 
     ixbrl_file_url = None
+    log_file_url = None
 
     # create viewer folder
     Path(f"{file}/viewer").mkdir(parents=True, exist_ok=True)
 
     logs_path = f"{file}/logs"
+
+    # Check if logs_path exists
+    if Path(logs_path).exists():
+        # Remove the existing directory
+        shutil.rmtree(logs_path)
+
+    # Create the directory
     Path(logs_path).mkdir(parents=True, exist_ok=True)
+
+    logs_file = f"{logs_path}/iXBRLViewer.logs"
 
     # ixbrl-file-generation
     plugin = f"{base_dir}/ixbrl-viewer/iXBRLViewerPlugin"
@@ -220,7 +230,7 @@ def ixbrl_viewer_file_generation(file):
 
     print("\n===============[ixbrl viewer file generation started]===============\n")
 
-    ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_path}/iXBRLViewer.logs"
+    ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_file}"
     # ixbrl_file_gen_cmd = f"python arelleCmdLine.py -f {file} --plugins EdgarRenderer --disclosureSystem efm-pragmatic --validate -r out --report out"
     subprocess.call(ixbrl_file_gen_cmd, shell=True)
 
@@ -256,11 +266,25 @@ def ixbrl_viewer_file_generation(file):
     except Exception as e:
         print(str(e))
 
+    try:
+        # Read the file content into memory
+        with open(logs_file, "rb") as f:
+            file_content = f.read()
+
+        # Convert the file content to BytesIO
+        file_object = io.BytesIO(file_content)
+        ixbrl_filename = os.path.basename(logs_file)
+
+        log_file_url = s3_uploader(ixbrl_filename, file_object)
+
+    except Exception as e:
+        print(str(e))
+
     # Remove the file, zip directory
     # shutil.rmtree(file)
     os.remove(zip_file_path)
 
-    return ixbrl_package_url, ixbrl_file_url
+    return ixbrl_package_url, ixbrl_file_url, log_file_url
 
 
 @app.route("/api/xml-files")
@@ -512,12 +536,15 @@ def generate_xml_schema_files():
 
     file_path = f"data/{ticker}-{filing_date}"
 
-    ixbrl_package_url, ixbrl_file_url = ixbrl_viewer_file_generation(file_path)
+    ixbrl_package_url, ixbrl_file_url, log_file_url = ixbrl_viewer_file_generation(
+        file_path
+    )
 
     return {
         "messages": "XML Files generated successfully.",
         "ixbrl_package_url": ixbrl_package_url,
         "ixbrl_file_url": ixbrl_file_url,
+        "log_file_url": log_file_url,
     }
 
 

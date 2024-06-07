@@ -94,50 +94,101 @@ class XHTMLGenerator:
 
             if period_date and axis_member:
                 splitted = axis_member.split("__")
+                # Group by 3
+                groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
+                for group in groups:
+                    _axis, _domain, _member = group
+                    axis = _axis.replace("--", "_").replace("custom", self.ticker)
+                    domain = _domain.replace("--", "_").replace("custom", self.ticker)
+                    member = _member.replace("--", "_").replace("custom", self.ticker)
 
-                _axis, _domain, _member = splitted
-                axis = _axis.replace("--", "_")
-                domain = _domain.replace("--", "_")
-                member = _member.replace("--", "_")
+                    if "__" in period_date:
+                        from_, to = period_date.split("__")
 
-                period_date_str = self.formatted_to_date(period_date)
+                        from_date_str = self.formatted_to_date(from_)
+                        to_date_str = self.formatted_to_date(to)
 
-                # Create the root element
-                dimension_root = etree.SubElement(
-                    resources, "{http://www.xbrl.org/2003/instance}context"
-                )
-                dimension_root.set("id", f"AsOf{period_date_str}_{member}")
+                        # Create the root element
+                        dimension_root = etree.SubElement(
+                            resources, "{http://www.xbrl.org/2003/instance}context"
+                        )
+                        dimension_root.set("id", f"AsOf{period_date_str}_{member}")
 
-                # Create the entity element
-                entity = etree.SubElement(
-                    dimension_root, "{http://www.xbrl.org/2003/instance}entity"
-                )
-                identifier = etree.SubElement(
-                    entity, "{http://www.xbrl.org/2003/instance}identifier"
-                )
-                identifier.set("scheme", "http://www.sec.gov/CIK")
-                identifier.text = self.cik
+                        # Create the entity element
+                        entity = etree.SubElement(
+                            dimension_root, "{http://www.xbrl.org/2003/instance}entity"
+                        )
+                        identifier = etree.SubElement(
+                            entity, "{http://www.xbrl.org/2003/instance}identifier"
+                        )
+                        identifier.set("scheme", "http://www.sec.gov/CIK")
+                        identifier.text = self.cik
 
-                # Add the segment element
-                segment = etree.SubElement(
-                    entity, "{http://www.xbrl.org/2003/instance}segment"
-                )
-                explicitMember = etree.SubElement(
-                    segment,
-                    "{http://xbrl.org/2006/xbrldi}explicitMember",
-                    nsmap={"xbrldi": namespace.get("xbrldi")},
-                )
-                explicitMember.set("dimension", axis.replace("_", ":"))
-                explicitMember.text = member.replace("_", ":")
+                        # Add the segment element
+                        segment = etree.SubElement(
+                            entity, "{http://www.xbrl.org/2003/instance}segment"
+                        )
+                        explicitMember = etree.SubElement(
+                            segment,
+                            "{http://xbrl.org/2006/xbrldi}explicitMember",
+                            nsmap={"xbrldi": namespace.get("xbrldi")},
+                        )
+                        explicitMember.set("dimension", axis.replace("_", ":"))
+                        explicitMember.text = member.replace("_", ":")
 
-                # Add the period element
-                period = etree.SubElement(
-                    dimension_root, "{http://www.xbrl.org/2003/instance}period"
-                )
-                instant = etree.SubElement(
-                    period, "{http://www.xbrl.org/2003/instance}instant"
-                )
-                instant.text = period_date_str
+                        # Create the period element
+                        period = etree.SubElement(
+                            context_root, "{http://www.xbrl.org/2003/instance}period"
+                        )
+                        startDate = etree.SubElement(
+                            period, "{http://www.xbrl.org/2003/instance}startDate"
+                        )
+                        startDate.text = from_date_str
+                        endDate = etree.SubElement(
+                            period, "{http://www.xbrl.org/2003/instance}endDate"
+                        )
+                        endDate.text = to_date_str
+
+                    else:
+                        period: str = record.get("Period")
+                        period_date_str = self.formatted_to_date(period_date)
+
+                        # Create the root element
+                        dimension_root = etree.SubElement(
+                            resources, "{http://www.xbrl.org/2003/instance}context"
+                        )
+                        dimension_root.set("id", f"AsOf{period_date_str}_{member}")
+
+                        # Create the entity element
+                        entity = etree.SubElement(
+                            dimension_root, "{http://www.xbrl.org/2003/instance}entity"
+                        )
+                        identifier = etree.SubElement(
+                            entity, "{http://www.xbrl.org/2003/instance}identifier"
+                        )
+                        identifier.set("scheme", "http://www.sec.gov/CIK")
+                        identifier.text = self.cik
+
+                        # Add the segment element
+                        segment = etree.SubElement(
+                            entity, "{http://www.xbrl.org/2003/instance}segment"
+                        )
+                        explicitMember = etree.SubElement(
+                            segment,
+                            "{http://xbrl.org/2006/xbrldi}explicitMember",
+                            nsmap={"xbrldi": namespace.get("xbrldi")},
+                        )
+                        explicitMember.set("dimension", axis.replace("_", ":"))
+                        explicitMember.text = member.replace("_", ":")
+
+                        # Add the period element
+                        period = etree.SubElement(
+                            dimension_root, "{http://www.xbrl.org/2003/instance}period"
+                        )
+                        instant = etree.SubElement(
+                            period, "{http://www.xbrl.org/2003/instance}instant"
+                        )
+                        instant.text = period_date_str
 
             else:
                 if "__" in period_date:
@@ -408,14 +459,30 @@ class XHTMLGenerator:
         if period_date and axis_member:
             # Split Axis_Member to extract the relevant member
             splitted = axis_member.split("__")
-            _, _, _member = splitted
-            member = _member.replace("--", "_")
 
-            # Format period_date to a specific date format
-            period_date_str = self.formatted_to_date(period_date)
+            # Group by 3
+            groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
+            for group in groups:
+                # axis, domain, member = group
+                _, _, _member = group
+                member = _member.replace("--", "_")
 
-            # Create context_id based on Period date and Axis member
-            context_id = f"AsOf{period_date_str}_{member}"
+                if "__" in period_date:
+                    # If Period contains a range, split it into start and end dates
+                    from_, to = period_date.split("__")
+
+                    # Format start and end dates
+                    from_date_str = self.formatted_to_date(from_)
+                    to_date_str = self.formatted_to_date(to)
+
+                    # Create context_id based on date range
+                    context_id = f"FROM{from_date_str}TO{to_date_str}_{member}"
+                else:
+                    # Format period_date to a specific date format
+                    period_date_str = self.formatted_to_date(period_date)
+
+                    # Create context_id based on Period date and Axis member
+                    context_id = f"AsOf{period_date_str}_{member}"
         else:
             if period_date:
                 # If Period is present but Axis_Member is not
@@ -640,11 +707,7 @@ class XHTMLGenerator:
         period_to = period_to_.strftime("%Y-%m-%d")
 
         units = record.get("unit", [])
-
-        non_numeric_1_contextRef = f"FROM{period_from}TO{period_to}"
-        non_numeric_1_text = self.cik
-
-        non_numeric_2_contextRef = f"FROM{period_from}TO{period_to}"
+        elements_data: dict = record.get("elementsData", {})
 
         schema_ref_xlink_href = self.xsd_filename
 
@@ -657,22 +720,18 @@ class XHTMLGenerator:
         # Create the 'ix:hidden' element
         hidden = etree.SubElement(root, "{http://www.xbrl.org/2013/inlineXBRL}hidden")
 
-        # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-        non_numeric_1 = etree.SubElement(
-            hidden,
-            "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
-            contextRef=non_numeric_1_contextRef,
-            name="dei:EntityCentralIndexKey",
-        )
-        non_numeric_1.text = non_numeric_1_text
+        non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
 
-        non_numeric_2 = etree.SubElement(
-            hidden,
-            "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
-            contextRef=non_numeric_2_contextRef,
-            name="dei:AmendmentFlag",
-        )
-        non_numeric_2.text = "false"
+        # Create the 'ix:nonNumeric' elements within 'ix:hidden'
+        for key, value in elements_data.items():
+
+            non_numeric = etree.SubElement(
+                hidden,
+                "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
+                contextRef=non_numeric_contextRef,
+                name=f"dei:{key}",
+            )
+            non_numeric.text = value
 
         # Create the 'ix:references' element
         references = etree.SubElement(

@@ -204,10 +204,7 @@ class XSDGenerator:
                             splitted[i : i + 3] for i in range(0, len(splitted), 3)
                         ]
                         for group in groups:
-                            _axis, _domain, _member = group
-                            axis = _axis.replace("--", "_")
-                            domain = _domain.replace("--", "_")
-                            member = _member.replace("--", "_")
+                            axis, domain, member = group
 
                             if axis.startswith("custom"):
                                 custom_elements.append(axis)
@@ -267,11 +264,13 @@ class XSDGenerator:
                     "id": f"{custom_element}".replace("custom", self.ticker).replace(
                         "--", "_"
                     ),
-                    "abstract": "true",
+                    "abstract": custom_element_data.get("abstract", ""),
                     "name": f"{element_name}",
-                    "nillable": "true",
-                    "xbrli:periodType": "duration",
-                    "substitutionGroup": "xbrli:item",
+                    "nillable": custom_element_data.get("nillable", ""),
+                    "xbrli:periodType": custom_element_data.get("period", ""),
+                    "substitutionGroup": custom_element_data.get(
+                        "substitutionGroup", ""
+                    ),
                     "type": data_type,
                 },
             )
