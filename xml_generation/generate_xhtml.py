@@ -730,12 +730,13 @@ class XHTMLGenerator:
             nsmap={"ix": namespace.get("ix")},
         )
 
-        # Create the 'ix:hidden' element
-        hidden = etree.SubElement(root, "{http://www.xbrl.org/2013/inlineXBRL}hidden")
-
         non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
 
         if elements_data:
+            # Create the 'ix:hidden' element
+            hidden = etree.SubElement(
+                root, "{http://www.xbrl.org/2013/inlineXBRL}hidden"
+            )
             # Create the 'ix:nonNumeric' elements within 'ix:hidden'
             for key, value in elements_data.items():
 
@@ -746,6 +747,23 @@ class XHTMLGenerator:
                     name=f"dei:{key}",
                 )
                 non_numeric.text = value
+        else:
+            non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
+            non_numeric_text = self.cik
+
+            # Create the 'ix:hidden' element
+            hidden = etree.SubElement(
+                root, "{http://www.xbrl.org/2013/inlineXBRL}hidden"
+            )
+
+            # Create the 'ix:nonNumeric' elements within 'ix:hidden'
+            non_numeric_1 = etree.SubElement(
+                hidden,
+                "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
+                contextRef=non_numeric_contextRef,
+                name="dei:EntityCentralIndexKey",
+            )
+            non_numeric_1.text = non_numeric_text
 
         # Create the 'ix:references' element
         references = etree.SubElement(
