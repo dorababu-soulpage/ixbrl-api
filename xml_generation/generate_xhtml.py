@@ -361,7 +361,6 @@ class XHTMLGenerator:
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
 
-
             # Create comments after the XML declaration
             comments_after_declaration = [
                 "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
@@ -370,7 +369,7 @@ class XHTMLGenerator:
             ]
 
             # Concatenate XML declaration and comments
-            xml_declaration  = "\n".join(comments_after_declaration) + "\n"
+            xml_declaration = "\n".join(comments_after_declaration) + "\n"
 
             # Encode XML declaration to bytes and write to file
             xml_declaration_bytes = xml_declaration.encode("utf-8")
@@ -535,7 +534,8 @@ class XHTMLGenerator:
         # data_type = data.get("DataType")
         # data_type = self.get_datatype(data.get("Element"))
         data_type = data.get("DataType")
-        if data_type:
+        heading = data.get("Heading")
+        if data_type and heading is False:
             data_type_record = self.get_datatype_data(data_type)
             if data_type_record:
                 datatype_element = data_type_record.get("element", "")
@@ -559,7 +559,9 @@ class XHTMLGenerator:
 
                     if attribute == "name":
                         element: str = data.get("Element", "")
-                        non_numeric_tag["name"] = element.replace("--", ":")
+                        non_numeric_tag["name"] = element.replace("--", ":").replace(
+                            "custom", self.ticker
+                        )
 
                     if attribute == "decimals":
                         precision: str = data.get("Precision", "")
