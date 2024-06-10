@@ -30,6 +30,9 @@ class XHTMLGenerator:
         # Extract HTML elements from the provided HTML file
         self.html_elements = extract_html_elements(html_file, only_id=True)
 
+    def get_filename(self):
+        return os.path.basename(self.html_file)
+
     def add_html_attributes(self):
         # Create a BeautifulSoup object
         soup = BeautifulSoup("", "html.parser")
@@ -271,11 +274,11 @@ class XHTMLGenerator:
                 # Create the root element
                 numerator_root = etree.SubElement(resources, "unit", id=name)
 
-                # Create the divide element
-                divide = etree.SubElement(numerator_root, "divide")
+                # # Create the divide element
+                # divide = etree.SubElement(numerator_root, "divide")
 
                 # Create the unitNumerator element
-                unitNumerator = etree.SubElement(divide, "unitNumerator")
+                unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
 
                 # Create the measure element for unitNumerator
                 measure_numerator = etree.SubElement(unitNumerator, "measure")
@@ -320,8 +323,9 @@ class XHTMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        output_html_file = self.get_filename()
         # Update the output file with the new soup data
-        with open(self.output_file, "wb") as out_file:
+        with open(f"{directory}/{output_html_file}", "wb") as out_file:
             html_content: str = soup.prettify()
 
             # remove all the namespaces in the ix header
@@ -357,23 +361,26 @@ class XHTMLGenerator:
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
 
-            # Write XML declaration to the output file
-            xml_declaration = """
-                <?xml version="1.0" encoding="utf-8"?>
-                <!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->
-                <!-- Creation Date : -->
-                <!-- Copyright (c) Apex CoVantage All Rights Reserved. -->
-                \n"""
+
+            # Create comments after the XML declaration
+            comments_after_declaration = [
+                "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
+                "<!-- Creation Date : -->",
+                "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
+            ]
+
+            # Concatenate XML declaration and comments
+            xml_declaration  = "\n".join(comments_after_declaration) + "\n"
 
             # Encode XML declaration to bytes and write to file
             xml_declaration_bytes = xml_declaration.encode("utf-8")
-            out_file.write(xml_declaration_bytes)
 
             # Encode prettified HTML content to bytes and write to file
             html_content_bytes = html_content.encode("utf-8")
 
+            final_content = xml_declaration_bytes + html_content_bytes
             # Write prettified HTML content to the output file
-            out_file.write(html_content_bytes)
+            out_file.write(final_content)
 
     def get_datatype_data(self, data_type):
         with open("assets/elements.json", "r") as json_file:
@@ -507,24 +514,6 @@ class XHTMLGenerator:
 
         return context_id
 
-    def get_datatype(self, element):
-        datatypes_dict = {
-            "us-gaap--Cash": "xbrli:monetaryItemType",
-            "dei--DocumentType": "dei:submissionTypeItemType",
-            "us-gaap--AssetsAbstract": "xbrli:stringItemType",
-            "us-gaap--InventoryNet": "xbrli:monetaryItemType",
-            "dei--DocumentPeriodEndDate": "xbrli:dateItemType",
-            "custom--NumberOfPages": "dei:submissionTypeItemType",
-            "us-gaap--AssetsCurrent": "dei:submissionTypeItemType",
-            "us-gaap--AssetsCurrentAbstract": "xbrli:stringItemType",
-            "us-gaap--AccountsReceivableNetCurrent": "xbrli:monetaryItemType",
-            "dei--EntityCommonStockSharesOutstanding": "dei:submissionTypeItemType",
-            "us-gaap--PrepaidExpenseAndOtherAssetsCurrent": "xbrli:monetaryItemType",
-            "us-gaap--OrganizationConsolidationAndPresentationOfFinancialStatementsDisclosureAndSignificantAccountingPoliciesTextBlock": "dei:submissionTypeItemType",
-        }
-
-        return datatypes_dict.get(element, "dei:submissionTypeItemType")
-
     def get_format_value(self, data_type, input_text):
 
         with open("assets/format.json", "r") as json_file:
@@ -584,7 +573,7 @@ class XHTMLGenerator:
                         if fact.strip() == "Z":
                             non_numeric_tag["format"] = "ixt:zerodash"
                         else:
-                            data_type = self.get_datatype(data.get("Element"))
+                            # data_type = self.get_datatype(data.get("Element"))
                             format_value = self.get_format_value(data_type, tag.text)
                             non_numeric_tag["format"] = format_value
 

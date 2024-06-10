@@ -202,6 +202,20 @@ def upload_zip_to_s3(name, zip_file):
         return None
 
 
+def zip_html_xml_files(directory, zip_name):
+    # Create a zip file
+    with zipfile.ZipFile(zip_name, "w") as zipf:
+        # Iterate through all files in the directory
+        for foldername, subfolders, filenames in os.walk(directory):
+            for filename in filenames:
+                # Check if the file is an HTML or XML file
+                if filename.endswith(".htm") or filename.endswith(".xml"):
+                    # Create the complete file path
+                    file_path = os.path.join(foldername, filename)
+                    # Add the file to the zip archive
+                    zipf.write(file_path, os.path.relpath(file_path, directory))
+
+
 def ixbrl_viewer_file_generation(file):
 
     ixbrl_file_url = None
@@ -237,7 +251,8 @@ def ixbrl_viewer_file_generation(file):
     # validation_logs = validation(file)
 
     # Zip the folder
-    shutil.make_archive(file, "zip", file)
+    # shutil.make_archive(file, "zip", file)
+    zip_html_xml_files(file, f"{file}.zip")
 
     # Upload the zip file to S3
     zip_file_path = f"{file}.zip"

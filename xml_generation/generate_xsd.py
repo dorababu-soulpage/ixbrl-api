@@ -1,5 +1,7 @@
 import re, os
 from itertools import groupby
+
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from utils import get_custom_element_record
 
@@ -314,9 +316,12 @@ class XSDGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # Optionally, write the XML to a file
-        with open(self.output_file, "w", encoding="US-ASCII") as file:
-            file.write(xml_data)
+        reparsed = minidom.parseString(xml_data)
+        pretty_xml_as_string = reparsed.toprettyxml(indent="  ")
+        # Write the pretty-printed XML to a file
+
+        with open(self.output_file, "w") as file:
+            file.write(pretty_xml_as_string)
 
 
 # # Example usage:

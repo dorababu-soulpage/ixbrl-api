@@ -10,7 +10,8 @@ class HtmlTagParser:
         # Extract a specific field from the data based on the provided prefix
         for item in data[1:-1]:
             if item.startswith(prefix):
-                return item.lstrip(prefix)
+                # return item.lstrip(prefix)
+                return item[len(prefix) :]
         return ""
 
     def check_heading_or_not(self, data):
@@ -112,7 +113,7 @@ class HtmlTagParser:
 #     # Add more HTML tags here
 # ]
 
-# html_tag = "apex_90C_eus-gaap--Cash_bdebit_dxbrli:monetaryItemType_uUSD_pn3n3_ylabel_c20230630_hsrt--RestatementAxis__srt--RestatementDomain__srt--ScenarioPreviouslyReportedMember_ma9xEtShfjXOnQUa2J__us-gaap--AssetsCurrent"
+# html_tag = "apex_90T_edei--DocumentType_b_ddei:submissionTypeItemType_rdocument_adei--CoverAbstract_ylabel_c20230101__20230630_DidlbFdLtBe3JCWx"
 
 # # Create an instance of HtmlTagParser
 # parser = HtmlTagParser()
