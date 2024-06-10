@@ -103,7 +103,6 @@ class PreXMLGenerator:
         # consider root level abstract as a pre element parent
 
         # pre parent element
-        print(_pre_element_parent, "=============[Pre Element Parent]============")
         if root_level_abstract != _pre_element_parent:
             pre_element_parent = _pre_element_parent
             if pre_element_parent and pre_element_parent_created is False:
