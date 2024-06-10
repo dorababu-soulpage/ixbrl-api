@@ -244,7 +244,10 @@ class LabXMLGenerator:
                     custom_element_data = get_custom_element_record(
                         self.client_id, name
                     )
-                    label_text = custom_element_data.get("label", "")
+                    if custom_element_data:
+                        label_text = custom_element_data.get("label", "")
+                    else:
+                        label_text = ""
                 else:
                     if "_" in element:
                         _, name = element.split("_")

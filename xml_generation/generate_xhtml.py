@@ -434,16 +434,17 @@ class XHTMLGenerator:
                 soup, data, first_id_tag, note_section=True
             )
 
-            if first_id_tag.find_all():
-                # Add all contents from the specific <p> tag to the new tag
-                for inner_tag in first_id_tag.find_all():
-                    datatype_tag.append(inner_tag)
+            if datatype_tag:
+                if first_id_tag.find_all():
+                    # Add all contents from the specific <p> tag to the new tag
+                    for inner_tag in first_id_tag.find_all():
+                        datatype_tag.append(inner_tag)
 
-            datatype_tag["id"] = f"f-{random_number}"
-            style = first_id_tag.get("style")
-            datatype_tag["id"] = f"f-{random_number}"
-            datatype_tag["style"] = style
-            first_id_tag.replace_with(datatype_tag)
+                datatype_tag["id"] = f"f-{random_number}"
+                style = first_id_tag.get("style")
+                datatype_tag["id"] = f"f-{random_number}"
+                datatype_tag["style"] = style
+                first_id_tag.replace_with(datatype_tag)
 
             return soup
 
@@ -541,54 +542,65 @@ class XHTMLGenerator:
                 return ""
 
     def create_datatype_tag(self, soup, data, tag, note_section=None):
+
         # data_type = data.get("DataType")
-        data_type = self.get_datatype(data.get("Element"))
-        data_type_record = self.get_datatype_data(data_type)
+        # data_type = self.get_datatype(data.get("Element"))
+        data_type = data.get("DataType")
+        if data_type:
+            data_type_record = self.get_datatype_data(data_type)
+            if data_type_record:
+                datatype_element = data_type_record.get("element", "")
+                datatype_attributes = data_type_record.get("attributes", "")
+                # Create new nonNumeric or Numeric tag
+                non_numeric_tag = soup.new_tag(datatype_element)
+                fact = data.get("Fact", "")
+                if fact.strip() == "N":
+                    non_numeric_tag["xs:nil"] = "true"
+                    unit: str = data.get("Unit", "")
+                    non_numeric_tag["unitRef"] = unit
 
-        datatype_element = data_type_record.get("element", "")
-        datatype_attributes = data_type_record.get("attributes", "")
-        # Create new nonNumeric or Numeric tag
-        non_numeric_tag = soup.new_tag(datatype_element)
+                for attribute in datatype_attributes:
+                    if attribute == "contextRef":
+                        context_id = self.get_context_id(data)
+                        non_numeric_tag["contextRef"] = context_id
 
-        for attribute in datatype_attributes:
-            if attribute == "contextRef":
-                context_id = self.get_context_id(data)
-                non_numeric_tag["contextRef"] = context_id
+                    if attribute == "unitRef":
+                        unit: str = data.get("Unit", "")
+                        non_numeric_tag["unitRef"] = unit
 
-            if attribute == "unitRef":
-                unit: str = data.get("Unit", "")
-                non_numeric_tag["unitRef"] = unit
+                    if attribute == "name":
+                        element: str = data.get("Element", "")
+                        non_numeric_tag["name"] = element.replace("--", ":")
 
-            if attribute == "name":
-                element: str = data.get("Element", "")
-                non_numeric_tag["name"] = element.replace("--", ":")
+                    if attribute == "decimals":
+                        precision: str = data.get("Precision", "")
+                        non_numeric_tag["decimals"] = precision
 
-            if attribute == "decimals":
-                precision: str = data.get("Precision", "")
-                non_numeric_tag["decimals"] = precision
+                    if attribute == "scale":
+                        counted_as: str = data.get("CountedAs", "")
+                        non_numeric_tag["scale"] = counted_as
 
-            if attribute == "scale":
-                counted_as: str = data.get("CountedAs", "")
-                non_numeric_tag["scale"] = counted_as
+                    if attribute == "format":
+                        if fact.strip() == "Z":
+                            non_numeric_tag["format"] = "ixt:zerodash"
+                        else:
+                            data_type = self.get_datatype(data.get("Element"))
+                            format_value = self.get_format_value(data_type, tag.text)
+                            non_numeric_tag["format"] = format_value
 
-            if attribute == "format":
-                data_type = self.get_datatype(data.get("Element"))
-                format_value = self.get_format_value(data_type, tag.text)
-                non_numeric_tag["format"] = format_value
+                    if attribute == "id":
+                        is_footnote = data.get("have_footnote")
+                        if is_footnote:
+                            uniq_id = is_footnote[0]
+                        else:
+                            uniq_id = data.get("UniqueId", "")
+                        non_numeric_tag["id"] = uniq_id
 
-            if attribute == "id":
-                is_footnote = data.get("have_footnote")
-                if is_footnote:
-                    uniq_id = is_footnote[0]
+                if note_section:
+                    return non_numeric_tag
                 else:
-                    uniq_id = data.get("UniqueId", "")
-                non_numeric_tag["id"] = uniq_id
-
-        if note_section:
-            return non_numeric_tag
-        else:
-            non_numeric_tag.string = tag.text
-            return non_numeric_tag
+                    non_numeric_tag.string = tag.text
+                    return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
 
@@ -603,11 +615,12 @@ class XHTMLGenerator:
             # create new Numeric or nonNumeric tag
             datatype_tag = self.create_datatype_tag(soup, data, tag)
 
-            # Replace original font tag with new Numeric or nonNumeric tag
-            font_tag = soup.find("font", id=tag_id)
+            if datatype_tag:
+                # Replace original font tag with new Numeric or nonNumeric tag
+                font_tag = soup.find("font", id=tag_id)
 
-            if font_tag:
-                font_tag.replace_with(datatype_tag)
+                if font_tag:
+                    font_tag.replace_with(datatype_tag)
 
         return soup
 
@@ -722,16 +735,17 @@ class XHTMLGenerator:
 
         non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
 
-        # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-        for key, value in elements_data.items():
+        if elements_data:
+            # Create the 'ix:nonNumeric' elements within 'ix:hidden'
+            for key, value in elements_data.items():
 
-            non_numeric = etree.SubElement(
-                hidden,
-                "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
-                contextRef=non_numeric_contextRef,
-                name=f"dei:{key}",
-            )
-            non_numeric.text = value
+                non_numeric = etree.SubElement(
+                    hidden,
+                    "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
+                    contextRef=non_numeric_contextRef,
+                    name=f"dei:{key}",
+                )
+                non_numeric.text = value
 
         # Create the 'ix:references' element
         references = etree.SubElement(
