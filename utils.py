@@ -269,7 +269,8 @@ def extract_html_elements(file, only_id=False) -> list[dict]:
 
         for tag in tags:
             # Find the <font> element by its ID
-            font_element = soup.find("font", id=tag["id"])
+            # font_element = soup.find("font", id=tag["id"])
+            font_element = soup.find(id=tag["id"])
 
             # Check if the <font> element exists
             if font_element:

@@ -209,7 +209,7 @@ def zip_html_xml_files(directory, zip_name):
         for foldername, subfolders, filenames in os.walk(directory):
             for filename in filenames:
                 # Check if the file is an HTML or XML file
-                if filename.endswith(".htm") or filename.endswith(".xml"):
+                if filename.endswith((".htm", ".xsd", ".xml")):
                     # Create the complete file path
                     file_path = os.path.join(foldername, filename)
                     # Add the file to the zip archive
@@ -296,7 +296,7 @@ def ixbrl_viewer_file_generation(file):
         print(str(e))
 
     # Remove the file, zip directory
-    # shutil.rmtree(file)
+    shutil.rmtree(file)
     os.remove(zip_file_path)
 
     return ixbrl_package_url, ixbrl_file_url, log_file_url

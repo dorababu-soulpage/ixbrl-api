@@ -14,6 +14,7 @@ from utils import (
 from lxml import etree
 from constants import namespace
 from xml_generation.html_parser import HtmlTagParser
+from xml_generation.tagging_formatter import FormatValueRetriever
 
 
 class XHTMLGenerator:
@@ -513,21 +514,10 @@ class XHTMLGenerator:
 
         return context_id
 
-    def get_format_value(self, data_type, input_text):
-
-        with open("assets/format.json", "r") as json_file:
-            data = json.load(json_file)
-            for record in data:
-                if (
-                    record.get("Datatype 1") == data_type
-                    or record.get("Datatype 2") == data_type
-                    or record.get("Datatype 3") == data_type
-                    or record.get("Datatype 4") == data_type
-                ):
-                    formate_value = record.get("Format Code", "")
-                    return formate_value
-            else:
-                return ""
+    def get_format_value(self, element, data_type, input_text):
+        retriever = FormatValueRetriever(input_text)
+        format_value = retriever.get_format_value(element, data_type)
+        return format_value
 
     def create_datatype_tag(self, soup, data, tag, note_section=None):
 
@@ -572,11 +562,14 @@ class XHTMLGenerator:
                         non_numeric_tag["scale"] = counted_as
 
                     if attribute == "format":
+                        element: str = data.get("Element", "")
                         if fact.strip() == "Z":
                             non_numeric_tag["format"] = "ixt:zerodash"
                         else:
                             # data_type = self.get_datatype(data.get("Element"))
-                            format_value = self.get_format_value(data_type, tag.text)
+                            format_value = self.get_format_value(
+                                element, data_type, tag.text
+                            )
                             non_numeric_tag["format"] = format_value
 
                     if attribute == "id":
@@ -608,7 +601,8 @@ class XHTMLGenerator:
 
             if datatype_tag:
                 # Replace original font tag with new Numeric or nonNumeric tag
-                font_tag = soup.find("font", id=tag_id)
+                # font_tag = soup.find("font", id=tag_id)
+                font_tag = soup.find(id=tag_id)
 
                 if font_tag:
                     font_tag.replace_with(datatype_tag)
