@@ -1,5 +1,7 @@
 import re, os
 from itertools import groupby
+
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
 
@@ -103,7 +105,7 @@ class PreXMLGenerator:
         # pre parent element
         if root_level_abstract != _pre_element_parent:
             pre_element_parent = _pre_element_parent
-            if pre_element_parent_created is False:
+            if pre_element_parent and pre_element_parent_created is False:
                 pre_element_parent_xlink_href = self.get_href_url(pre_element_parent)
                 pre_element_parent_loc = self.create_presentation_loc_element(
                     parent_tag=presentation_link,
@@ -133,9 +135,14 @@ class PreXMLGenerator:
 
             label_type = record.get("PreferredLabelType")
             preferred_label = self.get_preferred_label(label_type)
+            root_level_abstract = record.get("RootLevelAbstract")
 
             _pre_element_parent: str = record.get("PreElementParent")
-            pre_element_parent = _pre_element_parent.replace("--", "_")
+            if _pre_element_parent:
+                pre_element_parent = _pre_element_parent.replace("--", "_")
+            else:
+                pre_element_parent: str = root_level_abstract
+                pre_element_parent = _pre_element_parent.replace("--", "_")
 
             if element not in elements_list:
                 # main elements
@@ -160,7 +167,10 @@ class PreXMLGenerator:
                         pre_element_parent if pre_element_parent_created else line_item
                     )
                 else:
-                    xlink_from = pre_element_parent
+                    if pre_element_parent:
+                        xlink_from = pre_element_parent
+                    else:
+                        xlink_from = root_level_abstract
 
                 # calculate xlink from element element occurrence
                 if xlink_from not in element_occurrences:
@@ -175,7 +185,7 @@ class PreXMLGenerator:
                     "parent_tag": presentation_link,
                     "order": str(element_occurrences.get(xlink_from)),
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                    "xlink_from": f"loc_{xlink_from}",
+                    "xlink_from": f"loc_{xlink_from}".replace("--", "_"),
                     "xlink_to": f"loc_{element}",
                     "preferred_label": preferred_label,
                 }
@@ -463,9 +473,12 @@ class PreXMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # Save the XML data into the pre.xml file.
-        with open(self.output_file, "w", encoding="utf-8") as file:
-            file.write(xml_data)
+        reparsed = minidom.parseString(xml_data)
+        pretty_xml_as_string = reparsed.toprettyxml(indent="  ")
+        # Write the pretty-printed XML to a file
+
+        with open(self.output_file, "w") as file:
+            file.write(pretty_xml_as_string)
 
 
 # # Example usage:

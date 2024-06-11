@@ -1,5 +1,7 @@
 import re, os
 from itertools import groupby
+
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from utils import get_custom_element_record
 
@@ -257,6 +259,7 @@ class XSDGenerator:
             custom_element_data = get_custom_element_record(
                 self.client_id, element_name
             )
+            element_data: dict = custom_element_data.get("data")
             if custom_element_data:
                 data_type = custom_element_data.get("dataType", "")
                 custom_element = ET.Element(
@@ -265,13 +268,11 @@ class XSDGenerator:
                         "id": f"{custom_element}".replace(
                             "custom", self.ticker
                         ).replace("--", "_"),
-                        "abstract": custom_element_data.get("abstract", ""),
-                        "name": f"{element_name}",
-                        "nillable": custom_element_data.get("nillable", ""),
-                        "xbrli:periodType": custom_element_data.get("period", ""),
-                        "substitutionGroup": custom_element_data.get(
-                            "substitutionGroup", ""
-                        ),
+                        "abstract": element_data.get("abstract", ""),
+                        "name": element_name,
+                        "nillable": element_data.get("nillable", ""),
+                        "xbrli:periodType": element_data.get("period", ""),
+                        "substitutionGroup": element_data.get("substitutionGroup", ""),
                         "type": data_type,
                     },
                 )
@@ -314,9 +315,12 @@ class XSDGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # Optionally, write the XML to a file
-        with open(self.output_file, "w", encoding="US-ASCII") as file:
-            file.write(xml_data)
+        reparsed = minidom.parseString(xml_data)
+        pretty_xml_as_string = reparsed.toprettyxml(indent="  ")
+        # Write the pretty-printed XML to a file
+
+        with open(self.output_file, "w") as file:
+            file.write(pretty_xml_as_string)
 
 
 # # Example usage:

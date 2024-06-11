@@ -1,6 +1,8 @@
 import re, os
 from itertools import groupby
 from operator import itemgetter
+
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
 
@@ -263,9 +265,12 @@ class CalXMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # Save the XML data into the pre.xml file.
-        with open(self.output_file, "w", encoding="utf-8") as file:
-            file.write(xml_data)
+        reparsed = minidom.parseString(xml_data)
+        pretty_xml_as_string = reparsed.toprettyxml(indent="  ")
+        # Write the pretty-printed XML to a file
+
+        with open(self.output_file, "w") as file:
+            file.write(pretty_xml_as_string)
 
 
 # # Usage example:
