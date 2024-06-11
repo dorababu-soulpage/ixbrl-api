@@ -259,6 +259,7 @@ class XSDGenerator:
             custom_element_data = get_custom_element_record(
                 self.client_id, element_name
             )
+            element_data: dict = custom_element_data.get("data")
             if custom_element_data:
                 data_type = custom_element_data.get("dataType", "")
                 custom_element = ET.Element(
@@ -267,13 +268,11 @@ class XSDGenerator:
                         "id": f"{custom_element}".replace(
                             "custom", self.ticker
                         ).replace("--", "_"),
-                        "abstract": custom_element_data.get("abstract", ""),
-                        "name": f"{element_name}",
-                        "nillable": custom_element_data.get("nillable", ""),
-                        "xbrli:periodType": custom_element_data.get("period", ""),
-                        "substitutionGroup": custom_element_data.get(
-                            "substitutionGroup", ""
-                        ),
+                        "abstract": element_data.get("abstract", ""),
+                        "name": element_name,
+                        "nillable": element_data.get("nillable", ""),
+                        "xbrli:periodType": element_data.get("period", ""),
+                        "substitutionGroup": element_data.get("substitutionGroup", ""),
                         "type": data_type,
                     },
                 )
