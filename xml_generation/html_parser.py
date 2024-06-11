@@ -39,10 +39,15 @@ class HtmlTagParser:
         precision: str = result.get("Precision")
         counted_as: str = result.get("CountedAs")
 
-        result["Precision"] = precision.replace("n", "-")
-        result["CountedAs"] = counted_as.replace("n", "-")
+        result["Precision"] = precision.replace("n", "-").replace("p", "")
+        result["CountedAs"] = counted_as.replace("n", "-").replace("p", "")
 
-        return result.get(prefix).lstrip("d")
+        value = result.get(prefix).lstrip("d")
+
+        if value:
+            return value
+        else:
+            return "0"
 
     def get_calculation_parent(self, data):
         for item in data[1:-1]:
