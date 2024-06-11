@@ -601,7 +601,8 @@ class XHTMLGenerator:
 
             if datatype_tag:
                 # Replace original font tag with new Numeric or nonNumeric tag
-                font_tag = soup.find("font", id=tag_id)
+                # font_tag = soup.find("font", id=tag_id)
+                font_tag = soup.find(id=tag_id)
 
                 if font_tag:
                     font_tag.replace_with(datatype_tag)
