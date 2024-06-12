@@ -30,6 +30,46 @@ class FormatValueRetriever:
                 return "ixt:numdotdecimal"
             elif numdotdecimalin_pattern.match(self.input_text):
                 return "ixt:numdotdecimalin"
+
+        if data_type in ["xbrli:dateItemType", "xbrli:gMonthDayItemType"]:
+            # Patterns to match each format
+            datedaymonthyear_pattern = re.compile(r"^\d{2}[./]\d{2}[./]\d{4}$")
+            datemonthdayyear_pattern = re.compile(r"^\d{2}[./]\d{2}[./]\d{4}$")
+            datemonthdayyearen_pattern = re.compile(r"^[A-Za-z]+\s\d{2},\s\d{4}$")
+            datedaymonthyearen_pattern = re.compile(r"^\d{2}-[A-Za-z]{3}-\d{2}$")
+            dateyearmonthday_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+            if datedaymonthyear_pattern.match(self.input_text):
+                return "datedaymonthyear"
+            elif datemonthdayyear_pattern.match(self.input_text):
+                return "datemonthdayyear"
+            elif datemonthdayyearen_pattern.match(self.input_text):
+                return "datemonthdayyearen"
+            elif datedaymonthyearen_pattern.match(self.input_text):
+                return "datedaymonthyearen"
+            elif dateyearmonthday_pattern.match(self.input_text):
+                return "dateyearmonthday"
+
+        if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:
+            # Patterns to match each input format
+            patterns = {
+                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),  # Matches -22.3456
+                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 22.3456
+                "ixt-sec:durweek": re.compile(r"^\d+$"),  # Matches 0
+                "ixt-sec:durday": re.compile(r"^\d+\.\d+$"),  # Matches 0.000001
+                "ixt-sec:durhour": re.compile(r"^\d+$"),  # Matches 1000
+                "ixt-sec:durwordsen": re.compile(
+                    r"^\d+\syears?,\s\d+\smonths?$|^[A-Za-z]+\syears?,\s[A-Za-z]+\smonths?$"
+                ),  # Matches durations in words or numbers
+                "ixt-sec:numwordsen": re.compile(
+                    r"^[A-Za-z\s]+$|^(no|None)$"
+                ),  # Matches any string of words including specific "no" and "None"
+            }
+
+            # Check each pattern
+            for format_code, pattern in patterns.items():
+                if pattern.match(self.input_text):
+                    return format_code
         else:
             return self._retrieve_format_from_file(data_type)
 
@@ -49,6 +89,10 @@ class FormatValueRetriever:
             return ""
 
 
-# Usage:
-# retriever = FormatValueRetriever()
-# format_value = retriever.get_format_value(element, data_type, input_text)
+# # Usage:
+# input_text = "2016-12-31"
+# data_type = "xbrli:dateItemType"
+# element = "dei:DocumentPeriodEndDate"
+# retriever = FormatValueRetriever(input_text)
+# format_value = retriever.get_format_value(element, data_type)
+# print(format_value)
