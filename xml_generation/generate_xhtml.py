@@ -116,7 +116,9 @@ class XHTMLGenerator:
                         dimension_root = etree.SubElement(
                             resources, "{http://www.xbrl.org/2003/instance}context"
                         )
-                        dimension_root.set("id", f"AsOf{period_date_str}_{member}")
+                        dimension_root.set(
+                            "id", f"FROM{from_date_str}TO{to_date_str}_{member}"
+                        )
 
                         # Create the entity element
                         entity = etree.SubElement(
