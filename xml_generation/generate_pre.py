@@ -131,70 +131,73 @@ class PreXMLGenerator:
         for index, record in enumerate(role_data, start=1):
 
             _element: str = record.get("Element")
-            element = _element.replace("--", "_")
+            if _element:
+                element = _element.replace("--", "_")
 
-            label_type = record.get("PreferredLabelType")
-            preferred_label = self.get_preferred_label(label_type)
-            root_level_abstract = record.get("RootLevelAbstract")
+                label_type = record.get("PreferredLabelType")
+                preferred_label = self.get_preferred_label(label_type)
+                root_level_abstract = record.get("RootLevelAbstract")
 
-            _pre_element_parent: str = record.get("PreElementParent")
-            if _pre_element_parent:
-                pre_element_parent = _pre_element_parent.replace("--", "_")
-            else:
-                pre_element_parent: str = root_level_abstract
-                pre_element_parent = _pre_element_parent.replace("--", "_")
-
-            if element not in elements_list:
-                # main elements
-                if element.startswith("custom"):
-                    element = element.replace("custom", self.ticker)
-                    element_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{element}",
-                        xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
-                    )
-
+                _pre_element_parent: str = record.get("PreElementParent")
+                if _pre_element_parent:
+                    pre_element_parent = _pre_element_parent.replace("--", "_")
                 else:
-                    href_url = self.get_href_url(element)
-                    element_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_{element}",
-                        xlink_href=f"{href_url}#{element}",
-                    )
+                    pre_element_parent: str = root_level_abstract
+                    pre_element_parent = _pre_element_parent.replace("--", "_")
 
-                if dimension:
-                    xlink_from = (
-                        pre_element_parent if pre_element_parent_created else line_item
-                    )
-                else:
-                    if pre_element_parent:
-                        xlink_from = pre_element_parent
+                if element not in elements_list:
+                    # main elements
+                    if element.startswith("custom"):
+                        element = element.replace("custom", self.ticker)
+                        element_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{element}",
+                        )
+
                     else:
-                        xlink_from = root_level_abstract
+                        href_url = self.get_href_url(element)
+                        element_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_{element}",
+                            xlink_href=f"{href_url}#{element}",
+                        )
 
-                # calculate xlink from element element occurrence
-                if xlink_from not in element_occurrences:
-                    element_occurrences[xlink_from] = 1
-                else:
-                    element_occurrences[xlink_from] = (
-                        element_occurrences[xlink_from] + 1
-                    )
+                    if dimension:
+                        xlink_from = (
+                            pre_element_parent
+                            if pre_element_parent_created
+                            else line_item
+                        )
+                    else:
+                        if pre_element_parent:
+                            xlink_from = pre_element_parent
+                        else:
+                            xlink_from = root_level_abstract
 
-                # Common arguments for create_presentation_arc_element
-                arc_args = {
-                    "parent_tag": presentation_link,
-                    "order": str(element_occurrences.get(xlink_from)),
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
-                    "xlink_from": f"loc_{xlink_from}".replace("--", "_"),
-                    "xlink_to": f"loc_{element}",
-                    "preferred_label": preferred_label,
-                }
+                    # calculate xlink from element element occurrence
+                    if xlink_from not in element_occurrences:
+                        element_occurrences[xlink_from] = 1
+                    else:
+                        element_occurrences[xlink_from] = (
+                            element_occurrences[xlink_from] + 1
+                        )
 
-                # Create presentationArc element and append it to presentation_links list.
-                presentation_arc = self.create_presentation_arc_element(**arc_args)
+                    # Common arguments for create_presentation_arc_element
+                    arc_args = {
+                        "parent_tag": presentation_link,
+                        "order": str(element_occurrences.get(xlink_from)),
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                        "xlink_from": f"loc_{xlink_from}".replace("--", "_"),
+                        "xlink_to": f"loc_{element}",
+                        "preferred_label": preferred_label,
+                    }
 
-                # add element into elements list
-                elements_list.append(element)
+                    # Create presentationArc element and append it to presentation_links list.
+                    presentation_arc = self.create_presentation_arc_element(**arc_args)
+
+                    # add element into elements list
+                    elements_list.append(element)
 
         presentation_links.append(presentation_link)
 

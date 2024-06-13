@@ -18,7 +18,9 @@ from xml_generation.tagging_formatter import FormatValueRetriever
 
 
 class XHTMLGenerator:
-    def __init__(self, data, filing_date, ticker, cik, file_id, html_file, split_file):
+    def __init__(
+        self, data, filing_date, ticker, cik, file_id, html_file, filename, split_file
+    ):
         # Initialize class attributes
         self.cik = cik
         self.data = data
@@ -27,6 +29,7 @@ class XHTMLGenerator:
         self.html_file = html_file
         self.split_file = split_file
         self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
+        self.output_html = filename
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
         # Extract HTML elements from the provided HTML file
         self.html_elements = extract_html_elements(html_file, only_id=True)
@@ -280,11 +283,11 @@ class XHTMLGenerator:
                 # # Create the divide element
                 # divide = etree.SubElement(numerator_root, "divide")
 
-                # Create the unitNumerator element
-                unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
+                # # Create the unitNumerator element
+                # unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
 
                 # Create the measure element for unitNumerator
-                measure_numerator = etree.SubElement(unitNumerator, "measure")
+                measure_numerator = etree.SubElement(numerator_root, "measure")
                 measure_numerator.text = f"iso4217:{name}"
 
             if (
@@ -326,9 +329,9 @@ class XHTMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        output_html_file = self.get_filename()
+        # output_html_file = self.get_filename()
         # Update the output file with the new soup data
-        with open(f"{directory}/{output_html_file}", "wb") as out_file:
+        with open(f"{directory}/{self.output_html}.htm", "wb") as out_file:
             html_content: str = soup.prettify()
 
             # remove all the namespaces in the ix header
@@ -527,7 +530,8 @@ class XHTMLGenerator:
         # data_type = self.get_datatype(data.get("Element"))
         data_type = data.get("DataType")
         heading = data.get("Heading")
-        if data_type and heading is False:
+        element: str = data.get("Element", "")
+        if data_type and heading is False and not element.endswith("Abstract"):
             data_type_record = self.get_datatype_data(data_type)
             if data_type_record:
                 datatype_element = data_type_record.get("element", "")
@@ -550,7 +554,6 @@ class XHTMLGenerator:
                         non_numeric_tag["unitRef"] = unit
 
                     if attribute == "name":
-                        element: str = data.get("Element", "")
                         non_numeric_tag["name"] = element.replace("--", ":").replace(
                             "custom", self.ticker
                         )
@@ -564,7 +567,6 @@ class XHTMLGenerator:
                         non_numeric_tag["scale"] = counted_as
 
                     if attribute == "format":
-                        element: str = data.get("Element", "")
                         if fact.strip() == "Z":
                             non_numeric_tag["format"] = "ixt:zerodash"
                         else:
@@ -689,6 +691,70 @@ class XHTMLGenerator:
                 from_ref = is_footnote[0]
                 to_ref = footnote_id_dict.get(from_ref)
                 self.add_footnote_ix_header(soup, from_ref, to_ref)
+
+        return soup
+
+    def create_level_tags(self, soup: BeautifulSoup, start_id, end_id):
+        # Find the starting and ending tags
+        start_tag = soup.find(id=start_id)
+        end_tag = soup.find(id=end_id)
+
+        # Initialize an empty list to store the content between the tags
+        content = []
+
+        # Find all tags between the start and end tags
+        current_tag = start_tag.find_next_sibling()
+        while current_tag and current_tag != end_tag:
+            content.append(current_tag)
+            current_tag = current_tag.find_next_sibling()
+
+        parser = HtmlTagParser()
+        data = parser.process_tag(start_id)
+
+        # create new Numeric or nonNumeric tag
+        datatype_tag = self.create_datatype_tag(soup, data, start_tag)
+        for tag in content:
+            datatype_tag.append(tag)
+
+        # Insert the new tag into the document
+        start_tag.replace_with(datatype_tag)
+
+        return soup
+
+    def level_tags(self, soup: BeautifulSoup):
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        level1 = soup.find_all(
+            lambda tag: tag.get("id", "").startswith(("apex_80", "apex_81"))
+        )
+        level2 = soup.find_all(
+            lambda tag: tag.get("id", "").startswith(("apex_84", "apex_85"))
+        )
+        level3 = soup.find_all(
+            lambda tag: tag.get("id", "").startswith(("apex_89", "apex_8A"))
+        )
+
+        level1_tags = [tag["id"] for tag in level1]
+        level2_tags = [tag["id"] for tag in level2]
+        level3_tags = [tag["id"] for tag in level3]
+
+        level1_groups = [level1_tags[i : i + 2] for i in range(0, len(level1_tags), 2)]
+        level2_groups = [level2_tags[i : i + 2] for i in range(0, len(level2_tags), 2)]
+        level3_groups = [level3_tags[i : i + 2] for i in range(0, len(level3_tags), 2)]
+
+        for group in level1_groups:
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
+
+        for group in level2_groups:
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
+
+        for group in level3_groups:
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
 
         return soup
 
@@ -863,6 +929,8 @@ class XHTMLGenerator:
 
             # update the footnote to soup object
             soup = self.foot_notes(soup)
+            # created level1, level2, level3 tags
+            soup = self.level_tags(soup)
             soup = self.generate_datatypes_tags(soup)
             soup = self.ixt_continuation(soup)
 

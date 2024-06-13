@@ -227,12 +227,11 @@ class XSDGenerator:
                         "id": role_without_spaces,
                     },
                 )
-
                 # Create child elements for link:roleType
                 link_role_type_elements = [
                     {
                         "tag": "link:definition",
-                        "text": f"{self.get_definition_index(str(index))} - {role_type.capitalize()} - {self.get_definition(role)}",
+                        "text": f"{self.get_definition_index(str(index))} - {role_type.capitalize()} - {role}",
                     },
                     {"tag": "link:usedOn", "text": "link:presentationLink"},
                     {"tag": "link:usedOn", "text": "link:calculationLink"},
