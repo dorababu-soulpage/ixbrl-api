@@ -428,14 +428,25 @@ class DefXMLGenerator:
                                 element_occurrences[xlink_from] + 1
                             )
 
-                        # Add definition arc elements
-                        definition_arc = self.create_definition_arc_element(
-                            parent_tag=definition_link,
-                            order=str(element_occurrences.get(xlink_from)),
-                            arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
-                            xlink_from=f"loc_{xlink_from}",
-                            xlink_to=f"loc_{element}",
-                        )
+                        if pre_element_parent_created is False:
+                            # Add definition arc elements
+                            definition_arc = self.create_definition_arc_element(
+                                parent_tag=definition_link,
+                                order=str(element_occurrences.get(xlink_from)),
+                                arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                                xlink_from=f"loc_{line_items_list[-1]}",
+                                xlink_to=f"loc_{element}",
+                            )
+                            pre_element_parent_created = True
+                        else:
+                            # Add definition arc elements
+                            definition_arc = self.create_definition_arc_element(
+                                parent_tag=definition_link,
+                                order=str(element_occurrences.get(xlink_from)),
+                                arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
+                                xlink_from=f"loc_{xlink_from}",
+                                xlink_to=f"loc_{element}",
+                            )
 
                         elements_list.append(_element)
 
