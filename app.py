@@ -296,7 +296,7 @@ def ixbrl_viewer_file_generation(file):
         print(str(e))
 
     # Remove the file, zip directory
-    # shutil.rmtree(file)
+    shutil.rmtree(file)
     os.remove(zip_file_path)
 
     return ixbrl_package_url, ixbrl_file_url, log_file_url
@@ -515,9 +515,9 @@ def generate_xml_schema_files():
     # Get the formatted data for all tags
     data = parser.process_tags(html_elements)
 
-    # write data into output.json file
-    with open("output.json", "w") as output:
-        output.write(json.dumps(data))
+    # # write data into output.json file
+    # with open("output.json", "w") as output:
+    #     output.write(json.dumps(data))
 
     # # read json data from data.json file
     # with open("data.json", "r") as file:
