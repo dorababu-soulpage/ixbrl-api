@@ -258,8 +258,8 @@ class XSDGenerator:
             custom_element_data = get_custom_element_record(
                 self.client_id, element_name
             )
-            element_data: dict = custom_element_data.get("data")
             if custom_element_data:
+                element_data: dict = custom_element_data.get("data")
                 data_type = custom_element_data.get("dataType", "")
                 custom_element = ET.Element(
                     "xsd:element",
