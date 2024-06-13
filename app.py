@@ -545,7 +545,8 @@ def generate_xml_schema_files():
     lab_generator.generate_lab_xml()
 
     # generate xHTML file
-    args = data, filing_date, ticker, cik, file_id, html_file, split_file
+    filename = record.get("fileName")
+    args = data, filing_date, ticker, cik, file_id, html_file, filename, split_file
     xhtml_generator = XHTMLGenerator(*args)
     xhtml_generator.generate_xhtml_file()
 

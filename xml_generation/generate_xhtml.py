@@ -18,7 +18,9 @@ from xml_generation.tagging_formatter import FormatValueRetriever
 
 
 class XHTMLGenerator:
-    def __init__(self, data, filing_date, ticker, cik, file_id, html_file, split_file):
+    def __init__(
+        self, data, filing_date, ticker, cik, file_id, html_file, filename, split_file
+    ):
         # Initialize class attributes
         self.cik = cik
         self.data = data
@@ -27,6 +29,7 @@ class XHTMLGenerator:
         self.html_file = html_file
         self.split_file = split_file
         self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
+        self.output_html = filename
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
         # Extract HTML elements from the provided HTML file
         self.html_elements = extract_html_elements(html_file, only_id=True)
@@ -280,11 +283,11 @@ class XHTMLGenerator:
                 # # Create the divide element
                 # divide = etree.SubElement(numerator_root, "divide")
 
-                # Create the unitNumerator element
-                unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
+                # # Create the unitNumerator element
+                # unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
 
                 # Create the measure element for unitNumerator
-                measure_numerator = etree.SubElement(unitNumerator, "measure")
+                measure_numerator = etree.SubElement(numerator_root, "measure")
                 measure_numerator.text = f"iso4217:{name}"
 
             if (
@@ -326,9 +329,9 @@ class XHTMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        output_html_file = self.get_filename()
+        # output_html_file = self.get_filename()
         # Update the output file with the new soup data
-        with open(f"{directory}/{output_html_file}", "wb") as out_file:
+        with open(f"{directory}/{self.output_html}.htm", "wb") as out_file:
             html_content: str = soup.prettify()
 
             # remove all the namespaces in the ix header
@@ -739,16 +742,19 @@ class XHTMLGenerator:
         level3_groups = [level3_tags[i : i + 2] for i in range(0, len(level3_tags), 2)]
 
         for group in level1_groups:
-            start_id, end_id = group
-            soup = self.create_level_tags(soup, start_id, end_id)
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
 
         for group in level2_groups:
-            start_id, end_id = group
-            soup = self.create_level_tags(soup, start_id, end_id)
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
 
         for group in level3_groups:
-            start_id, end_id = group
-            soup = self.create_level_tags(soup, start_id, end_id)
+            if len(group) == 2:
+                start_id, end_id = group
+                soup = self.create_level_tags(soup, start_id, end_id)
 
         return soup
 
