@@ -7,7 +7,7 @@ class FormatValueRetriever:
         self.input_text = input_text
         self.format_file_path = "assets/format.json"
 
-    def get_format_value(self, element, data_type):
+    def get_format_value(self, element: str, data_type: str):
         if element.endswith("DocumentPeriodEndDate"):
             return "ixt:datemonthdayyearen"
 
@@ -25,11 +25,11 @@ class FormatValueRetriever:
             )
 
             if numcommadecdimal_pattern.match(self.input_text):
-                return "ixt:numcommadecdimal"
+                return "ixt:num-comma-decimal"
             elif numdotdecimal_pattern.match(self.input_text):
-                return "ixt:numdotdecimal"
+                return "ixt:num-dot-decimal"
             elif numdotdecimalin_pattern.match(self.input_text):
-                return "ixt:numdotdecimalin"
+                return "ixt:num-unit-decimal"
 
         if data_type in ["xbrli:dateItemType", "xbrli:gMonthDayItemType"]:
             # Patterns to match each format
@@ -40,15 +40,15 @@ class FormatValueRetriever:
             dateyearmonthday_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
             if datedaymonthyear_pattern.match(self.input_text):
-                return "datedaymonthyear"
+                return "ixt:datedaymonthyear"
             elif datemonthdayyear_pattern.match(self.input_text):
-                return "datemonthdayyear"
+                return "ixt:datemonthdayyear"
             elif datemonthdayyearen_pattern.match(self.input_text):
-                return "datemonthdayyearen"
+                return "ixt:datemonthdayyearen"
             elif datedaymonthyearen_pattern.match(self.input_text):
-                return "datedaymonthyearen"
+                return "ixt:datedaymonthyearen"
             elif dateyearmonthday_pattern.match(self.input_text):
-                return "dateyearmonthday"
+                return "ixt:dateyearmonthday"
 
         if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:
             # Patterns to match each input format

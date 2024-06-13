@@ -161,12 +161,15 @@ class DefXMLGenerator:
                 pass
             else:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
+                role = role_without_spaces.replace("(", "").replace(")", "")
                 # Create roleRef element and append it to role_ref_elements list.
-                role_uri = f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}"
+                role_uri = (
+                    f"http://{self.company_website}/{self.filing_date}/role/{role}"
+                )
                 role_ref_element = self.create_role_ref_element(
                     parent=linkbase_element,
                     role_uri=role_uri,
-                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role_without_spaces}",
+                    xlink_href=f"{self.ticker}-{self.filing_date}.xsd#{role}",
                 )
 
                 role_ref_elements.append(role_ref_element)
