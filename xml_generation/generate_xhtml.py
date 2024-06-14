@@ -1,6 +1,6 @@
 import json, os
-import random
 import requests
+import random, uuid
 from datetime import datetime
 from bs4 import BeautifulSoup, Comment
 
@@ -579,7 +579,13 @@ class XHTMLGenerator:
                     if attribute == "id":
                         is_footnote = data.get("have_footnote")
                         if is_footnote:
-                            uniq_id = is_footnote[0]
+                            foot_note_reference = tag.get("FR", "")
+                            # uniq_id = is_footnote[0]
+                            uniq_id = foot_note_reference
+                            # Remove the 'FR' attribute after the usage
+                            if "FR" in tag.attrs:
+                                del tag["data-info"]
+
                         else:
                             uniq_id = data.get("UniqueId", "")
                         non_numeric_tag["id"] = uniq_id
@@ -688,9 +694,13 @@ class XHTMLGenerator:
             data = parser.process_tag(tag_id)
             is_footnote: list = data.get("have_footnote")
             if is_footnote:
+                # add footnote reference to tag using FR attribute
+                foot_note_reference = uuid.uuid4().hex
+                tag["FR"] = foot_note_reference
                 from_ref = is_footnote[0]
                 to_ref = footnote_id_dict.get(from_ref)
-                self.add_footnote_ix_header(soup, from_ref, to_ref)
+                # self.add_footnote_ix_header(soup, from_ref, to_ref)
+                self.add_footnote_ix_header(soup, foot_note_reference, to_ref)
 
         return soup
 
