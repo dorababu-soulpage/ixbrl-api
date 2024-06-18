@@ -93,12 +93,17 @@ class XHTMLGenerator:
 
         return formatted_date_str
 
-    def non_dimension_context(self, context_root, period_date, resources, record):
+    def non_dimension_context(self, period_date, resources, record):
         if "__" in period_date:
             from_, to = period_date.split("__")
 
             from_date_str = self.formatted_to_date(from_)
             to_date_str = self.formatted_to_date(to)
+
+            # Create the root element
+            context_root = etree.SubElement(
+                resources, "{http://www.xbrl.org/2003/instance}context"
+            )
 
             context_root.set("id", f"FROM{from_date_str}TO{to_date_str}")
 
@@ -128,6 +133,7 @@ class XHTMLGenerator:
         else:
             period: str = record.get("Period")
             period_date_str = self.formatted_to_date(period_date)
+
             # Create the root element
             context_root = etree.SubElement(
                 resources, "{http://www.xbrl.org/2003/instance}context"
@@ -153,9 +159,7 @@ class XHTMLGenerator:
             )
             instant.text = period_date_str
 
-    def single_dimension_context(
-        self, group, period_date, resources, context_root, record
-    ):
+    def single_dimension_context(self, group, period_date, resources, record):
         _axis, _domain, _member = group
         axis = _axis.replace("--", "_").replace("custom", self.ticker)
         domain = _domain.replace("--", "_").replace("custom", self.ticker)
@@ -197,7 +201,7 @@ class XHTMLGenerator:
 
             # Create the period element
             period = etree.SubElement(
-                context_root, "{http://www.xbrl.org/2003/instance}period"
+                dimension_root, "{http://www.xbrl.org/2003/instance}period"
             )
             startDate = etree.SubElement(
                 period, "{http://www.xbrl.org/2003/instance}startDate"
@@ -249,9 +253,7 @@ class XHTMLGenerator:
             )
             instant.text = period_date_str
 
-    def multiple_dimension_context(
-        self, groups, period_date, resources, context_root, record
-    ):
+    def multiple_dimension_context(self, groups, period_date, resources, record):
         axis_list: list = []
         member_list: list = []
 
@@ -304,7 +306,7 @@ class XHTMLGenerator:
 
             # Create the period element
             period = etree.SubElement(
-                context_root, "{http://www.xbrl.org/2003/instance}period"
+                dimension_root, "{http://www.xbrl.org/2003/instance}period"
             )
             startDate = etree.SubElement(
                 period, "{http://www.xbrl.org/2003/instance}startDate"
@@ -359,10 +361,6 @@ class XHTMLGenerator:
             instant.text = period_date_str
 
     def created_context_ref(self, resources):
-        # Create the root element
-        context_root = etree.SubElement(
-            resources, "{http://www.xbrl.org/2003/instance}context"
-        )
         unique_entries = self.get_period_axis_unique_records(self.data)
         for record in unique_entries:
             period_date: str = record.get("Period")
@@ -374,15 +372,15 @@ class XHTMLGenerator:
                 groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
                 if len(groups) == 1:
                     self.single_dimension_context(
-                        groups[0], period_date, resources, context_root, record
+                        groups[0], period_date, resources, record
                     )
                 else:
                     self.multiple_dimension_context(
-                        groups, period_date, resources, context_root, record
+                        groups, period_date, resources, record
                     )
 
             else:
-                self.non_dimension_context(context_root, period_date, resources, record)
+                self.non_dimension_context(period_date, resources, record)
 
     def create_units(self, resources, units):
         for unit in units:
@@ -822,10 +820,11 @@ class XHTMLGenerator:
                 # add footnote reference to tag using FR attribute
                 foot_note_reference = uuid.uuid4().hex
                 tag["FR"] = foot_note_reference
-                from_ref = is_footnote[0]
-                to_ref = footnote_id_dict.get(from_ref)
-                # self.add_footnote_ix_header(soup, from_ref, to_ref)
-                self.add_footnote_ix_header(soup, foot_note_reference, to_ref)
+                for footnote in is_footnote:
+                    from_ref = footnote
+                    to_ref = footnote_id_dict.get(from_ref)
+                    # self.add_footnote_ix_header(soup, from_ref, to_ref)
+                    self.add_footnote_ix_header(soup, foot_note_reference, to_ref)
 
         return soup
 
@@ -927,6 +926,14 @@ class XHTMLGenerator:
             )
             # Create the 'ix:nonNumeric' elements within 'ix:hidden'
             for key, value in elements_data.items():
+                if key == "CurrentFiscalYearEndDate":
+                    # Extract the month and day parts
+                    month_day = value[5:]  # Slicing from the 6th character to the end
+                    # Prefix with "--" and return
+                    value = f"--{month_day}"
+
+                if key == "AmendmentFlag":
+                    value = value.lower()
 
                 non_numeric = etree.SubElement(
                     hidden,

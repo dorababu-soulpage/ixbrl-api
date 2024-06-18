@@ -3,13 +3,13 @@ import json
 
 
 class FormatValueRetriever:
-    def __init__(self, input_text=None):
-        self.input_text = input_text
+    def __init__(self, input_text: str = None):
+        self.input_text = input_text.replace("(", "").strip()
         self.format_file_path = "assets/format.json"
 
     def get_format_value(self, element: str, data_type: str):
         if element.endswith("DocumentPeriodEndDate"):
-            return "ixt:datemonthdayyearen"
+            return "ixt:date-monthname-day-year-en"
 
         if data_type in [
             "xbrli:monetaryItemType",
@@ -70,23 +70,24 @@ class FormatValueRetriever:
             for format_code, pattern in patterns.items():
                 if pattern.match(self.input_text):
                     return format_code
-        else:
-            return self._retrieve_format_from_file(data_type)
 
-    def _retrieve_format_from_file(self, data_type):
+    #     else:
+    #         return self._retrieve_format_from_file(data_type)
 
-        with open(self.format_file_path, "r") as json_file:
-            data = json.load(json_file)
+    # def _retrieve_format_from_file(self, data_type):
 
-            for record in data:
-                if (
-                    record.get("Datatype 1") == data_type
-                    or record.get("Datatype 2") == data_type
-                    or record.get("Datatype 3") == data_type
-                    or record.get("Datatype 4") == data_type
-                ):
-                    return record.get("Format Code", "")
-            return ""
+    #     with open(self.format_file_path, "r") as json_file:
+    #         data = json.load(json_file)
+
+    #         for record in data:
+    #             if (
+    #                 record.get("Datatype 1") == data_type
+    #                 or record.get("Datatype 2") == data_type
+    #                 or record.get("Datatype 3") == data_type
+    #                 or record.get("Datatype 4") == data_type
+    #             ):
+    #                 return record.get("Format Code", "")
+    #         return ""
 
 
 # # Usage:
