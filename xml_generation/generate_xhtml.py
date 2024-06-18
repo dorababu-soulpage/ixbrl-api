@@ -926,6 +926,14 @@ class XHTMLGenerator:
             )
             # Create the 'ix:nonNumeric' elements within 'ix:hidden'
             for key, value in elements_data.items():
+                if key == "CurrentFiscalYearEndDate":
+                    # Extract the month and day parts
+                    month_day = value[5:]  # Slicing from the 6th character to the end
+                    # Prefix with "--" and return
+                    value = f"--{month_day}"
+
+                if key == "AmendmentFlag":
+                    value = value.lower()
 
                 non_numeric = etree.SubElement(
                     hidden,

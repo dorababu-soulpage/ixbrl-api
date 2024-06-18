@@ -269,7 +269,7 @@ class XSDGenerator:
                         ).replace("--", "_"),
                         "abstract": element_data.get("abstract", ""),
                         "name": element_name,
-                        "nillable": element_data.get("nillable", ""),
+                        "nillable": "true",
                         "xbrli:periodType": element_data.get("period", ""),
                         "substitutionGroup": element_data.get("substitutionGroup", ""),
                         "type": data_type,
