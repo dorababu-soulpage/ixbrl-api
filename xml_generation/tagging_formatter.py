@@ -9,7 +9,7 @@ class FormatValueRetriever:
 
     def get_format_value(self, element: str, data_type: str):
         if element.endswith("DocumentPeriodEndDate"):
-            return "ixt:datemonthdayyearen"
+            return "ixt:date-monthname-day-year-en"
 
         if data_type in [
             "xbrli:monetaryItemType",
