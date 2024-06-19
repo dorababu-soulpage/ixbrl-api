@@ -223,8 +223,7 @@ class PreXMLGenerator:
         # iterate through dimension records
         for index, record in enumerate(dimension_records):
             _table = record.get("Table")
-            if _table:
-                table = _table.replace("--", "_")
+            table = _table.replace("--", "_")
 
             order = record.get("Indenting")
             axis_members: str = record.get("Axis_Member")
@@ -236,7 +235,7 @@ class PreXMLGenerator:
             label_type = record.get("PreferredLabelType")
             preferred_label = self.get_preferred_label(label_type)
 
-            if is_table_loc_created is False:
+            if table and is_table_loc_created is False:
                 # table location
                 table_xlink_href = self.get_href_url(table)
                 table_loc = self.create_presentation_loc_element(
