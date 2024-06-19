@@ -353,6 +353,8 @@ def generate_xml_schema_files():
 
     filename = record.get("fileName")
 
+    elements_data = record.get("elementsData")
+
     # Convert string to datetime object
     datetime_obj = datetime.strptime(str(period_end), "%Y-%m-%d %H:%M:%S")
 
@@ -385,7 +387,7 @@ def generate_xml_schema_files():
     xsd_generator = XSDGenerator(*args)
     xsd_generator.generate_xsd_schema()
 
-    args = data, filing_date, ticker, company_website, client_id
+    args = data, filing_date, ticker, company_website, client_id, elements_data
     pre_generator = PreXMLGenerator(*args)
     pre_generator.generate_pre_xml()
 

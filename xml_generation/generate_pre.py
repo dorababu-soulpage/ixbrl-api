@@ -7,7 +7,9 @@ from xml_generation.labels import labels_dict
 
 
 class PreXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website, client_id):
+    def __init__(
+        self, data, filing_date, ticker, company_website, client_id, elements_data
+    ):
         # Initialize the PreXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
@@ -16,6 +18,7 @@ class PreXMLGenerator:
         self.client_id = client_id
         self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_pre.xml"
         self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
+        self.elements_data = elements_data
 
     def get_preferred_label(self, label: str):
         for key, value in labels_dict.items():
@@ -456,6 +459,24 @@ class PreXMLGenerator:
                         presentation_link,
                         root_level_abstract,
                     )
+
+                # add elements data into pre.xml next to the main elements
+                if role == "Cover":
+                    for element in self.elements_data:
+                        element_xlink_href = self.get_href_url(f"dei--{element}")
+                        pre_element_parent_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_dei_{element}",
+                            xlink_href=f"{element_xlink_href}#{element}",
+                        )
+                        # Add definition arc elements
+                        presentation_arc = self.create_presentation_arc_element(
+                            parent_tag=presentation_link,
+                            order="1",
+                            arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                            xlink_from=f"loc_{root_level_abstract}",
+                            xlink_to=f"loc_dei_{element}",
+                        )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
