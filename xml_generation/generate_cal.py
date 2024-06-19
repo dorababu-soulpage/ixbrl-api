@@ -2,6 +2,7 @@ import re, os
 from itertools import groupby
 from operator import itemgetter
 
+from typing import Dict
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from xml_generation.labels import labels_dict
@@ -28,23 +29,17 @@ class CalXMLGenerator:
         for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
             self.grouped_data[key] = list(group)
 
-    def make_hashable(slef, d):
-        """Convert dictionary to a hashable type."""
-        return tuple((k, tuple(v) if isinstance(v, list) else v) for k, v in d.items())
-
     def group_data_by_cal_parent(self, data):
-        cal_parent_grouped_data = {}
+        cal_parent_grouped_data: Dict[str, list] = {}
 
-        # First, sort the data by CalculationParent
-        sorted_data = sorted(data, key=itemgetter("CalculationParent"))
-
-        # Group the data by CalculationParent using itertools groupby and store it in grouped_data.
-        for key, group in groupby(sorted_data, key=itemgetter("CalculationParent")):
-            # We need to convert the group to a list to iterate multiple times
-            group_list = list(group)
-            cal_parent_grouped_data[key] = [
-                dict(t) for t in {self.make_hashable(d) for d in group_list}
-            ]
+        for record in data:
+            cal_parent = record.get("CalculationParent")
+            if cal_parent:
+                if cal_parent not in cal_parent_grouped_data.keys():
+                    cal_parent_grouped_data[cal_parent] = []
+                    cal_parent_grouped_data[cal_parent].append(record)
+                else:
+                    cal_parent_grouped_data[cal_parent].append(record)
 
         return cal_parent_grouped_data
 
@@ -186,7 +181,8 @@ class CalXMLGenerator:
                             )
                             calculation_parent_loc = self.create_calculation_loc_element(
                                 parent_tag=calculation_link,
-                                label=f"loc_{calculation_parent}_{role_index}",
+                                # label=f"loc_{calculation_parent}_{role_index}",
+                                label=f"loc_{calculation_parent}",
                                 xlink_href=f"{calculation_parent_href}#{calculation_parent}",
                             )
                             # loop all cal parent children and create loc, and arc elements
@@ -197,21 +193,26 @@ class CalXMLGenerator:
                                 element = _element.replace("--", "_")
 
                                 if element not in cal_parent_Children:
+                                    if element in calculation_parents:
+                                        # element
+                                        element_href = self.get_href_url(element)
+                                        element_loc = self.create_calculation_loc_element(
+                                            parent_tag=calculation_link,
+                                            label=f"loc_{element}_1",
+                                            xlink_href=f"{element_href}#{element}_1",
+                                        )
+                                    else:
+                                        # element
+                                        element_href = self.get_href_url(element)
+                                        element_loc = self.create_calculation_loc_element(
+                                            parent_tag=calculation_link,
+                                            # label=f"loc_{element}_{index+1}",
+                                            label=f"loc_{element}",
+                                            xlink_href=f"{element_href}#{element}",
+                                        )
 
-                                    # if element in calculation_parents:
-                                    #     element_label = f"loc_{element}_{index+1}"
-                                    # else:
-                                    #     element_label = f"loc_{element}"
-
-                                    # element
-                                    element_href = self.get_href_url(element)
-                                    element_loc = self.create_calculation_loc_element(
-                                        parent_tag=calculation_link,
-                                        label=f"loc_{element}_{index+1}",
-                                        xlink_href=f"{element_href}#{element}",
-                                    )
-
-                                    xlink_from = f"{calculation_parent}_{parent_index}"
+                                    # xlink_from = f"{calculation_parent}_{parent_index}"
+                                    xlink_from = f"{calculation_parent}"
 
                                     # calculate xlink from element element occurrence
                                     if xlink_from not in element_occurrences:
@@ -221,6 +222,11 @@ class CalXMLGenerator:
                                             element_occurrences[xlink_from] + 1
                                         )
 
+                                    if element in calculation_parents:
+                                        xlink_to = f"loc_{element}_1"
+                                    else:
+                                        xlink_to = f"loc_{element}"
+
                                     # Add calculation arc elements
                                     calculation_arc = self.create_calculation_arc_element(
                                         parent_tag=calculation_link,
@@ -228,8 +234,10 @@ class CalXMLGenerator:
                                         weight="1",
                                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
                                         xlink_from=f"loc_{xlink_from}",
-                                        xlink_to=f"loc_{element}_{index+1}",
+                                        # xlink_to=f"loc_{element}_{index+1}",
+                                        xlink_to=xlink_to,
                                     )
+
                                     calculation_parents.append(calculation_parent)
                                     cal_parent_Children.append(element)
                                     # increment the children index
