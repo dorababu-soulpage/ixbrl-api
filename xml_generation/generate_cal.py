@@ -139,6 +139,13 @@ class CalXMLGenerator:
             else:
                 if role_name:
                     role_without_spaces = re.sub(r"\s+", "", role_name)
+                    role_without_spaces = (
+                        role_without_spaces.replace("(", "")
+                        .replace(")", "")
+                        .replace(",", "")
+                        .replace("-", "")
+                        .replace("'", "")
+                    )
 
                     # Create roleRef element and append it to role_ref_elements list.
                     role_uri = f"http://{self.company_website}/{self.filing_date}/role/{role_without_spaces}"

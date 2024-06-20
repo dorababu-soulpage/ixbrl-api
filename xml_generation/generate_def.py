@@ -133,12 +133,15 @@ class DefXMLGenerator:
         definition_links = []  # List to store presentationLink elements.
 
         tables_list = []
+        members_list = []
         line_items_list = []
         dimension_records_list = []
         pre_element_parent_created = False
         main_element_list = []
         # main elements
         elements_list: list = []
+        is_table_loc_created = False
+        is_line_item_created = False
 
         # Create the root linkbase element with namespaces
         linkbase_element = ET.Element(
@@ -163,7 +166,13 @@ class DefXMLGenerator:
                 pass
             else:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
-                role = role_without_spaces.replace("(", "").replace(")", "")
+                role = (
+                    role_without_spaces.replace("(", "")
+                    .replace(")", "")
+                    .replace(",", "")
+                    .replace("-", "")
+                    .replace("'", "")
+                )
                 # Create roleRef element and append it to role_ref_elements list.
                 role_uri = (
                     f"http://{self.company_website}/{self.filing_date}/role/{role}"
@@ -209,35 +218,40 @@ class DefXMLGenerator:
 
                     axis_members: str = record.get("Axis_Member")
 
-                    # line item location
-                    line_item_xlink_href = self.get_href_url(line_item)
-                    line_item_loc = self.create_definition_loc_element(
-                        parent_tag=definition_link,
-                        label=f"loc_{line_item}",
-                        xlink_href=f"{line_item_xlink_href}#{line_item}",
-                    )
-                    line_items_list.append(line_item)
+                    if line_item and is_line_item_created is False:
+                        # line item location
+                        line_item_xlink_href = self.get_href_url(line_item)
+                        line_item_loc = self.create_definition_loc_element(
+                            parent_tag=definition_link,
+                            label=f"loc_{line_item}",
+                            xlink_href=f"{line_item_xlink_href}#{line_item}",
+                        )
+                        line_items_list.append(line_item)
+                        is_line_item_created = True
 
-                    # table
-                    table_xlink_href = self.get_href_url(table)
-                    table_loc = self.create_definition_loc_element(
-                        parent_tag=definition_link,
-                        label=f"loc_{table}",
-                        xlink_href=f"{table_xlink_href}#{table}",
-                    )
+                    if table and is_table_loc_created is False:
+                        # table
+                        table_xlink_href = self.get_href_url(table)
+                        table_loc = self.create_definition_loc_element(
+                            parent_tag=definition_link,
+                            label=f"loc_{table}",
+                            xlink_href=f"{table_xlink_href}#{table}",
+                        )
 
-                    # Common arguments for create_presentation_arc_element
-                    arc_args = {
-                        "parent_tag": definition_link,
-                        "arc_role": "http://xbrl.org/int/dim/arcrole/all",
-                        "xlink_from": f"loc_{line_item}",
-                        "xlink_to": f"loc_{table}",
-                        "order": "1",
-                    }
+                        # Common arguments for create_presentation_arc_element
+                        arc_args = {
+                            "parent_tag": definition_link,
+                            "arc_role": "http://xbrl.org/int/dim/arcrole/all",
+                            "xlink_from": f"loc_{line_item}",
+                            "xlink_to": f"loc_{table}",
+                            "order": "1",
+                        }
 
-                    # Add definition arc elements
-                    definition_arc = self.create_definition_arc_element(**arc_args)
-                    tables_list.append(table)
+                        # Add definition arc elements
+                        definition_arc = self.create_definition_arc_element(**arc_args)
+                        tables_list.append(table)
+
+                        is_table_loc_created = True
 
                     if axis_members:
                         splitted = axis_members.split("__")
@@ -248,11 +262,17 @@ class DefXMLGenerator:
                         ]
                         for group in groups:
                             _axis, _domain, _member = group
-                            axis = _axis.replace("--", "_")
-                            domain = _domain.replace("--", "_")
-                            member = _member.replace("--", "_")
+                            axis = _axis.replace("--", "_").replace(
+                                "custom", self.ticker
+                            )
+                            domain = _domain.replace("--", "_").replace(
+                                "custom", self.ticker
+                            )
+                            member = _member.replace("--", "_").replace(
+                                "custom", self.ticker
+                            )
 
-                            dimension_record = (axis, domain, member)
+                            dimension_record = (axis, domain)
                             if dimension_record not in dimension_records_list:
 
                                 # axis
@@ -322,6 +342,9 @@ class DefXMLGenerator:
                                     **arc_args
                                 )
 
+                                dimension_records_list.append(dimension_record)
+
+                            if member not in members_list:
                                 # member
                                 member_xlink_href = self.get_href_url(member)
                                 member_loc = self.create_definition_loc_element(
@@ -343,12 +366,10 @@ class DefXMLGenerator:
                                 definition_arc = self.create_definition_arc_element(
                                     **arc_args
                                 )
-
-                                dimension_records_list.append(dimension_record)
+                                members_list.append(member)
 
                             # add dimension record
                             main_element_list.append(record)
-
                         else:
                             main_element_list.append(record)
 

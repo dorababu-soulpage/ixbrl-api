@@ -662,56 +662,117 @@ class XHTMLGenerator:
                 # Create new nonNumeric or Numeric tag
                 non_numeric_tag = soup.new_tag(datatype_element)
                 fact = data.get("Fact", "")
-                if fact.strip() == "N":
+                if fact and "N" in fact:
+                    # name attribute
+                    non_numeric_tag["name"] = element.replace("--", ":").replace(
+                        "custom", self.ticker
+                    )
+
+                    # contextRef attribute
+                    context_id = self.get_context_id(data)
+                    non_numeric_tag["contextRef"] = context_id
+
+                    # id attribute
+                    is_footnote = data.get("have_footnote")
+                    if is_footnote:
+                        foot_note_reference = tag.get("FR", "")
+                        # uniq_id = is_footnote[0]
+                        uniq_id = foot_note_reference
+                        # Remove the 'FR' attribute after the usage
+                        if "FR" in tag.attrs:
+                            del tag["data-info"]
+
+                    else:
+                        uniq_id = data.get("UniqueId", "")
+                    non_numeric_tag["id"] = uniq_id
+
+                    # unitRef attribute
+                    unit: str = data.get("Unit", "")
+                    non_numeric_tag["unitRef"] = unit
+
+                    # xs:nill attribute
                     non_numeric_tag["xs:nil"] = "true"
                     unit: str = data.get("Unit", "")
                     non_numeric_tag["unitRef"] = unit
 
-                for attribute in datatype_attributes:
-                    if attribute == "contextRef":
-                        context_id = self.get_context_id(data)
-                        non_numeric_tag["contextRef"] = context_id
+                if fact and "Z" in fact:
+                    # name attribute
+                    non_numeric_tag["name"] = element.replace("--", ":").replace(
+                        "custom", self.ticker
+                    )
 
-                    if attribute == "unitRef":
-                        unit: str = data.get("Unit", "")
-                        non_numeric_tag["unitRef"] = unit
+                    # contextRef attribute
+                    context_id = self.get_context_id(data)
+                    non_numeric_tag["contextRef"] = context_id
 
-                    if attribute == "name":
-                        non_numeric_tag["name"] = element.replace("--", ":").replace(
-                            "custom", self.ticker
-                        )
+                    # id attribute
+                    is_footnote = data.get("have_footnote")
+                    if is_footnote:
+                        foot_note_reference = tag.get("FR", "")
+                        # uniq_id = is_footnote[0]
+                        uniq_id = foot_note_reference
+                        # Remove the 'FR' attribute after the usage
+                        if "FR" in tag.attrs:
+                            del tag["data-info"]
 
-                    if attribute == "decimals":
-                        precision: str = data.get("Precision", "")
-                        non_numeric_tag["decimals"] = precision
+                    else:
+                        uniq_id = data.get("UniqueId", "")
+                    non_numeric_tag["id"] = uniq_id
 
-                    if attribute == "scale":
-                        counted_as: str = data.get("CountedAs", "")
-                        non_numeric_tag["scale"] = counted_as
+                    # formate attribute
+                    non_numeric_tag["format"] = "ixt:zerodash"
 
-                    if attribute == "format":
-                        if fact.strip() == "Z":
-                            non_numeric_tag["format"] = "ixt:zerodash"
-                        else:
+                    # decimals attribute
+                    precision: str = data.get("Precision", "")
+                    non_numeric_tag["decimals"] = precision
+
+                    # unitRef attribute
+                    unit: str = data.get("Unit", "")
+                    non_numeric_tag["unitRef"] = unit
+
+                else:
+                    for attribute in datatype_attributes:
+                        if attribute == "contextRef":
+                            context_id = self.get_context_id(data)
+                            non_numeric_tag["contextRef"] = context_id
+
+                        if attribute == "unitRef":
+                            unit: str = data.get("Unit", "")
+                            non_numeric_tag["unitRef"] = unit
+
+                        if attribute == "name":
+                            non_numeric_tag["name"] = element.replace(
+                                "--", ":"
+                            ).replace("custom", self.ticker)
+
+                        if attribute == "decimals":
+                            precision: str = data.get("Precision", "")
+                            non_numeric_tag["decimals"] = precision
+
+                        if attribute == "scale":
+                            counted_as: str = data.get("CountedAs", "")
+                            non_numeric_tag["scale"] = counted_as
+
+                        if attribute == "format":
                             # data_type = self.get_datatype(data.get("Element"))
                             format_value = self.get_format_value(
                                 element, data_type, tag.text
                             )
                             non_numeric_tag["format"] = format_value
 
-                    if attribute == "id":
-                        is_footnote = data.get("have_footnote")
-                        if is_footnote:
-                            foot_note_reference = tag.get("FR", "")
-                            # uniq_id = is_footnote[0]
-                            uniq_id = foot_note_reference
-                            # Remove the 'FR' attribute after the usage
-                            if "FR" in tag.attrs:
-                                del tag["data-info"]
+                        if attribute == "id":
+                            is_footnote = data.get("have_footnote")
+                            if is_footnote:
+                                foot_note_reference = tag.get("FR", "")
+                                # uniq_id = is_footnote[0]
+                                uniq_id = foot_note_reference
+                                # Remove the 'FR' attribute after the usage
+                                if "FR" in tag.attrs:
+                                    del tag["data-info"]
 
-                        else:
-                            uniq_id = data.get("UniqueId", "")
-                        non_numeric_tag["id"] = uniq_id
+                            else:
+                                uniq_id = data.get("UniqueId", "")
+                            non_numeric_tag["id"] = uniq_id
 
                 if note_section:
                     return non_numeric_tag

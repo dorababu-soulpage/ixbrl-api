@@ -217,7 +217,14 @@ class XSDGenerator:
                             if member.startswith("custom"):
                                 custom_elements.append(member)
 
-                _role = role.replace("(", "").replace(")", "")
+                _role = (
+                    role.replace("(", "")
+                    .replace(")", "")
+                    .replace(",", "")
+                    .replace("-", "")
+                    .replace("'", "")
+                )
+
                 role_without_spaces = re.sub(r"\s+", "", _role)
 
                 link_role_type = ET.Element(
