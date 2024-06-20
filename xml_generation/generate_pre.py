@@ -220,6 +220,7 @@ class PreXMLGenerator:
     ):
         is_table_loc_created = False
         dimension_records_list = []
+        members_list = []
         # iterate through dimension records
         for index, record in enumerate(dimension_records):
             _table = record.get("Table")
@@ -263,11 +264,11 @@ class PreXMLGenerator:
             groups = [splitted[i : i + 3] for i in range(0, len(splitted), 3)]
             for group in groups:
                 _axis, _domain, _member = group
-                axis = _axis.replace("--", "_")
-                domain = _domain.replace("--", "_")
-                member = _member.replace("--", "_")
+                axis = _axis.replace("--", "_").replace("custom", self.ticker)
+                domain = _domain.replace("--", "_").replace("custom", self.ticker)
+                member = _member.replace("--", "_").replace("custom", self.ticker)
 
-                dimension_record = (axis, domain, member)
+                dimension_record = (axis, domain)
                 if dimension_record not in dimension_records_list:
 
                     # axis location
@@ -310,6 +311,9 @@ class PreXMLGenerator:
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
 
+                    dimension_records_list.append(dimension_record)
+
+                if member not in members_list:
                     # member location
                     member_xlink_href = self.get_href_url(member)
                     member_loc = self.create_presentation_loc_element(
@@ -329,8 +333,7 @@ class PreXMLGenerator:
 
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
-
-                    dimension_records_list.append(dimension_record)
+                    members_list.append(member)
 
             # add line item only for last item
             if index == len(dimension_records) - 1:
@@ -354,27 +357,23 @@ class PreXMLGenerator:
                 # Create presentationArc element and append it to presentation_links list.
                 presentation_arc = self.create_presentation_arc_element(**arc_args)
 
-            # generate mail element xml
-            self.generate_elements_xml(
-                role_data,
-                presentation_links,
-                presentation_link,
-                line_item,
-                dimension=True,
-            )
+        # generate mail element xml
+        self.generate_elements_xml(
+            role_data,
+            presentation_links,
+            presentation_link,
+            line_item,
+            dimension=True,
+        )
 
     def check_role_is_dimension_or_not(self, role_data):
         # Flag variable to track if any Axis_Member has a value
-        records: list = []
-        elements_list: list = []
+        records: list[str] = []
 
         # Check if any Axis_Member has a value
         for item in role_data:
             if item["Axis_Member"]:
-                element = item["Element"]
-                if element not in elements_list:
-                    elements_list.append(element)
-                    records.append(item)
+                records.append(item)
 
         return records
 
@@ -404,7 +403,13 @@ class PreXMLGenerator:
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
                 role_name_without_spaces = re.sub(r"\s+", "", role_name)
-                role = role_name_without_spaces.replace("(", "").replace(")", "")
+                role = (
+                    role_name_without_spaces.replace("(", "")
+                    .replace(")", "")
+                    .replace(",", "")
+                    .replace("-", "")
+                    .replace("'", "")
+                )
                 # Create roleRef element and append it to role_ref_elements list.
                 role_uri = (
                     f"http://{self.company_website}/{self.filing_date}/role/{role}"

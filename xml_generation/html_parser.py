@@ -96,7 +96,12 @@ class HtmlTagParser:
         for tag in html_tags:
             tag_id = tag.get("id")
             formatted_data = self.get_formatted_data(tag_id)
-            formatted_data["RoleName"] = tag.get("role")
+            fact = formatted_data.get("Fact")
+            if "P" in fact:
+                formatted_data["RoleName"] = tag.get("role") + " " + "(Parenthetical)"
+            else:
+                formatted_data["RoleName"] = tag.get("role")
+
             formatted_data["PreferredLabel"] = tag.get("label")
             # root_level_abstract: str = formatted_data.get("RootLevelAbstract")
             # if root_level_abstract:

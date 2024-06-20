@@ -11,6 +11,12 @@ class FormatValueRetriever:
         if element.endswith("DocumentPeriodEndDate"):
             return "ixt:date-monthname-day-year-en"
 
+        if self.input_text in ["no", "None"]:
+            return "ixt-sec:numwordsen"
+
+        if self.input_text == "-":
+            return "ixt:zerodash"
+
         if data_type in [
             "xbrli:monetaryItemType",
             "xbrli:sharesItemType",
@@ -49,6 +55,15 @@ class FormatValueRetriever:
                 return "ixt:datedaymonthyearen"
             elif dateyearmonthday_pattern.match(self.input_text):
                 return "ixt:dateyearmonthday"
+
+        if data_type == "dei:edgarExchangeCodeItemType":
+            return "ixt-sec:exchnameen"
+
+        if data_type == "dei:stateOrProvinceItemType":
+            return "ixt-sec:edgarprovcountryen"
+
+        if data_type == "dei:filerCategoryItemType":
+            return "ixt-sec:entityfilercategoryen"
 
         if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:
             # Patterns to match each input format
