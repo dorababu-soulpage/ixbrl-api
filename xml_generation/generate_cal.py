@@ -197,7 +197,9 @@ class CalXMLGenerator:
                             for index, record in enumerate(children, start=1):
 
                                 _element = record.get("Element")
-                                element = _element.replace("--", "_")
+                                element = _element.replace("--", "_").replace(
+                                    "custom", self.ticker
+                                )
 
                                 if element not in cal_parent_Children:
                                     if element in calculation_parents:

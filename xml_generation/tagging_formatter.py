@@ -17,6 +17,12 @@ class FormatValueRetriever:
         if self.input_text == "-":
             return "ixt:zerodash"
 
+        if data_type == "dei:yesNoItemType" and self.input_text in ["☐", "☑", "☒"]:
+            return "ixt-sec:yesnoballotbox"
+
+        if data_type == "xbrli:booleanItemType" and self.input_text in ["☐", "☑", "☒"]:
+            return "ixt-sec:boolballotbox"
+
         if data_type in [
             "xbrli:monetaryItemType",
             "xbrli:sharesItemType",
@@ -59,10 +65,27 @@ class FormatValueRetriever:
         if data_type == "dei:edgarExchangeCodeItemType":
             return "ixt-sec:exchnameen"
 
-        if data_type == "dei:stateOrProvinceItemType":
+        states_list = ["California", "Ontario"]
+
+        if (
+            data_type == "dei:stateOrProvinceItemType"
+            and self.input_text in states_list
+        ):
+            return "ixt-sec:stateprovnameen"
+
+        if data_type == "dei:countryCodeItemType" and self.input_text in states_list:
             return "ixt-sec:edgarprovcountryen"
 
-        if data_type == "dei:filerCategoryItemType":
+        county_list = ["Canada", "Cayman Islands"]
+        if data_type == "dei:countryCodeItemType" and self.input_text in county_list:
+            return "ixt-sec:countrynameen"
+
+        category_list = [
+            "Large accelerated filer",
+            "accelerated filer",
+            "Non-Accelerated Filer",
+        ]
+        if data_type == "dei:filerCategoryItemType" and category_list:
             return "ixt-sec:entityfilercategoryen"
 
         if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:

@@ -267,18 +267,22 @@ class XSDGenerator:
             )
             if custom_element_data:
                 element_data: dict = custom_element_data.get("data")
-                data_type = custom_element_data.get("dataType", "")
+                data_type: str = custom_element_data.get("dataType", "")
+                abstract: str = element_data.get("abstract", "")
+                id = f"{custom_element}".replace("custom", self.ticker).replace(
+                    "--", "_"
+                )
+
                 custom_element = ET.Element(
                     "xsd:element",
                     {
-                        "id": f"{custom_element}".replace(
-                            "custom", self.ticker
-                        ).replace("--", "_"),
-                        "abstract": element_data.get("abstract", ""),
+                        "id": id,
+                        "abstract": abstract.lower(),
                         "name": element_name,
                         "nillable": "true",
                         "xbrli:periodType": element_data.get("period", ""),
                         "substitutionGroup": element_data.get("substitutionGroup", ""),
+                        "balance": element_data.get("balance", ""),
                         "type": data_type,
                     },
                 )
