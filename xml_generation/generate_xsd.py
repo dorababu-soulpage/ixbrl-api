@@ -20,9 +20,13 @@ class XSDGenerator:
 
     def group_data_by_role(self):
         # Group data by RoleName using itertools.groupby
-        grouped_data = {}
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            grouped_data[key] = list(group)
+        grouped_data: dict[str, list] = {}
+        for record in self.data:
+            role_name = record["RoleName"]
+            if role_name in grouped_data.keys():
+                grouped_data[role_name].append(record)
+            else:
+                grouped_data[role_name] = [record]
         return grouped_data
 
     def create_root_element(self):

@@ -17,7 +17,8 @@ class PreXMLGenerator:
         self.company_website = company_website
         self.client_id = client_id
         self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_pre.xml"
-        self.grouped_data = {}  # Dictionary to store grouped data by RoleName.
+        # Dictionary to store grouped data by RoleName.
+        self.grouped_data: dict[str, list] = {}
         self.elements_data = elements_data
 
     def get_preferred_label(self, label: str):
@@ -26,9 +27,12 @@ class PreXMLGenerator:
                 return value
 
     def group_data_by_role(self):
-        # Group the data by RoleName using itertools groupby and store it in grouped_data.
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            self.grouped_data[key] = list(group)
+        for record in self.data:
+            role_name = record["RoleName"]
+            if role_name in self.grouped_data.keys():
+                self.grouped_data[role_name].append(record)
+            else:
+                self.grouped_data[role_name] = [record]
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         # Create an XML element for roleRef with roleURI and xlink:href attributes.
