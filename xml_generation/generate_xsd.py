@@ -20,9 +20,13 @@ class XSDGenerator:
 
     def group_data_by_role(self):
         # Group data by RoleName using itertools.groupby
-        grouped_data = {}
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            grouped_data[key] = list(group)
+        grouped_data: dict[str, list] = {}
+        for record in self.data:
+            role_name = record["RoleName"]
+            if role_name in grouped_data.keys():
+                grouped_data[role_name].append(record)
+            else:
+                grouped_data[role_name] = [record]
         return grouped_data
 
     def create_root_element(self):
@@ -267,18 +271,22 @@ class XSDGenerator:
             )
             if custom_element_data:
                 element_data: dict = custom_element_data.get("data")
-                data_type = custom_element_data.get("dataType", "")
+                data_type: str = custom_element_data.get("dataType", "")
+                abstract: str = element_data.get("abstract", "")
+                id = f"{custom_element}".replace("custom", self.ticker).replace(
+                    "--", "_"
+                )
+
                 custom_element = ET.Element(
                     "xsd:element",
                     {
-                        "id": f"{custom_element}".replace(
-                            "custom", self.ticker
-                        ).replace("--", "_"),
-                        "abstract": element_data.get("abstract", ""),
+                        "id": id,
+                        "abstract": abstract.lower(),
                         "name": element_name,
                         "nillable": "true",
                         "xbrli:periodType": element_data.get("period", ""),
                         "substitutionGroup": element_data.get("substitutionGroup", ""),
+                        "balance": element_data.get("balance", ""),
                         "type": data_type,
                     },
                 )

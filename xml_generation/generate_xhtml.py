@@ -388,25 +388,29 @@ class XHTMLGenerator:
             name = unit.get("name")
             custom_unit = unit.get("customUnit")
             if custom_unit:
-                custom_root = etree.SubElement(resources, "unit", id=name)
+                custom_root = etree.SubElement(
+                    resources, "{http://www.xbrl.org/2003/instance}unit", id=name
+                )
 
                 # Create the measure element
-                measure = etree.SubElement(custom_root, "measure")
+                measure = etree.SubElement(
+                    custom_root, "{http://www.xbrl.org/2003/instance}measure"
+                )
                 measure.text = f"{self.ticker}:{name}"
 
             if "denominator" not in unit.keys() and custom_unit is False:
 
                 # Create the root element
-                numerator_root = etree.SubElement(resources, "unit", id=name)
-
-                # # Create the divide element
-                # divide = etree.SubElement(numerator_root, "divide")
-
-                # # Create the unitNumerator element
-                # unitNumerator = etree.SubElement(numerator_root, "unitNumerator")
+                numerator_root = etree.SubElement(
+                    resources,
+                    "{http://www.xbrl.org/2003/instance}unit",
+                    id=name,
+                )
 
                 # Create the measure element for unitNumerator
-                measure_numerator = etree.SubElement(numerator_root, "measure")
+                measure_numerator = etree.SubElement(
+                    numerator_root, "{http://www.xbrl.org/2003/instance}measure"
+                )
                 measure_numerator.text = f"iso4217:{name}"
 
             if (
@@ -415,23 +419,35 @@ class XHTMLGenerator:
                 and not custom_unit
             ):
                 # Create the root element
-                nd_root = etree.SubElement(resources, "unit", id=name)
+                nd_root = etree.SubElement(
+                    resources, "{http://www.xbrl.org/2003/instance}unit", id=name
+                )
 
                 # Create the divide element
-                divide = etree.SubElement(nd_root, "divide")
+                divide = etree.SubElement(
+                    nd_root, "{http://www.xbrl.org/2003/instance}divide"
+                )
 
                 # Create the unitNumerator element
-                unitNumerator = etree.SubElement(divide, "unitNumerator")
+                unitNumerator = etree.SubElement(
+                    divide, "{http://www.xbrl.org/2003/instance}unitNumerator"
+                )
 
                 # Create the measure element for unitNumerator
-                measure_numerator = etree.SubElement(unitNumerator, "measure")
+                measure_numerator = etree.SubElement(
+                    unitNumerator, "{http://www.xbrl.org/2003/instance}measure"
+                )
                 measure_numerator.text = f"iso4217:{name}"
 
                 # Create the unitDenominator element
-                unitDenominator = etree.SubElement(divide, "unitDenominator")
+                unitDenominator = etree.SubElement(
+                    divide, "{http://www.xbrl.org/2003/instance}unitDenominator"
+                )
 
                 # Create the measure element for unitDenominator
-                measure_denominator = etree.SubElement(unitDenominator, "measure")
+                measure_denominator = etree.SubElement(
+                    unitDenominator, "{http://www.xbrl.org/2003/instance}measure"
+                )
                 measure_denominator.text = name
 
     def remove_ix_namespaces(self, html_content: str):

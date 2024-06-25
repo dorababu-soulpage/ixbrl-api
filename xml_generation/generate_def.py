@@ -18,9 +18,13 @@ class DefXMLGenerator:
 
     def group_data_by_role(self):
         # Group data by RoleName using itertools.groupby
-        grouped_data = {}
-        for key, group in groupby(self.data, key=lambda x: x["RoleName"]):
-            grouped_data[key] = list(group)
+        grouped_data: dict[str, list] = {}
+        for record in self.data:
+            role_name = record["RoleName"]
+            if role_name in grouped_data.keys():
+                grouped_data[role_name].append(record)
+            else:
+                grouped_data[role_name] = [record]
         return grouped_data
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
@@ -141,7 +145,6 @@ class DefXMLGenerator:
         # main elements
         elements_list: list = []
         is_table_loc_created = False
-        is_line_item_created = False
 
         # Create the root linkbase element with namespaces
         linkbase_element = ET.Element(
@@ -159,6 +162,8 @@ class DefXMLGenerator:
 
         # Iterate through grouped data and create roleRef and presentationLink elements
         for role_name, role_data in self.grouped_data.items():
+
+            is_line_item_created = False
 
             # Check if all Axis_Member are empty
             all_empty = self.are_all_axis_member_empty(role_data)

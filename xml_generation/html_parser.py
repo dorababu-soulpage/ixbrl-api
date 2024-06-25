@@ -51,7 +51,7 @@ class HtmlTagParser:
 
     def get_calculation_parent(self, data):
         for item in data[1:-1]:
-            if item.startswith("m"):
+            if item.startswith("m") and not item.startswith("mt"):
                 _, cal_parent = item.split("__")
                 return cal_parent
         return ""

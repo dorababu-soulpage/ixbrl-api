@@ -288,7 +288,7 @@ def extract_html_elements(file, only_id=False) -> list[dict]:
                         html_tags_data.append(
                             {
                                 "role": table.get("role", ""),
-                                "label": table.get("title", ""),
+                                "label": tag.get("title", ""),
                                 "id": final_id,
                             }
                         )
