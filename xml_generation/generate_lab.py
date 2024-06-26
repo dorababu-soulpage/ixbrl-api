@@ -240,6 +240,9 @@ class LabXMLGenerator:
             label_types: list = main_element.get("label_types")
             label_created = False
             for index, label_type in enumerate(label_types, start=1):
+
+                label_text = ""
+
                 if element.startswith(self.ticker):
                     _, name = element.split("_")
                     custom_element_data = get_custom_element_record(

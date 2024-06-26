@@ -8,9 +8,9 @@ from utils import (
     get_db_record,
     get_split_file_record,
     extract_html_elements,
-    remove_ix_namespaces,
 )
 
+import html
 from lxml import etree
 from constants import namespace
 from xml_generation.html_parser import HtmlTagParser
@@ -464,10 +464,14 @@ class XHTMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        # Manage entities manually
+        parsed_html = html.unescape(str(soup))
+
         # output_html_file = self.get_filename()
         # Update the output file with the new soup data
         with open(f"{directory}/{self.output_html}.htm", "wb") as out_file:
-            html_content: str = soup.prettify()
+            # html_content: str = soup.prettify()
+            html_content: str = parsed_html
 
             # remove all the namespaces in the ix header
             html_content = self.remove_ix_namespaces(html_content)
