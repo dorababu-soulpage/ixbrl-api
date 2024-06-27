@@ -242,6 +242,7 @@ class LabXMLGenerator:
             for index, label_type in enumerate(label_types, start=1):
 
                 label_text = ""
+                documentation = ""
 
                 if element.startswith(self.ticker):
                     _, name = element.split("_")
@@ -250,8 +251,10 @@ class LabXMLGenerator:
                     )
                     if custom_element_data:
                         label_text = custom_element_data.get("label", "")
-                    else:
-                        label_text = ""
+
+                    if custom_element_data:
+                        data = custom_element_data.get("data")
+                        documentation = data.get("documentation")
                 else:
                     if "_" in element:
                         _, name = element.split("_")
@@ -269,6 +272,16 @@ class LabXMLGenerator:
                         label_text=label_text,
                     )
                     label_created = True
+
+                    if documentation:
+                        # documentation entry
+                        self.create_label_element(
+                            parent_tag=label_link,
+                            id=f"lab_{element}_1_doc_en-US",
+                            xlink_label=element,
+                            xlink_role="http://www.xbrl.org/2003/role/documentation",
+                            label_text=documentation,
+                        )
 
                 # create remaining lables
                 if label_type and label_type != "label":
