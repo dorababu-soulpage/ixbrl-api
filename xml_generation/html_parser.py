@@ -56,6 +56,16 @@ class HtmlTagParser:
                 return cal_parent
         return ""
 
+    def get_calculation_weight(self, data):
+        for item in data[1:-1]:
+            if item.startswith("m") and not item.startswith("mt"):
+                cal_weight = item[1]
+                if cal_weight == "a":
+                    return "1"
+                if cal_weight == "s":
+                    return "-1"
+        return ""
+
     def check_foot_note(self, data):
         footnotes_list: list = []
         for item in data[1:-1]:
@@ -76,6 +86,7 @@ class HtmlTagParser:
             "Precision": self.get_precision_counted_as(data, "Precision"),
             "CountedAs": self.get_precision_counted_as(data, "CountedAs"),
             "CalculationParent": self.get_calculation_parent(data),
+            "CalculationWeight": self.get_calculation_weight(data),
             "Period": self.extract_field(data, "c"),
             "Axis_Member": self.extract_field(data, "h"),
             "PreferredLabelType": self.extract_field(data, "y"),

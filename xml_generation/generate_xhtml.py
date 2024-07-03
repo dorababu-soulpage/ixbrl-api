@@ -37,6 +37,20 @@ class XHTMLGenerator:
     def get_filename(self):
         return os.path.basename(self.html_file)
 
+    def get_unit_value(self, unit):
+        # Read the JSON file
+
+        with open("assets/units.json", "r") as json_file:
+            data = json.load(json_file)
+
+        # Loop through each object in the JSON data
+        for obj in data:
+            # Access individual fields, for example:
+            if unit == obj["unitId"]:
+                return obj["baseStandard"]
+        else:
+            return ""
+
     def add_html_attributes(self):
         # Create a BeautifulSoup object
         soup = BeautifulSoup("", "html.parser")
@@ -387,6 +401,8 @@ class XHTMLGenerator:
             # check custom unit or not
             name = unit.get("name")
             custom_unit = unit.get("customUnit")
+            baseStandard = self.get_unit_value(name)
+
             if custom_unit:
                 custom_root = etree.SubElement(
                     resources, "{http://www.xbrl.org/2003/instance}unit", id=name
@@ -411,7 +427,11 @@ class XHTMLGenerator:
                 measure_numerator = etree.SubElement(
                     numerator_root, "{http://www.xbrl.org/2003/instance}measure"
                 )
-                measure_numerator.text = f"iso4217:{name}"
+
+                if baseStandard:
+                    measure_numerator.text = f"{baseStandard}:{name}"
+                else:
+                    measure_numerator.text = f"{name}"
 
             if (
                 "numerator" in unit.keys()
@@ -437,7 +457,11 @@ class XHTMLGenerator:
                 measure_numerator = etree.SubElement(
                     unitNumerator, "{http://www.xbrl.org/2003/instance}measure"
                 )
-                measure_numerator.text = f"iso4217:{name}"
+
+                if baseStandard:
+                    measure_numerator.text = f"{baseStandard}:{name}"
+                else:
+                    measure_numerator.text = f"{name}"
 
                 # Create the unitDenominator element
                 unitDenominator = etree.SubElement(
@@ -681,6 +705,8 @@ class XHTMLGenerator:
                 datatype_attributes = data_type_record.get("attributes", "")
                 # Create new nonNumeric or Numeric tag
                 non_numeric_tag = soup.new_tag(datatype_element)
+                # data_type = self.get_datatype(data.get("Element"))
+                format_value = self.get_format_value(element, data_type, tag.text)
                 fact = data.get("Fact", "")
                 if fact and "N" in fact:
                     # name attribute
@@ -765,19 +791,16 @@ class XHTMLGenerator:
                                 "--", ":"
                             ).replace("custom", self.ticker)
 
-                        if attribute == "decimals":
+                        if attribute == "decimals" and format_value != "ixt:zerodash":
                             precision: str = data.get("Precision", "")
                             non_numeric_tag["decimals"] = precision
 
-                        if attribute == "scale":
+                        if attribute == "scale" and format_value != "ixt:zerodash":
                             counted_as: str = data.get("CountedAs", "")
                             non_numeric_tag["scale"] = counted_as
 
                         if attribute == "format":
-                            # data_type = self.get_datatype(data.get("Element"))
-                            format_value = self.get_format_value(
-                                element, data_type, tag.text
-                            )
+
                             non_numeric_tag["format"] = format_value
 
                         if attribute == "id":

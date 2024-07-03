@@ -201,6 +201,7 @@ class CalXMLGenerator:
                             for index, record in enumerate(children, start=1):
 
                                 _element = record.get("Element")
+                                calculation_weight = record.get("CalculationWeight")
                                 element = _element.replace("--", "_").replace(
                                     "custom", self.ticker
                                 )
@@ -244,7 +245,7 @@ class CalXMLGenerator:
                                     calculation_arc = self.create_calculation_arc_element(
                                         parent_tag=calculation_link,
                                         order=str(element_occurrences.get(xlink_from)),
-                                        weight="1",
+                                        weight=calculation_weight,
                                         arc_role="http://www.xbrl.org/2003/arcrole/summation-item",
                                         xlink_from=f"loc_{xlink_from}",
                                         # xlink_to=f"loc_{element}_{index+1}",
