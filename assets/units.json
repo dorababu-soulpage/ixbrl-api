@@ -1,0 +1,1270 @@
+[
+    {
+        "unitId": "acre",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "sqft",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "sqmi",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "sqyd",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Boe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Btu",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "ft_lb",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MBoe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Mcfe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MMBoe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MMBTU",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "ft",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "in",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "mi",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "nmi",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "yd",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "lb",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "oz",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "ozt",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "T",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "hp",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "bbl",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "ft3",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "gal",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MBbls",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Mcf",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MMBbls",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MMcf",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "AED",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AFN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ALL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AMD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ANG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AOA",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ARS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AUD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AWG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "AZN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BAM",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BBD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BDT",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BGN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BHD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BIF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BMD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BND",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BOB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BOV",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BRL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BSD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BTN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BWP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BYN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BYR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "BZD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CAD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CDF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CHE",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CHF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CHW",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CLF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CLP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CNY",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "COP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "COU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CRC",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CUC",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CUP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CVE",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "CZK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "DJF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "DKK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "DOP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "DZD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "EEK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "EGP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ERN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ETB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "EUR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "FJD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "FKP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GBP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GEL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GHS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GIP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GMD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GNF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GTQ",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "GYD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "HKD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "HNL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "HRK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "HTG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "HUF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "IDR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ILS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "INR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "IQD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "IRR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ISK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "JMD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "JOD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "JPY",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KES",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KGS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KHR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KMF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KPW",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KRW",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KWD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KYD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "KZT",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LAK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LBP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LKR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LRD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LSL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LTL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LVL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "LYD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MAD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MDL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MGA",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MKD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MMK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MNT",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MOP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MRO",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MRU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MUR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MVR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MWK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MXN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MXV",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MYR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "MZN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NAD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NGN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NIO",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NOK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NPR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "NZD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "OMR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PAB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PEN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PGK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PHP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PKR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PLN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "PYG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "QAR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "RON",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "RSD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "RUB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "RWF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SAR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SBD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SCR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SDG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SEK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SGD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SHP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SLL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SLE",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SOS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SRD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SSP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "STD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "STN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SVC",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SYP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "SZL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "THB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TJS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TMT",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TND",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TOP",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TRY",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TTD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TWD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "TZS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UAH",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UGX",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "USD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "USN",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "USS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UYI",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UYU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UYW",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "UZS",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VEB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VEF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VES",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VED",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VND",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "VUV",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "WST",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XAF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XAG",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XAU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XBA",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XBB",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XBC",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XBD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XCD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XDR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XFU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XOF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XPD",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XPF",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XPT",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XSU",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "XUA",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "YER",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ZAR",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ZMK",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ZMW",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "ZWL",
+        "baseStandard": "ISO4217"
+    },
+    {
+        "unitId": "Cal",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "t",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "B",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "GB",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "kB",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "MB",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "TB",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "ha",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "sqkm",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "sqm",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "A",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "J",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "kJ",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "kWh",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "mJ",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "MWh",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "V",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Hz",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "cm",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "dm",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "km",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "m",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "mm",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "g",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "kg",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "GW",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "kW",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "MW",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "TW",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "W",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "kV",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "l",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "m3",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "bu",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "aft",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Monetary_per_Share",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "Monetary_per_Decimal",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "Monetary_per_Monetary",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "pure",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "Rate",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "shares",
+        "baseStandard": "XBRL"
+    },
+    {
+        "unitId": "Y",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "M",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "D",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "H",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MM",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "S",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Volume_per_Duration",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MV",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "GV",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Bcf",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Tcf",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "GWh",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "TWh",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Q",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "WK",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MMcfe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Bcfe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Tcfe",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "kT",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MT",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "GT",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "kt",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "Mt",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "Gt",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "MWM",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "GWM",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Energy_per_Duration",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Celsius",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "K",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "F",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Pa",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Bar",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "psi",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "atm",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "N",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "var",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "VA",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Wh",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "VAh",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Ah",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "C",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "Degree",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "rad",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "dth",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MWd",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "GJ",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "MJ",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "TJ",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "PB",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "Mvar",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "MVA",
+        "baseStandard": "SI"
+    },
+    {
+        "unitId": "tCO2e",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "ktCO2e",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "MtCO2e",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "GtCO2e",
+        "baseStandard": "Non-SI"
+    },
+    {
+        "unitId": "Emissions_per_Monetary",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Energy_per_Monetary",
+        "baseStandard": "Customary"
+    },
+    {
+        "unitId": "Volume_per_Monetary",
+        "baseStandard": "Customary"
+    }
+]

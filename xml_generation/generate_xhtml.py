@@ -8,9 +8,9 @@ from utils import (
     get_db_record,
     get_split_file_record,
     extract_html_elements,
-    remove_ix_namespaces,
 )
 
+import html
 from lxml import etree
 from constants import namespace
 from xml_generation.html_parser import HtmlTagParser
@@ -36,6 +36,20 @@ class XHTMLGenerator:
 
     def get_filename(self):
         return os.path.basename(self.html_file)
+
+    def get_unit_value(self, unit):
+        # Read the JSON file
+
+        with open("assets/units.json", "r") as json_file:
+            data = json.load(json_file)
+
+        # Loop through each object in the JSON data
+        for obj in data:
+            # Access individual fields, for example:
+            if unit == obj["unitId"]:
+                return obj["baseStandard"]
+        else:
+            return ""
 
     def add_html_attributes(self):
         # Create a BeautifulSoup object
@@ -387,6 +401,8 @@ class XHTMLGenerator:
             # check custom unit or not
             name = unit.get("name")
             custom_unit = unit.get("customUnit")
+            baseStandard = self.get_unit_value(name)
+
             if custom_unit:
                 custom_root = etree.SubElement(
                     resources, "{http://www.xbrl.org/2003/instance}unit", id=name
@@ -411,7 +427,11 @@ class XHTMLGenerator:
                 measure_numerator = etree.SubElement(
                     numerator_root, "{http://www.xbrl.org/2003/instance}measure"
                 )
-                measure_numerator.text = f"iso4217:{name}"
+
+                if baseStandard:
+                    measure_numerator.text = f"{baseStandard}:{name}"
+                else:
+                    measure_numerator.text = f"{name}"
 
             if (
                 "numerator" in unit.keys()
@@ -437,7 +457,11 @@ class XHTMLGenerator:
                 measure_numerator = etree.SubElement(
                     unitNumerator, "{http://www.xbrl.org/2003/instance}measure"
                 )
-                measure_numerator.text = f"iso4217:{name}"
+
+                if baseStandard:
+                    measure_numerator.text = f"{baseStandard}:{name}"
+                else:
+                    measure_numerator.text = f"{name}"
 
                 # Create the unitDenominator element
                 unitDenominator = etree.SubElement(
@@ -464,10 +488,14 @@ class XHTMLGenerator:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        # Manage entities manually
+        parsed_html = html.unescape(str(soup))
+
         # output_html_file = self.get_filename()
         # Update the output file with the new soup data
         with open(f"{directory}/{self.output_html}.htm", "wb") as out_file:
-            html_content: str = soup.prettify()
+            # html_content: str = soup.prettify()
+            html_content: str = parsed_html
 
             # remove all the namespaces in the ix header
             html_content = self.remove_ix_namespaces(html_content)
@@ -677,6 +705,8 @@ class XHTMLGenerator:
                 datatype_attributes = data_type_record.get("attributes", "")
                 # Create new nonNumeric or Numeric tag
                 non_numeric_tag = soup.new_tag(datatype_element)
+                # data_type = self.get_datatype(data.get("Element"))
+                format_value = self.get_format_value(element, data_type, tag.text)
                 fact = data.get("Fact", "")
                 if fact and "N" in fact:
                     # name attribute
@@ -761,19 +791,16 @@ class XHTMLGenerator:
                                 "--", ":"
                             ).replace("custom", self.ticker)
 
-                        if attribute == "decimals":
+                        if attribute == "decimals" and format_value != "ixt:zerodash":
                             precision: str = data.get("Precision", "")
                             non_numeric_tag["decimals"] = precision
 
-                        if attribute == "scale":
+                        if attribute == "scale" and format_value != "ixt:zerodash":
                             counted_as: str = data.get("CountedAs", "")
                             non_numeric_tag["scale"] = counted_as
 
                         if attribute == "format":
-                            # data_type = self.get_datatype(data.get("Element"))
-                            format_value = self.get_format_value(
-                                element, data_type, tag.text
-                            )
+
                             non_numeric_tag["format"] = format_value
 
                         if attribute == "id":
@@ -790,6 +817,9 @@ class XHTMLGenerator:
                                 uniq_id = data.get("UniqueId", "")
                             non_numeric_tag["id"] = uniq_id
 
+                style = tag.get("style")
+                if style:
+                    non_numeric_tag["style"] = style
                 if note_section:
                     return non_numeric_tag
                 else:
@@ -995,12 +1025,24 @@ class XHTMLGenerator:
         )
 
         non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
+        non_numeric_text = self.cik
+
+        # Create the 'ix:hidden' element
+        hidden = etree.SubElement(root, "{http://www.xbrl.org/2013/inlineXBRL}hidden")
+
+        # Create the 'ix:nonNumeric' elements within 'ix:hidden'
+        # CIK Entry
+        non_numeric_cik = etree.SubElement(
+            hidden,
+            "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
+            contextRef=non_numeric_contextRef,
+            name="dei:EntityCentralIndexKey",
+        )
+        non_numeric_cik.text = non_numeric_text
 
         if elements_data:
             # Create the 'ix:hidden' element
-            hidden = etree.SubElement(
-                root, "{http://www.xbrl.org/2013/inlineXBRL}hidden"
-            )
+
             # Create the 'ix:nonNumeric' elements within 'ix:hidden'
             for key, value in elements_data.items():
                 if key == "CurrentFiscalYearEndDate":
@@ -1019,23 +1061,6 @@ class XHTMLGenerator:
                     name=f"dei:{key}",
                 )
                 non_numeric.text = value
-        else:
-            non_numeric_contextRef = f"FROM{period_from}TO{period_to}"
-            non_numeric_text = self.cik
-
-            # Create the 'ix:hidden' element
-            hidden = etree.SubElement(
-                root, "{http://www.xbrl.org/2013/inlineXBRL}hidden"
-            )
-
-            # Create the 'ix:nonNumeric' elements within 'ix:hidden'
-            non_numeric_1 = etree.SubElement(
-                hidden,
-                "{http://www.xbrl.org/2013/inlineXBRL}nonNumeric",
-                contextRef=non_numeric_contextRef,
-                name="dei:EntityCentralIndexKey",
-            )
-            non_numeric_1.text = non_numeric_text
 
         # Create the 'ix:references' element
         references = etree.SubElement(

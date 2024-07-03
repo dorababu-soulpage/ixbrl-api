@@ -475,7 +475,7 @@ class PreXMLGenerator:
                         pre_element_parent_loc = self.create_presentation_loc_element(
                             parent_tag=presentation_link,
                             label=f"loc_dei_{element}",
-                            xlink_href=f"{element_xlink_href}#{element}",
+                            xlink_href=f"{element_xlink_href}#dei_{element}",
                         )
                         # Add definition arc elements
                         presentation_arc = self.create_presentation_arc_element(

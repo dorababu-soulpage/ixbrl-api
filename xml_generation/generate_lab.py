@@ -9,7 +9,9 @@ from utils import get_custom_element_record
 
 
 class LabXMLGenerator:
-    def __init__(self, data, filing_date, ticker, company_website, client_id):
+    def __init__(
+        self, data, filing_date, ticker, company_website, client_id, elements_data
+    ):
         # Initialize the LabXMLGenerator with data, filing_date, ticker, and company_website.
         self.data = data
         self.filing_date = filing_date
@@ -18,6 +20,7 @@ class LabXMLGenerator:
         self.client_id = client_id
         self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_lab.xml"
         self.element_data = []
+        self.elements_data = elements_data
 
     def create_role_ref_element(self, parent=None, role_uri=None, xlink_href=None):
         return ET.SubElement(
@@ -240,6 +243,10 @@ class LabXMLGenerator:
             label_types: list = main_element.get("label_types")
             label_created = False
             for index, label_type in enumerate(label_types, start=1):
+
+                label_text = ""
+                documentation = ""
+
                 if element.startswith(self.ticker):
                     _, name = element.split("_")
                     custom_element_data = get_custom_element_record(
@@ -247,8 +254,10 @@ class LabXMLGenerator:
                     )
                     if custom_element_data:
                         label_text = custom_element_data.get("label", "")
-                    else:
-                        label_text = ""
+
+                    if custom_element_data:
+                        data = custom_element_data.get("data")
+                        documentation = data.get("documentation")
                 else:
                     if "_" in element:
                         _, name = element.split("_")
@@ -267,6 +276,16 @@ class LabXMLGenerator:
                     )
                     label_created = True
 
+                    if documentation:
+                        # documentation entry
+                        self.create_label_element(
+                            parent_tag=label_link,
+                            id=f"lab_{element}_1_doc_en-US",
+                            xlink_label=element,
+                            xlink_role="http://www.xbrl.org/2003/role/documentation",
+                            label_text=documentation,
+                        )
+
                 # create remaining lables
                 if label_type and label_type != "label":
 
@@ -278,6 +297,29 @@ class LabXMLGenerator:
                         xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
                         label_text=label_text,
                     )
+
+        if self.elements_data:
+            # hidden line items
+            for element in self.elements_data:
+                # Create location for elements.
+                href_url = self.get_href_url(element)
+                element_loc = self.create_label_loc_element(
+                    parent_tag=label_link,
+                    label=f"loc_dei_{element}",
+                    xlink_href=f"{href_url}#{element}",
+                )
+
+                # Common arguments for create_label_arc_element
+                arc_args = {
+                    "parent_tag": label_link,
+                    "order": "1",
+                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                    "xlink_from": f"loc_dei_{element}",
+                    "xlink_to": f"lab_{element}",
+                }
+
+                # Create presentationArc element and append it to presentation_links list.
+                label_arc = self.create_label_arc_element(**arc_args)
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
