@@ -30,10 +30,12 @@ class FormatValueRetriever:
             "srt-types:perUnitItemType",
         ]:
             # Patterns to match each format
-            numcommadecdimal_pattern = re.compile(r"^\d{1,3}(?:[\.\s]?\d{3})*,\d{2}$")
-            numdotdecimal_pattern = re.compile(r"^\d{1,3}(?:[,\s]?\d{3})*(?:\.\d{2})?$")
+            numcommadecdimal_pattern = re.compile(r"^\d{1,3}(?:[\.\s]?\d{3})*,\d{1,2}$")
+            numdotdecimal_pattern = re.compile(
+                r"^\d{1,3}(?:[,\s]?\d{3})*(?:\.\d{1,2})?$"
+            )
             numdotdecimalin_pattern = re.compile(
-                r"^\d{1,2}(?:[,\s]?\d{2})*(?:\.\d{2})?$"
+                r"^\d{1,2}(?:[,\s]?\d{2})*(?:\.\d{1,2})?$"
             )
 
             if numcommadecdimal_pattern.match(self.input_text):
@@ -128,10 +130,10 @@ class FormatValueRetriever:
     #         return ""
 
 
-# # Usage:
-# input_text = "2016-12-31"
-# data_type = "xbrli:dateItemType"
-# element = "dei:DocumentPeriodEndDate"
-# retriever = FormatValueRetriever(input_text)
-# format_value = retriever.get_format_value(element, data_type)
-# print(format_value)
+# Usage:
+input_text = "148.6"
+data_type = "xbrli:monetaryItemType"
+element = "usgap:Cash"
+retriever = FormatValueRetriever(input_text)
+format_value = retriever.get_format_value(element, data_type)
+print(format_value)

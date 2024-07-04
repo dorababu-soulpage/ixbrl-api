@@ -144,7 +144,7 @@ class DefXMLGenerator:
         main_element_list = []
         # main elements
         elements_list: list = []
-        is_table_loc_created = False
+        # is_table_loc_created = False
 
         # Create the root linkbase element with namespaces
         linkbase_element = ET.Element(
@@ -164,6 +164,7 @@ class DefXMLGenerator:
         for role_name, role_data in self.grouped_data.items():
 
             is_line_item_created = False
+            is_table_loc_created = False
 
             # Check if all Axis_Member are empty
             all_empty = self.are_all_axis_member_empty(role_data)

@@ -19,7 +19,16 @@ from xml_generation.tagging_formatter import FormatValueRetriever
 
 class XHTMLGenerator:
     def __init__(
-        self, data, filing_date, ticker, cik, file_id, html_file, filename, split_file
+        self,
+        data,
+        filing_date,
+        ticker,
+        cik,
+        file_id,
+        html_file,
+        filename,
+        split_file,
+        website,
     ):
         # Initialize class attributes
         self.cik = cik
@@ -28,6 +37,8 @@ class XHTMLGenerator:
         self.file_id = file_id
         self.html_file = html_file
         self.split_file = split_file
+        self.company_website = website
+        self.filing_date = filing_date
         self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
         self.output_html = filename
         self.xsd_filename = f"{ticker}-{filing_date}.xsd"  # XSD file name
@@ -80,7 +91,9 @@ class XHTMLGenerator:
         html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
         html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
         html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
-        html_tag["xmlns:fult"] = "http://fult.com/20230516"
+        html_tag[f"xmlns:{self.ticker}"] = (
+            f"http://{self.company_website}/{self.filing_date}"
+        )
         html_tag["xml:lang"] = "en-US"
         html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
         html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"

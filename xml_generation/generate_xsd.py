@@ -39,6 +39,11 @@ class XSDGenerator:
                 "elementFormDefault": "qualified",
                 "xmlns:dtr-types": "http://www.xbrl.org/dtr/type/2022-03-31",
                 "xmlns:country": "http://xbrl.sec.gov/country/2023",
+                "xmlns:currency": "https://xbrl.sec.gov/currency/2023/currency-2023",
+                "xmlns:exch": "https://xbrl.sec.gov/exch/2023/exch-2023",
+                "xmlns:naics": "https://xbrl.sec.gov/naics/2023/naics-2023",
+                "xmlns:sic": "https://xbrl.sec.gov/sic/2023/sic-2023",
+                "xmlns:stpr": "https://xbrl.sec.gov/stpr/2023/stpr-2023",
                 "xmlns:ecd-sub": "http://xbrl.sec.gov/ecd-sub/2023",
                 f"xmlns:{self.ticker}": f"http://{self.company_website}/{self.filing_date}",
                 "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
@@ -276,20 +281,27 @@ class XSDGenerator:
                 id = f"{custom_element}".replace("custom", self.ticker).replace(
                     "--", "_"
                 )
+                custom_element_attributes = {
+                    "id": id,
+                    "name": element_name,
+                    "nillable": "true",
+                    "type": data_type,
+                }
 
-                custom_element = ET.Element(
-                    "xsd:element",
-                    {
-                        "id": id,
-                        "abstract": abstract.lower(),
-                        "name": element_name,
-                        "nillable": "true",
-                        "xbrli:periodType": element_data.get("period", ""),
-                        "substitutionGroup": element_data.get("substitutionGroup", ""),
-                        "balance": element_data.get("balance", ""),
-                        "type": data_type,
-                    },
-                )
+                period = element_data.get("period", "")
+                balance = element_data.get("balance", "")
+                substitutionGroup = element_data.get("substitutionGroup", "")
+
+                if abstract:
+                    custom_element_attributes["abstract"] = abstract.lower()
+                if period:
+                    custom_element_attributes["xbrli:periodType"] = period
+                if substitutionGroup:
+                    custom_element_attributes["substitutionGroup"] = substitutionGroup
+                if balance:
+                    custom_element_attributes["balance"] = balance
+
+                custom_element = ET.Element("xsd:element", custom_element_attributes)
                 self.root.append(custom_element)
 
     def generate_xsd_schema(self):

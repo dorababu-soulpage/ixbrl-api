@@ -288,15 +288,24 @@ class LabXMLGenerator:
 
                 # create remaining lables
                 if label_type and label_type != "label":
-
-                    # create terseLabel
-                    self.create_label_element(
-                        parent_tag=label_link,
-                        id=f"lab_{element}_{index}_{label_type}_en-US",
-                        xlink_label=element,
-                        xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
-                        label_text=label_text,
-                    )
+                    if label_type == "negatedLabel":
+                        # create terseLabel
+                        self.create_label_element(
+                            parent_tag=label_link,
+                            id=f"lab_{element}_{index}_{label_type}_en-US",
+                            xlink_label=element,
+                            xlink_role=f"http://www.xbrl.org/2009/role/{label_type}",
+                            label_text=label_text,
+                        )
+                    else:
+                        # create terseLabel
+                        self.create_label_element(
+                            parent_tag=label_link,
+                            id=f"lab_{element}_{index}_{label_type}_en-US",
+                            xlink_label=element,
+                            xlink_role=f"http://www.xbrl.org/2003/role/{label_type}",
+                            label_text=label_text,
+                        )
 
         if self.elements_data:
             # hidden line items

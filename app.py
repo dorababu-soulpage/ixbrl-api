@@ -399,12 +399,22 @@ def generate_xml_schema_files():
     cal_generator = CalXMLGenerator(*args)
     cal_generator.generate_cal_xml()
 
-    args = data, filing_date, ticker, company_website, client_id
+    args = data, filing_date, ticker, company_website, client_id, elements_data
     lab_generator = LabXMLGenerator(*args)
     lab_generator.generate_lab_xml()
 
     # generate xHTML file
-    args = data, filing_date, ticker, cik, file_id, html_file, filename, split_file
+    args = (
+        data,
+        filing_date,
+        ticker,
+        cik,
+        file_id,
+        html_file,
+        filename,
+        split_file,
+        company_website,
+    )
     xhtml_generator = XHTMLGenerator(*args)
     xhtml_generator.generate_xhtml_file()
 
