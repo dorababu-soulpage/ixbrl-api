@@ -69,6 +69,18 @@ class PreXMLGenerator:
             return "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd"
         if element.startswith(self.ticker):
             return f"{self.ticker}-{self.filing_date}.xsd"
+        if element.startswith("country"):
+            return "http://xbrl.sec.gov/country/2023.xsd"
+        if element.startswith("currency"):
+            return "https://xbrl.sec.gov/currency/2023/currency-2023.xsd"
+        if element.startswith("exch"):
+            return "https://xbrl.sec.gov/exch/2023/exch-2023.xsd"
+        if element.startswith("naics"):
+            return "https://xbrl.sec.gov/naics/2023/naics-2023.xsd"
+        if element.startswith("sic"):
+            return "https://xbrl.sec.gov/sic/2023/sic-2023.xsd"
+        if element.startswith("stpr"):
+            return "https://xbrl.sec.gov/stpr/2023/stpr-2023.xsd"
 
     def create_presentation_arc_element(
         self,
