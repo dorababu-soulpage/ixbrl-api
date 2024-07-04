@@ -130,10 +130,10 @@ class FormatValueRetriever:
     #         return ""
 
 
-# Usage:
-input_text = "148.6"
-data_type = "xbrli:monetaryItemType"
-element = "usgap:Cash"
-retriever = FormatValueRetriever(input_text)
-format_value = retriever.get_format_value(element, data_type)
-print(format_value)
+# # Usage:
+# input_text = "148.6"
+# data_type = "xbrli:monetaryItemType"
+# element = "usgap:Cash"
+# retriever = FormatValueRetriever(input_text)
+# format_value = retriever.get_format_value(element, data_type)
+# print(format_value)
