@@ -237,6 +237,7 @@ class PreXMLGenerator:
         is_table_loc_created = False
         dimension_records_list = []
         members_list = []
+        member_order = 1
         # iterate through dimension records
         for index, record in enumerate(dimension_records):
             _table = record.get("Table")
@@ -341,7 +342,7 @@ class PreXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
-                        "order": "1",
+                        "order": str(member_order),
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{domain}",
                         "xlink_to": f"loc_{member}",
@@ -350,6 +351,7 @@ class PreXMLGenerator:
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
                     members_list.append(member)
+                    member_order += 1
 
             # add line item only for last item
             if index == len(dimension_records) - 1:

@@ -779,11 +779,15 @@ class XHTMLGenerator:
                     non_numeric_tag["id"] = uniq_id
 
                     # formate attribute
-                    non_numeric_tag["format"] = "ixt:zerodash"
+                    non_numeric_tag["format"] = "ixt:fixed-zero"
 
                     # decimals attribute
                     precision: str = data.get("Precision", "")
                     non_numeric_tag["decimals"] = precision
+
+                    # scale attribute
+                    counted_as: str = data.get("CountedAs", "")
+                    non_numeric_tag["scale"] = counted_as
 
                     # unitRef attribute
                     unit: str = data.get("Unit", "")
@@ -804,11 +808,11 @@ class XHTMLGenerator:
                                 "--", ":"
                             ).replace("custom", self.ticker)
 
-                        if attribute == "decimals" and format_value != "ixt:zerodash":
+                        if attribute == "decimals" and format_value != "ixt:fixed-zero":
                             precision: str = data.get("Precision", "")
                             non_numeric_tag["decimals"] = precision
 
-                        if attribute == "scale" and format_value != "ixt:zerodash":
+                        if attribute == "scale" and format_value != "ixt:fixed-zero":
                             counted_as: str = data.get("CountedAs", "")
                             non_numeric_tag["scale"] = counted_as
 
