@@ -379,8 +379,16 @@ class DefXMLGenerator:
                         else:
                             main_element_list.append(record)
 
-                # pre parent element
-                initial_record = role_data[0]
+                initial_record = None
+                for record in role_data:
+
+                    heading = record.get("Heading")
+                    if heading:
+                        continue
+                    else:
+                        initial_record = record
+                        break
+
                 root_level_abstract = initial_record.get("RootLevelAbstract")
                 _pre_element_parent: str = initial_record.get("PreElementParent")
 
@@ -389,19 +397,19 @@ class DefXMLGenerator:
 
                 # pre parent element
                 if root_level_abstract != _pre_element_parent:
-                    pre_element_parent = _pre_element_parent
+                    pre_element_parent = _pre_element_parent.replace("--", "_")
                     if pre_element_parent and pre_element_parent_created is False:
                         pre_element_parent_xlink_href = self.get_href_url(
                             pre_element_parent
                         )
-                        pre_element_parent_loc = self.create_presentation_loc_element(
+                        pre_element_parent_loc = self.create_definition_loc_element(
                             parent_tag=definition_link,
                             label=f"loc_{pre_element_parent}",
                             xlink_href=f"{pre_element_parent_xlink_href}#{pre_element_parent}",
                         )
 
                         # Add definition arc elements
-                        definition_arc = self.create_presentation_arc_element(
+                        definition_arc = self.create_definition_arc_element(
                             parent_tag=definition_link,
                             order="1",
                             arc_role="http://xbrl.org/int/dim/arcrole/parent-child",

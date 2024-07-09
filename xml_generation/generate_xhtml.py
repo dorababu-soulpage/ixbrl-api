@@ -842,7 +842,7 @@ class XHTMLGenerator:
                 if note_section:
                     return non_numeric_tag
                 else:
-                    non_numeric_tag.string = tag.text
+                    # non_numeric_tag.string = tag.text
                     return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
@@ -859,6 +859,19 @@ class XHTMLGenerator:
             datatype_tag = self.create_datatype_tag(soup, data, tag)
 
             if datatype_tag:
+                datatype_tag.string = tag.text
+
+                fact = data.get("Fact", "")
+
+                if "R" in fact and "(" in tag.text:
+                    datatype_tag.string = tag.text.replace("(", "")
+
+                    # Create a new NavigableString for the parenthesis
+                    parenthesis = soup.new_string("(")
+
+                    # Insert the parenthesis before the non_numeric_tag tag
+                    tag.insert_before(parenthesis)
+
                 # Replace original font tag with new Numeric or nonNumeric tag
                 # font_tag = soup.find("font", id=tag_id)
                 font_tag = soup.find(id=tag_id)
