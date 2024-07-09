@@ -834,6 +834,8 @@ class XHTMLGenerator:
                                 uniq_id = data.get("UniqueId", "")
                             non_numeric_tag["id"] = uniq_id
 
+                        if "R" in fact:
+                            non_numeric_tag["sign"] = "-"
                 style = tag.get("style")
                 if style:
                     non_numeric_tag["style"] = style
