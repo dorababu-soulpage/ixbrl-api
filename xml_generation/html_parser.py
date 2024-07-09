@@ -46,8 +46,10 @@ class HtmlTagParser:
 
         if value:
             return value
-        else:
+        if value == "0":
             return "0"
+        else:
+            return ""
 
     def get_calculation_parent(self, data):
         for item in data[1:-1]:
