@@ -985,26 +985,28 @@ class XHTMLGenerator:
 
         # create new Numeric or nonNumeric tag
         datatype_tag = self.create_datatype_tag(soup, data, start_tag)
-        datatype_tag_string = datatype_tag.text
 
-        # keep the strong tag for the tagged element
-        target_element = soup.find(string=start_tag.text)
-        if target_element:
-            # Check if the parent tag is <strong>
-            parent_tag = target_element.parent
-            if parent_tag.name == "strong":
-                strong_tag = soup.new_tag("strong")
-                datatype_tag.string = ""
-                strong_tag.string = datatype_tag_string
-                datatype_tag.append(strong_tag)
-            else:
-                datatype_tag.string = datatype_tag_string
+        if datatype_tag:
+            datatype_tag_string = datatype_tag.text
 
-        for tag in content:
-            datatype_tag.append(tag)
+            # keep the strong tag for the tagged element
+            target_element = soup.find(string=start_tag.text)
+            if target_element:
+                # Check if the parent tag is <strong>
+                parent_tag = target_element.parent
+                if parent_tag.name == "strong":
+                    strong_tag = soup.new_tag("strong")
+                    datatype_tag.string = ""
+                    strong_tag.string = datatype_tag_string
+                    datatype_tag.append(strong_tag)
+                else:
+                    datatype_tag.string = datatype_tag_string
 
-        # Insert the new tag into the document
-        start_tag.replace_with(datatype_tag)
+            for tag in content:
+                datatype_tag.append(tag)
+
+            # Insert the new tag into the document
+            start_tag.replace_with(datatype_tag)
 
         return soup
 
