@@ -905,23 +905,32 @@ class XHTMLGenerator:
         # Find the ix:resources element
         resources = soup.find("ix:resources")
 
-        # Define the relationships
-        relationship = soup.new_tag("ix:relationship", fromRefs=from_ref, toRefs=to_ref)
+        if resources:
+            # Define the relationships
+            relationship = soup.new_tag(
+                "ix:relationship", fromRefs=from_ref, toRefs=to_ref
+            )
 
-        # Find the last xbrli:unit element if it exists
-        last_unit = (
-            resources.find_all("xbrli:unit")[-1]
-            if resources.find_all("xbrli:unit")
-            else None
-        )
+            # Find the last xbrli:unit element if it exists
+            last_unit = (
+                resources.find_all("xbrli:unit")[-1]
+                if resources.find_all("xbrli:unit")
+                else None
+            )
 
-        # Insert relationships after the last xbrli:unit element if it exists, otherwise append to resources
-        if last_unit:
-            if relationship not in resources:
-                last_unit.insert_after(relationship)
-        else:
-            if relationship not in resources:
-                resources.append(relationship)
+            # Find all xbrli:unit elements with namespace handling
+            xbrli_units = resources.find_all("unit")
+
+            # Find the last xbrli:unit element if it exists
+            last_unit = xbrli_units[-1] if xbrli_units else None
+
+            # Insert relationships after the last xbrli:unit element if it exists, otherwise append to resources
+            if last_unit:
+                if relationship not in resources:
+                    last_unit.insert_after(relationship)
+            else:
+                if relationship not in resources:
+                    resources.append(relationship)
 
     def foot_notes(self, soup: BeautifulSoup):
 
@@ -1202,6 +1211,11 @@ class XHTMLGenerator:
                 # Try to locate body and head tags within the HTML structure
                 body = soup.body
                 head_tag = soup.head
+
+                if not head_tag:
+                    head_tag = soup.new_tag("head")
+                    soup.html.insert(0, head_tag)
+
                 # Insert meta tag specifying content type within head tag
                 meta_tag = soup.new_tag("meta")
                 meta_tag.attrs["http-equiv"] = "Content-Type"
