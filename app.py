@@ -21,7 +21,7 @@ from xml_generation.generate_lab import LabXMLGenerator
 from xml_generation.generate_xhtml import XHTMLGenerator
 
 # from auto_tagging.tagging import auto_tagging
-from flask import Flask, request
+from flask import Flask, request, render_template
 from utils import (
     extract_html_elements,
     get_db_record,
@@ -34,7 +34,7 @@ from utils import (
 )
 from rule_based_tagging import RuleBasedTagging
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static/", static_url_path="/")
 
 storage_dir = "data"
 base_dir = Path().absolute()
@@ -430,6 +430,11 @@ def generate_xml_schema_files():
         "ixbrl_file_url": ixbrl_file_url,
         "log_file_url": log_file_url,
     }
+
+
+@app.route("/<folder_name>/ix.html")
+def viewer(folder_name):
+    return render_template("ix.html")
 
 
 @app.route("/api/upload-file", methods=["POST"])

@@ -484,21 +484,24 @@ class PreXMLGenerator:
 
                 # add elements data into pre.xml next to the main elements
                 if role == "Cover":
-                    for element in self.elements_data:
-                        element_xlink_href = self.get_href_url(f"dei--{element}")
-                        pre_element_parent_loc = self.create_presentation_loc_element(
-                            parent_tag=presentation_link,
-                            label=f"loc_dei_{element}",
-                            xlink_href=f"{element_xlink_href}#dei_{element}",
-                        )
-                        # Add definition arc elements
-                        presentation_arc = self.create_presentation_arc_element(
-                            parent_tag=presentation_link,
-                            order="1",
-                            arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                            xlink_from=f"loc_{root_level_abstract}",
-                            xlink_to=f"loc_dei_{element}",
-                        )
+                    if self.elements_data:
+                        for element in self.elements_data:
+                            element_xlink_href = self.get_href_url(f"dei--{element}")
+                            pre_element_parent_loc = (
+                                self.create_presentation_loc_element(
+                                    parent_tag=presentation_link,
+                                    label=f"loc_dei_{element}",
+                                    xlink_href=f"{element_xlink_href}#dei_{element}",
+                                )
+                            )
+                            # Add definition arc elements
+                            presentation_arc = self.create_presentation_arc_element(
+                                parent_tag=presentation_link,
+                                order="1",
+                                arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                                xlink_from=f"loc_{root_level_abstract}",
+                                xlink_to=f"loc_dei_{element}",
+                            )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
