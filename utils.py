@@ -247,7 +247,7 @@ def get_taxonomy_values(element):
         return None
 
 
-def extract_html_elements(file, only_id=False) -> list[dict]:
+def extract_html_elements(file, only_id=False):
     # # file = "https://deeplobe.s3.ap-south-1.amazonaws.com/mays4160726-10q.htm"
 
     # # read tags from html and add into the exists concepts

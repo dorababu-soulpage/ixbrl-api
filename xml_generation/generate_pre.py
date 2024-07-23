@@ -415,7 +415,10 @@ class PreXMLGenerator:
 
         # Iterate through grouped data and create roleRef and presentationLink elements.
         for role_name, role_data in self.grouped_data.items():
-            record: dict = role_data[0] | {}
+            record = {}
+            if role_data[0]:
+                record = role_data[0]
+
             if role_name:
                 _root_level_abstract: str = record.get("RootLevelAbstract")
                 root_level_abstract = _root_level_abstract.replace("--", "_")
