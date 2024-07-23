@@ -1,40 +1,12 @@
-# core modules
-certifi==2023.7.22
-lxml==4.9.3
-OpenPyXL==3.1.2
-pyparsing==3.1.1
-regex==2023.8.8
-isodate==0.6.1
-aniso8601==9.0.1
-CherryPy==18.8.0
-Cheroot==10.0.0
-# special note: pip install --no-cache --use-pep517 pycountry
-pycountry==22.3.5
-# plugins
-# EdgarRenderer plugin
-NumPy==1.24.4 ; python_version <= "3.8"
-NumPy==1.25.2 ; python_version > "3.8"
-Matplotlib==3.7.1
-holidays==0.31
-Tornado==6.3.3
-# security plugin
-PyCryptodome==3.18.0
-# xbrlDB plugin
-cx_Oracle==8.3.0
-pg8000==1.30.1
-PyMySQL==1.1.0
-pyodbc==4.0.39
-RDFLib==5.0.0
-# other
-graphviz==0.20.1
-Pillow==10.0.0
-pywin32==306 ; sys_platform == "win32"
-tinycss2==1.2.1
+arelle-release==2.30.13
+Flask==3.0.3
+holidays
+matplotlib
+pytz
 boto3==1.28.59
 requests==2.31.0
+pandas==2.0.1
 python-decouple==3.8
-Flask==3.0.0
 bs4==0.0.1
 openpyxl==3.1.2
 psycopg2-binary==2.9.9
-pandas==2.0.1

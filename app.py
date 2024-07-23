@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from urllib.parse import urlparse
 
+import uuid
 import boto3
 import requests
 import pandas as pd
@@ -21,7 +22,7 @@ from xml_generation.generate_lab import LabXMLGenerator
 from xml_generation.generate_xhtml import XHTMLGenerator
 
 # from auto_tagging.tagging import auto_tagging
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for
 from utils import (
     extract_html_elements,
     get_db_record,
@@ -203,39 +204,70 @@ def zip_html_xml_files(directory, zip_name):
                     zipf.write(file_path, os.path.relpath(file_path, directory))
 
 
+def get_plugins(desired_names):
+    plugins_path = os.path.join(app.static_folder, "plugins")
+    if os.path.exists(plugins_path) and os.path.isdir(plugins_path):
+        # List all items in the plugins directory
+        subdirectories = [
+            os.path.join(plugins_path, name)
+            for name in os.listdir(plugins_path)
+            if os.path.isdir(os.path.join(plugins_path, name)) and name in desired_names
+        ]
+        # Join the subdirectory names with a pipe separator
+        return "|".join(subdirectories)
+    else:
+        return ""
+
+
+def run_arelle(input_file, output_dir):
+    pluginsPath = get_plugins(["EdgarRenderer"])
+
+    # Command to run Arelle with input HTML and save the output in the specified directory
+    command = [
+        "arelleCmdLine",
+        "-f",
+        input_file,
+        "-v",
+        "--efm",
+        "--plugins",
+        pluginsPath,
+        "--reportFormat",
+        "HtmlAndXml",
+        "-r",
+        output_dir,
+    ]
+
+    # Run the command
+    try:
+        subprocess.run(command, check=True)
+        print(f"View generated successfully and saved in {output_dir}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error running Arelle: {e}")
+
+
 def ixbrl_viewer_file_generation(file):
 
-    ixbrl_file_url = None
-    log_file_url = None
+    # Create a unique folder for the output
+    unique_folder = str(uuid.uuid4())
+    output_folder = os.path.join(app.static_folder, unique_folder)
+    xbrl_url = None
 
-    # create viewer folder
-    Path(f"{file}/viewer").mkdir(parents=True, exist_ok=True)
+    file_path = file
 
-    logs_path = f"{file}/logs"
+    try:
+        output_path = f"{app.static_folder}/viewer"
+        output_filename = f"/viewer/{unique_folder}/FilingSummary.htm"
 
-    # Check if logs_path exists
-    if Path(logs_path).exists():
-        # Remove the existing directory
-        shutil.rmtree(logs_path)
+        run_arelle(file_path, os.path.join(output_path, unique_folder))
+        url = url_for("static", filename=output_filename)
 
-    # Create the directory
-    Path(logs_path).mkdir(parents=True, exist_ok=True)
+        xbrl_url = url
 
-    logs_file = f"{logs_path}/iXBRLViewer.logs"
-
-    # ixbrl-file-generation
-    plugin = f"{base_dir}/ixbrl-viewer/iXBRLViewerPlugin"
-
-    output_html = f"{file}/viewer/{Path(file).name}-ixbrl-viewer.html"
-    viewer_url = "https://cdn.jsdelivr.net/npm/ixbrl-viewer/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
-
-    print("\n===============[ixbrl viewer file generation started]===============\n")
-
-    ixbrl_file_gen_cmd = f"python arelleCmdLine.py --plugins={plugin} -f {file} --save-viewer {output_html} --viewer-url {viewer_url} --logFile={logs_file}"
-    # ixbrl_file_gen_cmd = f"python arelleCmdLine.py -f {file} --plugins EdgarRenderer --disclosureSystem efm-pragmatic --validate -r out --report out"
-    subprocess.call(ixbrl_file_gen_cmd, shell=True)
-
-    # validation_logs = validation(file)
+    except Exception as e:
+        # Check if output_folder exists
+        if Path(output_folder).exists():
+            os.rmdir(output_folder)
+            os.remove(file_path)
 
     # Zip the folder
     # shutil.make_archive(file, "zip", file)
@@ -254,39 +286,11 @@ def ixbrl_viewer_file_generation(file):
     filename = path.name
     ixbrl_package_url = upload_zip_to_s3(filename, zip_file_path)
 
-    try:
-        # Read the file content into memory
-        with open(output_html, "rb") as f:
-            file_content = f.read()
-
-        # Convert the file content to BytesIO
-        file_object = io.BytesIO(file_content)
-        ixbrl_filename = os.path.basename(output_html)
-
-        ixbrl_file_url = s3_uploader(ixbrl_filename, file_object)
-
-    except Exception as e:
-        print(str(e))
-
-    try:
-        # Read the file content into memory
-        with open(logs_file, "rb") as f:
-            file_content = f.read()
-
-        # Convert the file content to BytesIO
-        file_object = io.BytesIO(file_content)
-        ixbrl_filename = os.path.basename(logs_file)
-
-        log_file_url = s3_uploader(ixbrl_filename, file_object)
-
-    except Exception as e:
-        print(str(e))
-
     # Remove the file, zip directory
     shutil.rmtree(file)
     os.remove(zip_file_path)
 
-    return ixbrl_package_url, ixbrl_file_url, log_file_url
+    return ixbrl_package_url, xbrl_url
 
 
 @app.route("/api/rule-based-tagging", methods=["POST"])
@@ -420,20 +424,17 @@ def generate_xml_schema_files():
 
     file_path = f"data/{ticker}-{filing_date}"
 
-    ixbrl_package_url, ixbrl_file_url, log_file_url = ixbrl_viewer_file_generation(
-        file_path
-    )
+    package_url, xbrl_url = ixbrl_viewer_file_generation(file_path)
 
     return {
         "messages": "XML Files generated successfully.",
-        "ixbrl_package_url": ixbrl_package_url,
-        "ixbrl_file_url": ixbrl_file_url,
-        "log_file_url": log_file_url,
+        "ixbrl_package_url": package_url,
+        "xbrl_url": xbrl_url,
     }
 
 
-@app.route("/<folder_name>/ix.html")
-def viewer(folder_name):
+@app.route("/ix")
+def viewer():
     return render_template("ix.html")
 
 
