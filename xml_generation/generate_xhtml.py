@@ -841,11 +841,11 @@ class XHTMLGenerator:
                                 "--", ":"
                             ).replace("custom", self.ticker)
 
-                        if attribute == "decimals" and format_value != "ixt:zerodash":
+                        if attribute == "decimals" and format_value != "ixt:fixed-zero":
                             precision: str = data.get("Precision", "")
                             non_numeric_tag["decimals"] = precision
 
-                        if attribute == "scale" and format_value != "ixt:zerodash":
+                        if attribute == "scale" and format_value != "ixt:fixed-zero":
                             counted_as: str = data.get("CountedAs", "")
                             non_numeric_tag["scale"] = counted_as
 
