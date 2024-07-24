@@ -6,8 +6,10 @@ namespace = {
     "xbrldt": "http://xbrl.org/2005/xbrldt",
     "iso4217": "http://www.xbrl.org/2003/iso4217",
     "ix": "http://www.xbrl.org/2013/inlineXBRL",
-    "ixt": "http://www.xbrl.org/inlineXBRL/transformation/2015-02-26",
-    "ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31",
+    # "ixt": "http://www.xbrl.org/inlineXBRL/transformation/2015-02-26" #Old
+    "ixt": "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12",  # New
+    # "ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31", #Old
+    "ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31",  # New
     "link": "http://www.xbrl.org/2003/linkbase",
     "dei": "http://xbrl.sec.gov/dei/2023",
     "ref": "http://www.xbrl.org/2006/ref",
@@ -17,5 +19,6 @@ namespace = {
     "srt": "http://fasb.org/srt/2023",
     "xsi": "http://www.w3.org/2001/XMLSchema-instance",
     "ecd": "http://xbrl.sec.gov/ecd/2023",
-    "fult": "http://fult.com/20230516",
+    "utr": "http://www.xbrl.org/2009/utr",
+    "iso4217": "http://www.xbrl.org/2003/iso4217",
 }

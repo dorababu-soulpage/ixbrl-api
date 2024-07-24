@@ -1,1270 +1,1587 @@
 [
     {
         "unitId": "acre",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "sqft",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "sqmi",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "sqyd",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Boe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Btu",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "ft_lb",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MBoe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Mcfe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MMBoe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MMBTU",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "ft",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "in",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "mi",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "nmi",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "yd",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "lb",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "oz",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "ozt",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "T",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "hp",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "bbl",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "ft3",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "gal",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MBbls",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Mcf",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MMBbls",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MMcf",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "AED",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AFN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ALL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AMD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ANG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AOA",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ARS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AUD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AWG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "AZN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BAM",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BBD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BDT",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BGN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BHD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BIF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BMD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BND",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BOB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BOV",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BRL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BSD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BTN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BWP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BYN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BYR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "BZD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CAD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CDF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CHE",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CHF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CHW",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CLF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CLP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CNY",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "COP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "COU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CRC",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CUC",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CUP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CVE",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "CZK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "DJF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "DKK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "DOP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "DZD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "EEK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "EGP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ERN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ETB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "EUR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "FJD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "FKP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GBP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GEL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GHS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GIP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GMD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GNF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GTQ",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "GYD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "HKD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "HNL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "HRK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "HTG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "HUF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "IDR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ILS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "INR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "IQD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "IRR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ISK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "JMD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "JOD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "JPY",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KES",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KGS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KHR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KMF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KPW",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KRW",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KWD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KYD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "KZT",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LAK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LBP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LKR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LRD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LSL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LTL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LVL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "LYD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MAD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MDL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MGA",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MKD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MMK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MNT",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MOP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MRO",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MRU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MUR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MVR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MWK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MXN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MXV",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MYR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "MZN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NAD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NGN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NIO",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NOK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NPR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "NZD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "OMR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PAB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PEN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PGK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PHP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PKR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PLN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "PYG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "QAR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "RON",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "RSD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "RUB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "RWF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SAR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SBD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SCR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SDG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SEK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SGD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SHP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SLL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SLE",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SOS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SRD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SSP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "STD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "STN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SVC",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SYP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "SZL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "THB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TJS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TMT",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TND",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TOP",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TRY",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TTD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TWD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "TZS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UAH",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UGX",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "USD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "USN",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "USS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UYI",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UYU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UYW",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "UZS",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VEB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VEF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VES",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VED",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VND",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "VUV",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "WST",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XAF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XAG",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XAU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XBA",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XBB",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XBC",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XBD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XCD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XDR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XFU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XOF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XPD",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XPF",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XPT",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XSU",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "XUA",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "YER",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ZAR",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ZMK",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ZMW",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "ZWL",
+        "nsUnit": "http://www.xbrl.org/2003/iso4217",
         "baseStandard": "ISO4217"
     },
     {
         "unitId": "Cal",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "t",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "B",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "GB",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "kB",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "MB",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "TB",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "ha",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "sqkm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "sqm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "A",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "J",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "kJ",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "kWh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "mJ",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "MWh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "V",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Hz",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "cm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "dm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "km",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "m",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "mm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "g",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "kg",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "GW",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "kW",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "MW",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "TW",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "W",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "kV",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "l",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "m3",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "bu",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "aft",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Monetary_per_Share",
+        "nsUnit": null,
         "baseStandard": "XBRL"
     },
     {
         "unitId": "Monetary_per_Decimal",
+        "nsUnit": null,
         "baseStandard": "XBRL"
     },
     {
         "unitId": "Monetary_per_Monetary",
+        "nsUnit": null,
         "baseStandard": "XBRL"
     },
     {
         "unitId": "pure",
+        "nsUnit": "http://www.xbrl.org/2003/instance",
         "baseStandard": "XBRL"
     },
     {
         "unitId": "Rate",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "XBRL"
     },
     {
         "unitId": "shares",
+        "nsUnit": "http://www.xbrl.org/2003/instance",
         "baseStandard": "XBRL"
     },
     {
         "unitId": "Y",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "M",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "D",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "H",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MM",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "S",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Volume_per_Duration",
+        "nsUnit": null,
         "baseStandard": "Customary"
     },
     {
         "unitId": "MV",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "GV",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Bcf",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Tcf",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "GWh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "TWh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Q",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "WK",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MMcfe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Bcfe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Tcfe",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "kT",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MT",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "GT",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "kt",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "Mt",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "Gt",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "MWM",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "GWM",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Energy_per_Duration",
+        "nsUnit": null,
         "baseStandard": "Customary"
     },
     {
         "unitId": "Celsius",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "K",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "F",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Pa",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Bar",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "psi",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "atm",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "N",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "var",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "VA",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Wh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "VAh",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "Ah",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "C",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "Degree",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "rad",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "dth",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MWd",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "GJ",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "MJ",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "TJ",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "PB",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "Mvar",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Customary"
     },
     {
         "unitId": "MVA",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "SI"
     },
     {
         "unitId": "tCO2e",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "ktCO2e",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "MtCO2e",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "GtCO2e",
+        "nsUnit": "http://www.xbrl.org/2009/utr",
         "baseStandard": "Non-SI"
     },
     {
         "unitId": "Emissions_per_Monetary",
+        "nsUnit": null,
         "baseStandard": "Customary"
     },
     {
         "unitId": "Energy_per_Monetary",
+        "nsUnit": null,
         "baseStandard": "Customary"
     },
     {
         "unitId": "Volume_per_Monetary",
+        "nsUnit": null,
         "baseStandard": "Customary"
     }
 ]
