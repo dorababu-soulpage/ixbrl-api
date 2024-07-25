@@ -204,6 +204,7 @@ class LabXMLGenerator:
         role_ref_elements = self.add_role_ref_elements(parent=linkbase_element)
 
         elements_types: Dict[str, list] = {}
+        main_elements_list = []
 
         label_link = ET.SubElement(
             linkbase_element,
@@ -215,6 +216,7 @@ class LabXMLGenerator:
         )
         main_elements_data = self.get_element_and_types()
         for main_element in main_elements_data:
+            original_element = main_element
             element: str = main_element.get("element")
             element: str = element.replace("--", "_")
             if element.startswith("custom"):
@@ -307,28 +309,38 @@ class LabXMLGenerator:
                             label_text=label_text,
                         )
 
+            main_elements_list.append(element)
+
+        root_level_abstract = None
+        for el in main_elements_list:
+            if el.endswith("Abstract"):
+                root_level_abstract = el
+                break
+
         if self.elements_data:
             # hidden line items
             for element in self.elements_data:
-                # Create location for elements.
-                href_url = self.get_href_url(element)
-                element_loc = self.create_label_loc_element(
-                    parent_tag=label_link,
-                    label=f"loc_dei_{element}",
-                    xlink_href=f"{href_url}#{element}",
-                )
+                # if element not in main elements list, add element
+                if f"dei_{element}" not in main_elements_list:
+                    # Create location for elements.
+                    href_url = self.get_href_url(f"dei--{element}")
+                    element_loc = self.create_label_loc_element(
+                        parent_tag=label_link,
+                        label=f"loc_dei_{element}",
+                        xlink_href=f"{href_url}#dei_{element}",
+                    )
 
-                # Common arguments for create_label_arc_element
-                arc_args = {
-                    "parent_tag": label_link,
-                    "order": "1",
-                    "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                    "xlink_from": f"loc_dei_{element}",
-                    "xlink_to": f"lab_{element}",
-                }
+                    # Common arguments for create_label_arc_element
+                    arc_args = {
+                        "parent_tag": label_link,
+                        "order": "1",
+                        "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                        "xlink_from": f"loc_{root_level_abstract}",
+                        "xlink_to": f"lab_{element}",
+                    }
 
-                # Create presentationArc element and append it to presentation_links list.
-                label_arc = self.create_label_arc_element(**arc_args)
+                    # Create presentationArc element and append it to presentation_links list.
+                    label_arc = self.create_label_arc_element(**arc_args)
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
