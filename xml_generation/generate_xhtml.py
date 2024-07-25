@@ -58,9 +58,9 @@ class XHTMLGenerator:
         for obj in data:
             # Access individual fields, for example:
             if unit == obj["unitId"]:
-                return obj["baseStandard"]
+                return obj["baseStandard"], obj["nsUnit"]
         else:
-            return ""
+            return None, None
 
     def add_html_attributes(self):
         # Create a BeautifulSoup object
@@ -97,6 +97,8 @@ class XHTMLGenerator:
         html_tag["xml:lang"] = "en-US"
         html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
         html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
+        html_tag["xmlns:utr"] = "http://www.xbrl.org/2009/utr"
+        html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
 
         return str(html_tag).replace("</html>", "")
 
@@ -413,8 +415,9 @@ class XHTMLGenerator:
         for unit in units:
             # check custom unit or not
             name = unit.get("name")
+            numerator: str = unit.get("numerator")
+            denominator: str = unit.get("denominator")
             custom_unit = unit.get("customUnit")
-            baseStandard = self.get_unit_value(name)
 
             if custom_unit:
                 custom_root = etree.SubElement(
@@ -441,10 +444,18 @@ class XHTMLGenerator:
                     numerator_root, "{http://www.xbrl.org/2003/instance}measure"
                 )
 
+                baseStandard, nsUnit = self.get_unit_value(name)
+
                 if baseStandard:
-                    measure_numerator.text = f"{baseStandard}:{name}"
+                    if nsUnit.endswith("instance"):
+                        baseStandard = f"{baseStandard}i".lower()
+                        measure_numerator.text = f"{baseStandard}:{name}"
+                    if nsUnit.endswith("utr"):
+                        measure_numerator.text = f"utr:{name}"
+                    if nsUnit.endswith("iso4217"):
+                        measure_numerator.text = f"iso4217:{name}"
                 else:
-                    measure_numerator.text = f"{name}"
+                    measure_numerator.text = f"{self.ticker}:{name}"
 
             if (
                 "numerator" in unit.keys()
@@ -471,10 +482,19 @@ class XHTMLGenerator:
                     unitNumerator, "{http://www.xbrl.org/2003/instance}measure"
                 )
 
+                name = numerator.split()[0]
+                baseStandard, nsUnit = self.get_unit_value(name)
+
                 if baseStandard:
-                    measure_numerator.text = f"{baseStandard}:{name}"
+                    if nsUnit.endswith("instance"):
+                        baseStandard = f"{baseStandard}i".lower()
+                        measure_numerator.text = f"{baseStandard}:{name}"
+                    if nsUnit.endswith("utr"):
+                        measure_numerator.text = f"utr:{name}"
+                    if nsUnit.endswith("iso4217"):
+                        measure_numerator.text = f"iso4217:{name}"
                 else:
-                    measure_numerator.text = f"{name}"
+                    measure_numerator.text = f"{self.ticker}:{name}"
 
                 # Create the unitDenominator element
                 unitDenominator = etree.SubElement(
@@ -485,7 +505,20 @@ class XHTMLGenerator:
                 measure_denominator = etree.SubElement(
                     unitDenominator, "{http://www.xbrl.org/2003/instance}measure"
                 )
-                measure_denominator.text = name
+
+                name = denominator.split()[0]
+                baseStandard, nsUnit = self.get_unit_value(name)
+
+                if baseStandard:
+                    if nsUnit.endswith("instance"):
+                        baseStandard = f"{baseStandard}i".lower()
+                        measure_denominator.text = f"{baseStandard}:{name}"
+                    if nsUnit.endswith("utr"):
+                        measure_denominator.text = f"utr:{name}"
+                    if nsUnit.endswith("iso4217"):
+                        measure_denominator.text = f"iso4217:{name}"
+                else:
+                    measure_denominator.text = f"{self.ticker}:{name}"
 
     def remove_ix_namespaces(self, html_content: str):
         for key, value in namespace.items():

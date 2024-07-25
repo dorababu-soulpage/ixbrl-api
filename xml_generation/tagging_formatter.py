@@ -15,7 +15,7 @@ class FormatValueRetriever:
             return "ixt-sec:numwordsen"
 
         if self.input_text == "-":
-            return "ixt:zerodash"
+            return "ixt:fixed-zero"
 
         if data_type == "dei:yesNoItemType" and self.input_text in ["☐", "☑", "☒"]:
             return "ixt-sec:yesnoballotbox"

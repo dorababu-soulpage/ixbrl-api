@@ -124,7 +124,7 @@
     "Datatype 2": "xbrli:sharesItemType",
     "Datatype 3": "xbrli:integerItemType",
     "Datatype 4": null,
-    "Format Code": "ixt:zerodash",
+    "Format Code": "ixt:fixed-zero",
     "Description": "Zero dash",
     "Input format": "-",
     "Output format": 0,
