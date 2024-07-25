@@ -20,6 +20,8 @@ class PreXMLGenerator:
         # Dictionary to store grouped data by RoleName.
         self.grouped_data: dict[str, list] = {}
         self.elements_data = elements_data
+        # main elements
+        self.elements_list: list = []
 
     def get_preferred_label(self, label: str):
         for key, value in labels_dict.items():
@@ -143,8 +145,6 @@ class PreXMLGenerator:
 
                 pre_element_parent_created = True
 
-        # main elements
-        elements_list: list = []
         element_occurrences: dict = {}
 
         for index, record in enumerate(role_data, start=1):
@@ -164,7 +164,8 @@ class PreXMLGenerator:
                     pre_element_parent: str = root_level_abstract
                     pre_element_parent = _pre_element_parent.replace("--", "_")
 
-                if element not in elements_list:
+                if element not in self.elements_list:
+                    original_element = element
                     # main elements
                     if element.startswith("custom"):
                         element = element.replace("custom", self.ticker)
@@ -222,7 +223,7 @@ class PreXMLGenerator:
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
 
                     # add element into elements list
-                    elements_list.append(element)
+                    self.elements_list.append(original_element)
 
         presentation_links.append(presentation_link)
 
@@ -489,22 +490,24 @@ class PreXMLGenerator:
                 if role == "Cover":
                     if self.elements_data:
                         for element in self.elements_data:
-                            element_xlink_href = self.get_href_url(f"dei--{element}")
-                            pre_element_parent_loc = (
-                                self.create_presentation_loc_element(
+                            # if element not in main elements list, add element
+                            if f"dei_{element}" not in self.elements_list:
+                                element_xlink_href = self.get_href_url(
+                                    f"dei--{element}"
+                                )
+                                pre_element_parent_loc = self.create_presentation_loc_element(
                                     parent_tag=presentation_link,
                                     label=f"loc_dei_{element}",
                                     xlink_href=f"{element_xlink_href}#dei_{element}",
                                 )
-                            )
-                            # Add definition arc elements
-                            presentation_arc = self.create_presentation_arc_element(
-                                parent_tag=presentation_link,
-                                order="1",
-                                arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                                xlink_from=f"loc_{root_level_abstract}",
-                                xlink_to=f"loc_dei_{element}",
-                            )
+                                # Add definition arc elements
+                                presentation_arc = self.create_presentation_arc_element(
+                                    parent_tag=presentation_link,
+                                    order="1",
+                                    arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                                    xlink_from=f"loc_{root_level_abstract}",
+                                    xlink_to=f"loc_dei_{element}",
+                                )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
