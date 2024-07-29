@@ -787,7 +787,7 @@ class XHTMLGenerator:
                 # data_type = self.get_datatype(data.get("Element"))
                 format_value = self.get_format_value(element, data_type, tag.text)
                 fact = data.get("Fact", "")
-                if fact and "N" in fact:
+                if fact and "N" in fact and tag.text != "-":
                     # name attribute
                     non_numeric_tag["name"] = element.replace("--", ":").replace(
                         "custom", self.ticker
@@ -997,17 +997,19 @@ class XHTMLGenerator:
             else:
                 if relationship not in resources:
                     resources.append(relationship)
-    
+
     def alphanumeric_string(self, length=16):
 
         # Define character sets
         letters = string.ascii_letters
         alphanumeric = string.ascii_letters + string.digits
-        
+
         # Generate the first character from letters and the rest from alphanumeric
         first_char = random.choice(letters)
-        remaining_chars = ''.join(random.choice(alphanumeric) for _ in range(length - 1))
-        
+        remaining_chars = "".join(
+            random.choice(alphanumeric) for _ in range(length - 1)
+        )
+
         return first_char + remaining_chars
 
     def foot_notes(self, soup: BeautifulSoup):

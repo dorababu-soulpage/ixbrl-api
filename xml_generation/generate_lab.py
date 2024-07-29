@@ -319,6 +319,25 @@ class LabXMLGenerator:
 
         if self.elements_data:
             # hidden line items
+            # EntityCentralIndexKey
+            href_url = self.get_href_url(f"dei--EntityCentralIndexKey")
+            element_loc = self.create_label_loc_element(
+                parent_tag=label_link,
+                label=f"loc_dei_{element}",
+                xlink_href=f"{href_url}#dei_EntityCentralIndexKey",
+            )
+
+            # Common arguments for create_label_arc_element
+            arc_args = {
+                "parent_tag": label_link,
+                "order": "1",
+                "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
+                "xlink_from": f"loc_{root_level_abstract}",
+                "xlink_to": f"lab_dei_EntityCentralIndexKey",
+            }
+            # Create presentationArc element and append it to presentation_links list.
+            label_arc = self.create_label_arc_element(**arc_args)
+
             for element in self.elements_data:
                 # if element not in main elements list, add element
                 if f"dei_{element}" not in main_elements_list:
@@ -336,7 +355,7 @@ class LabXMLGenerator:
                         "order": "1",
                         "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
                         "xlink_from": f"loc_{root_level_abstract}",
-                        "xlink_to": f"lab_{element}",
+                        "xlink_to": f"lab_dei_{element}",
                     }
 
                     # Create presentationArc element and append it to presentation_links list.

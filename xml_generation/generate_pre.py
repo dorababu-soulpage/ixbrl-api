@@ -488,6 +488,24 @@ class PreXMLGenerator:
 
                 # add elements data into pre.xml next to the main elements
                 if role == "Cover":
+                    # hidden line items
+                    # EntityCentralIndexKey
+                    element_xlink_href = self.get_href_url(
+                        f"dei--EntityCentralIndexKey"
+                    )
+                    pre_element_parent_loc = self.create_presentation_loc_element(
+                        parent_tag=presentation_link,
+                        label=f"loc_dei_EntityCentralIndexKey",
+                        xlink_href=f"{element_xlink_href}#dei_EntityCentralIndexKey",
+                    )
+                    # Add definition arc elements
+                    presentation_arc = self.create_presentation_arc_element(
+                        parent_tag=presentation_link,
+                        order="1",
+                        arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                        xlink_from=f"loc_{root_level_abstract}",
+                        xlink_to=f"loc_dei_EntityCentralIndexKey",
+                    )
                     if self.elements_data:
                         for element in self.elements_data:
                             # if element not in main elements list, add element
