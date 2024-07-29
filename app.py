@@ -383,7 +383,7 @@ def generate_xml_schema_files():
     #     output.write(json.dumps(data))
 
     # # read json data from data.json file
-    # with open("data.json", "r") as file:
+    # with open(f"{filename}.json", "r") as file:
     #     data = json.load(file)
 
     args = data, ticker, filing_date, company_website, client_id

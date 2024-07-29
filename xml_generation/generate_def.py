@@ -124,12 +124,23 @@ class DefXMLGenerator:
         )
         return arcrole_ref_elements_xml
 
-    # Function to check if all Axis_Member are empty
-    def are_all_axis_member_empty(self, json_data):
-        for item in json_data:
-            if item["Axis_Member"] != "":
-                return False
-        return True
+    # # Function to check if all Axis_Member are empty
+    # def are_all_axis_member_empty(self, json_data):
+    #     for item in json_data:
+    #         if item["Axis_Member"]:
+    #             return False
+    #     return True
+
+    def check_role_is_dimension_or_not(self, role_data):
+        # Flag variable to track if any Axis_Member has a value
+        records: list[str] = []
+
+        # Check if any Axis_Member has a value
+        for item in role_data:
+            if item["Axis_Member"]:
+                records.append(item)
+
+        return records
 
     def generate_def_xml(self):
 
@@ -137,9 +148,7 @@ class DefXMLGenerator:
         definition_links = []  # List to store presentationLink elements.
 
         tables_list = []
-        members_list = []
         line_items_list = []
-        dimension_records_list = []
         pre_element_parent_created = False
         main_element_list = []
         # main elements
@@ -165,12 +174,14 @@ class DefXMLGenerator:
 
             is_line_item_created = False
             is_table_loc_created = False
+            dimension_records_list = []
+            members_list = []
+            member_order = 1
 
-            # Check if all Axis_Member are empty
-            all_empty = self.are_all_axis_member_empty(role_data)
-            if all_empty:
-                pass
-            else:
+            # Check if all Axis_Member are empty or not
+            dimension_records = self.check_role_is_dimension_or_not(role_data)
+
+            if dimension_records:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
                 role = (
                     role_without_spaces.replace("(", "")
@@ -201,7 +212,7 @@ class DefXMLGenerator:
                     },
                 )
 
-                for index, record in enumerate(role_data, start=1):
+                for record in dimension_records:
                     role = record.get("RoleName")
 
                     _table = record.get("Table")
@@ -365,7 +376,7 @@ class DefXMLGenerator:
                                     "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
                                     "xlink_from": f"loc_{domain}",
                                     "xlink_to": f"loc_{member}",
-                                    "order": "1",
+                                    "order": str(member_order),
                                 }
 
                                 # Add definition arc elements
@@ -373,6 +384,7 @@ class DefXMLGenerator:
                                     **arc_args
                                 )
                                 members_list.append(member)
+                                member_order += 1
 
                             # add dimension record
                             main_element_list.append(record)
