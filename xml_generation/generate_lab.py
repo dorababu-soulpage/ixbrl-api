@@ -323,7 +323,7 @@ class LabXMLGenerator:
             href_url = self.get_href_url(f"dei--EntityCentralIndexKey")
             element_loc = self.create_label_loc_element(
                 parent_tag=label_link,
-                label=f"loc_dei_{element}",
+                label=f"loc_dei_EntityCentralIndexKey",
                 xlink_href=f"{href_url}#dei_EntityCentralIndexKey",
             )
 
