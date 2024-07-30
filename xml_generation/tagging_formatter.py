@@ -17,10 +17,12 @@ class FormatValueRetriever:
         if self.input_text == "-":
             return "ixt:fixed-zero"
 
-        if data_type == "dei:yesNoItemType" and self.input_text in ["☐", "☑", "☒"]:
+        # if data_type == "dei:yesNoItemType" and self.input_text in ["☐", "☑", "☒"]:
+        if data_type == "dei:yesNoItemType":
             return "ixt-sec:yesnoballotbox"
 
-        if data_type == "xbrli:booleanItemType" and self.input_text in ["☐", "☑", "☒"]:
+        # if data_type == "xbrli:booleanItemType" and self.input_text in ["☐", "☑", "☒"]:
+        if data_type == "xbrli:booleanItemType":
             return "ixt-sec:boolballotbox"
 
         if data_type in [
@@ -67,19 +69,13 @@ class FormatValueRetriever:
         if data_type == "dei:edgarExchangeCodeItemType":
             return "ixt-sec:exchnameen"
 
-        states_list = ["California", "Ontario"]
-
-        if (
-            data_type == "dei:stateOrProvinceItemType"
-            and self.input_text in states_list
-        ):
+        if data_type == "dei:stateOrProvinceItemType":
             return "ixt-sec:stateprovnameen"
 
-        if data_type == "dei:countryCodeItemType" and self.input_text in states_list:
+        if data_type == "dei:countryCodeItemType":
             return "ixt-sec:edgarprovcountryen"
 
-        county_list = ["Canada", "Cayman Islands"]
-        if data_type == "dei:countryCodeItemType" and self.input_text in county_list:
+        if data_type == "dei:countryCodeItemType":
             return "ixt-sec:countrynameen"
 
         category_list = [
@@ -89,7 +85,8 @@ class FormatValueRetriever:
         ]
         if data_type == "dei:filerCategoryItemType" and category_list:
             return "ixt-sec:entityfilercategoryen"
-
+        if data_type == "dei:edgarStateCountryItemType":
+            return "ixt-sec:edgarprovcountryen"
         if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:
             # Patterns to match each input format
             patterns = {

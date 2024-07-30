@@ -477,18 +477,19 @@ class XHTMLGenerator:
                     numerator_root, "{http://www.xbrl.org/2003/instance}measure"
                 )
 
-                baseStandard, nsUnit = self.get_unit_value(name)
+                numerator_name = numerator.split()[0]
+                baseStandard, nsUnit = self.get_unit_value(numerator_name)
 
                 if baseStandard:
                     if nsUnit.endswith("instance"):
                         baseStandard = f"{baseStandard}i".lower()
-                        measure_numerator.text = f"{baseStandard}:{name}"
+                        measure_numerator.text = f"{baseStandard}:{numerator_name}"
                     if nsUnit.endswith("utr"):
-                        measure_numerator.text = f"utr:{name}"
+                        measure_numerator.text = f"utr:{numerator_name}"
                     if nsUnit.endswith("iso4217"):
-                        measure_numerator.text = f"iso4217:{name}"
+                        measure_numerator.text = f"iso4217:{numerator_name}"
                 else:
-                    measure_numerator.text = f"{self.ticker}:{name}"
+                    measure_numerator.text = f"{self.ticker}:{numerator_name}"
 
             if (
                 "numerator" in unit.keys()
@@ -515,19 +516,19 @@ class XHTMLGenerator:
                     unitNumerator, "{http://www.xbrl.org/2003/instance}measure"
                 )
 
-                name = numerator.split()[0]
-                baseStandard, nsUnit = self.get_unit_value(name)
+                numerator_name = numerator.split()[0]
+                baseStandard, nsUnit = self.get_unit_value(numerator_name)
 
                 if baseStandard:
                     if nsUnit.endswith("instance"):
                         baseStandard = f"{baseStandard}i".lower()
-                        measure_numerator.text = f"{baseStandard}:{name}"
+                        measure_numerator.text = f"{baseStandard}:{numerator_name}"
                     if nsUnit.endswith("utr"):
-                        measure_numerator.text = f"utr:{name}"
+                        measure_numerator.text = f"utr:{numerator_name}"
                     if nsUnit.endswith("iso4217"):
-                        measure_numerator.text = f"iso4217:{name}"
+                        measure_numerator.text = f"iso4217:{numerator_name}"
                 else:
-                    measure_numerator.text = f"{self.ticker}:{name}"
+                    measure_numerator.text = f"{self.ticker}:{numerator_name}"
 
                 # Create the unitDenominator element
                 unitDenominator = etree.SubElement(
