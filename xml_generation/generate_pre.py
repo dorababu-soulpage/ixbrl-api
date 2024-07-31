@@ -487,7 +487,7 @@ class PreXMLGenerator:
                     )
 
                 # add elements data into pre.xml next to the main elements
-                if role == "Cover":
+                if role in ["Cover", "DocumentandEntityInformation"]:
                     # hidden line items
                     # EntityCentralIndexKey
                     element_xlink_href = self.get_href_url(

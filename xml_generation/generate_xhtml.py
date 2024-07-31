@@ -776,9 +776,12 @@ class XHTMLGenerator:
         # data_type = data.get("DataType")
         # data_type = self.get_datatype(data.get("Element"))
         data_type = data.get("DataType")
-        heading = data.get("Heading")
         element: str = data.get("Element", "")
-        if data_type and heading is False and not element.endswith("Abstract"):
+        heading = data.get("Heading")
+        if heading:
+            del tag["id"]
+
+        if data_type and element.endswith("Abstract"):
             data_type_record = self.get_datatype_data(data_type)
             if data_type_record:
                 datatype_element = data_type_record.get("element", "")
