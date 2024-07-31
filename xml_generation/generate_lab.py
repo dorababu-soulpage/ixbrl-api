@@ -338,6 +338,21 @@ class LabXMLGenerator:
             # Create presentationArc element and append it to presentation_links list.
             label_arc = self.create_label_arc_element(**arc_args)
 
+            hidden_label_text = ""
+            element_value: dict = get_taxonomy_values("EntityCentralIndexKey")
+
+            if element_value:
+                hidden_label_text = element_value.get("label", "")
+
+            # create label
+            self.create_label_element(
+                parent_tag=label_link,
+                id=f"lab_dei_EntityCentralIndexKey_1_label_en-US",
+                xlink_label="lab_dei_EntityCentralIndexKey",
+                xlink_role=f"http://www.xbrl.org/2003/role/label",
+                label_text=hidden_label_text,
+            )
+
             for element in self.elements_data:
                 # if element not in main elements list, add element
                 if f"dei_{element}" not in main_elements_list:
@@ -360,6 +375,21 @@ class LabXMLGenerator:
 
                     # Create presentationArc element and append it to presentation_links list.
                     label_arc = self.create_label_arc_element(**arc_args)
+
+                    hidden_label_text = ""
+                    element_value: dict = get_taxonomy_values(element)
+
+                    if element_value:
+                        hidden_label_text = element_value.get("label", "")
+
+                    # create label
+                    self.create_label_element(
+                        parent_tag=label_link,
+                        id=f"lab_dei_{element}_1_label_en-US",
+                        xlink_label=f"lab_dei_{element}",
+                        xlink_role=f"http://www.xbrl.org/2003/role/label",
+                        label_text=hidden_label_text,
+                    )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'

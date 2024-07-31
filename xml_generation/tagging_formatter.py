@@ -39,6 +39,7 @@ class FormatValueRetriever:
             numdotdecimalin_pattern = re.compile(
                 r"^\d{1,2}(?:[,\s]?\d{2})*(?:\.\d{1,2})?$"
             )
+            no_none = re.compile(r"^[A-Za-z\s]+$|^(no|None)$")
 
             if numcommadecdimal_pattern.match(self.input_text):
                 return "ixt:num-comma-decimal"
@@ -47,9 +48,15 @@ class FormatValueRetriever:
             elif numdotdecimalin_pattern.match(self.input_text):
                 return "ixt:num-unit-decimal"
 
+            elif no_none.match(self.input_text):
+                return "ixt-sec:numwordsen"
+
+            elif re.match(r".*", self.input_text):  # This regex matches any string
+                return "ixt:fixed-zero"
+
         if data_type in ["xbrli:dateItemType", "xbrli:gMonthDayItemType"]:
             # Patterns to match each format
-            datedaymonthyear_pattern = re.compile(r"^\d{2}[./]\d{2}[./]\d{4}$")
+            datedaymonthyear_pattern = re.compile(r"^\d{1,2}[./]\d{1,2}[./]\d{4}$")
             datemonthdayyear_pattern = re.compile(r"^\d{2}[./]\d{2}[./]\d{4}$")
             datemonthdayyearen_pattern = re.compile(r"^[A-Za-z]+\s\d{2},\s\d{4}$")
             datedaymonthyearen_pattern = re.compile(r"^\d{2}-[A-Za-z]{3}-\d{2}$")
@@ -85,9 +92,14 @@ class FormatValueRetriever:
         ]
         if data_type == "dei:filerCategoryItemType" and category_list:
             return "ixt-sec:entityfilercategoryen"
+
         if data_type == "dei:edgarStateCountryItemType":
             return "ixt-sec:edgarprovcountryen"
-        if data_type in ["xbrli:durationItemType", "xbrli:stringItemType"]:
+
+        if data_type == "xbrli:stringItemType":
+            return "ixt-sec:numwordsen"
+
+        if data_type == "xbrli:durationItemType":
             # Patterns to match each input format
             patterns = {
                 "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),  # Matches -22.3456
@@ -98,9 +110,6 @@ class FormatValueRetriever:
                 "ixt-sec:durwordsen": re.compile(
                     r"^\d+\syears?,\s\d+\smonths?$|^[A-Za-z]+\syears?,\s[A-Za-z]+\smonths?$"
                 ),  # Matches durations in words or numbers
-                "ixt-sec:numwordsen": re.compile(
-                    r"^[A-Za-z\s]+$|^(no|None)$"
-                ),  # Matches any string of words including specific "no" and "None"
             }
 
             # Check each pattern
@@ -128,8 +137,8 @@ class FormatValueRetriever:
 
 
 # # Usage:
-# input_text = "148.6"
-# data_type = "xbrli:monetaryItemType"
+# input_text = "4/1/2025"
+# data_type = "xbrli:dateItemType"
 # element = "usgap:Cash"
 # retriever = FormatValueRetriever(input_text)
 # format_value = retriever.get_format_value(element, data_type)
