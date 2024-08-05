@@ -932,8 +932,20 @@ class XHTMLGenerator:
 
                 fact = data.get("Fact", "")
 
+                # with reverse fact
                 if "R" in fact and "(" in tag.text:
                     datatype_tag.string = tag.text.replace("(", "")
+
+                    # Create a new NavigableString for the parenthesis
+                    parenthesis = soup.new_string("(")
+
+                    # Insert the parenthesis before the non_numeric_tag tag
+                    tag.insert_before(parenthesis)
+
+                # without reverse fact
+                if "R" not in fact and "(" in tag.text:
+                    datatype_tag.string = tag.text.replace("(", "")
+                    datatype_tag["sign"] = "-"
 
                     # Create a new NavigableString for the parenthesis
                     parenthesis = soup.new_string("(")

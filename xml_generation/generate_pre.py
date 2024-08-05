@@ -22,6 +22,7 @@ class PreXMLGenerator:
         self.elements_data = elements_data
         # main elements
         self.elements_list: list = []
+        self.element_occurrences: dict = {}
 
     def get_preferred_label(self, label: str):
         for key, value in labels_dict.items():
@@ -107,12 +108,7 @@ class PreXMLGenerator:
         return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
     def generate_elements_xml(
-        self,
-        role_data,
-        presentation_links,
-        presentation_link,
-        line_item,
-        dimension=False,
+        self, role_data, presentation_links, presentation_link, line_item, role=None
     ):
         initial_record = role_data[0]
 
@@ -144,8 +140,6 @@ class PreXMLGenerator:
                 )
 
                 pre_element_parent_created = True
-
-        element_occurrences: dict = {}
 
         for index, record in enumerate(role_data, start=1):
 
@@ -189,18 +183,18 @@ class PreXMLGenerator:
                         xlink_from = root_level_abstract
 
                     # calculate xlink from element element occurrence
-                    if xlink_from not in element_occurrences:
-                        element_occurrences[xlink_from] = 1
+                    if xlink_from not in self.element_occurrences:
+                        self.element_occurrences[xlink_from] = 1
                     else:
-                        element_occurrences[xlink_from] = (
-                            element_occurrences[xlink_from] + 1
+                        self.element_occurrences[xlink_from] = (
+                            self.element_occurrences[xlink_from] + 1
                         )
 
                     if pre_element_parent_created is False:
                         # Common arguments for create_presentation_arc_element
                         arc_args = {
                             "parent_tag": presentation_link,
-                            "order": str(element_occurrences.get(xlink_from)),
+                            "order": str(self.element_occurrences.get(xlink_from)),
                             "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                             "xlink_from": f"loc_{line_item}",
                             "xlink_to": f"loc_{element}",
@@ -212,7 +206,7 @@ class PreXMLGenerator:
                         # Common arguments for create_presentation_arc_element
                         arc_args = {
                             "parent_tag": presentation_link,
-                            "order": str(element_occurrences.get(xlink_from)),
+                            "order": str(self.element_occurrences.get(xlink_from)),
                             "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                             "xlink_from": f"loc_{xlink_from}".replace("--", "_"),
                             "xlink_to": f"loc_{element}",
@@ -226,6 +220,52 @@ class PreXMLGenerator:
                     self.elements_list.append(original_element)
 
         presentation_links.append(presentation_link)
+
+        # add elements data into pre.xml next to the main elements
+        if role in ["Cover", "DocumentandEntityInformation"]:
+            # hidden line items
+            # EntityCentralIndexKey
+            element_xlink_href = self.get_href_url(f"dei--EntityCentralIndexKey")
+            pre_element_parent_loc = self.create_presentation_loc_element(
+                parent_tag=presentation_link,
+                label=f"loc_dei_EntityCentralIndexKey",
+                xlink_href=f"{element_xlink_href}#dei_EntityCentralIndexKey",
+            )
+            # Add definition arc elements
+            presentation_arc = self.create_presentation_arc_element(
+                parent_tag=presentation_link,
+                order=str(self.element_occurrences.get(root_level_abstract) + 1),
+                arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
+                xlink_to=f"loc_dei_EntityCentralIndexKey",
+            )
+            self.element_occurrences[xlink_from] = (
+                self.element_occurrences[root_level_abstract] + 1
+            )
+            if self.elements_data:
+                for element in self.elements_data:
+                    # if element not in main elements list, add element
+                    if f"dei_{element}" not in self.elements_list:
+                        element_xlink_href = self.get_href_url(f"dei--{element}")
+                        pre_element_parent_loc = self.create_presentation_loc_element(
+                            parent_tag=presentation_link,
+                            label=f"loc_dei_{element}",
+                            xlink_href=f"{element_xlink_href}#dei_{element}",
+                        )
+                        # Add definition arc elements
+                        presentation_arc = self.create_presentation_arc_element(
+                            parent_tag=presentation_link,
+                            order=str(
+                                self.element_occurrences.get(root_level_abstract) + 1
+                            ),
+                            arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                            xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
+                            xlink_to=f"loc_dei_{element}",
+                        )
+
+                        self.element_occurrences[xlink_from] = (
+                            self.element_occurrences[root_level_abstract] + 1
+                        )
 
     def generate_dimension_xml(
         self,
@@ -378,11 +418,7 @@ class PreXMLGenerator:
 
         # generate mail element xml
         self.generate_elements_xml(
-            role_data,
-            presentation_links,
-            presentation_link,
-            line_item,
-            dimension=True,
+            role_data, presentation_links, presentation_link, line_item
         )
 
     def check_role_is_dimension_or_not(self, role_data):
@@ -484,48 +520,8 @@ class PreXMLGenerator:
                         presentation_links,
                         presentation_link,
                         root_level_abstract,
+                        role=role,
                     )
-
-                # add elements data into pre.xml next to the main elements
-                if role in ["Cover", "DocumentandEntityInformation"]:
-                    # hidden line items
-                    # EntityCentralIndexKey
-                    element_xlink_href = self.get_href_url(
-                        f"dei--EntityCentralIndexKey"
-                    )
-                    pre_element_parent_loc = self.create_presentation_loc_element(
-                        parent_tag=presentation_link,
-                        label=f"loc_dei_EntityCentralIndexKey",
-                        xlink_href=f"{element_xlink_href}#dei_EntityCentralIndexKey",
-                    )
-                    # Add definition arc elements
-                    presentation_arc = self.create_presentation_arc_element(
-                        parent_tag=presentation_link,
-                        order="1",
-                        arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                        xlink_from=f"loc_{root_level_abstract}",
-                        xlink_to=f"loc_dei_EntityCentralIndexKey",
-                    )
-                    if self.elements_data:
-                        for element in self.elements_data:
-                            # if element not in main elements list, add element
-                            if f"dei_{element}" not in self.elements_list:
-                                element_xlink_href = self.get_href_url(
-                                    f"dei--{element}"
-                                )
-                                pre_element_parent_loc = self.create_presentation_loc_element(
-                                    parent_tag=presentation_link,
-                                    label=f"loc_dei_{element}",
-                                    xlink_href=f"{element_xlink_href}#dei_{element}",
-                                )
-                                # Add definition arc elements
-                                presentation_arc = self.create_presentation_arc_element(
-                                    parent_tag=presentation_link,
-                                    order="1",
-                                    arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                                    xlink_from=f"loc_{root_level_abstract}",
-                                    xlink_to=f"loc_dei_{element}",
-                                )
 
         # XML declaration and comments.
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
