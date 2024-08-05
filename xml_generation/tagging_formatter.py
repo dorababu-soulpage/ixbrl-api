@@ -30,6 +30,10 @@ class FormatValueRetriever:
             "xbrli:sharesItemType",
             "xbrli:integerItemType",
             "srt-types:perUnitItemType",
+            "dtr-types:areaItemType",
+            "dtr-types:energyItemType",
+            "dtr-types:massItemType",
+            "dtr-types:flowItemType",
         ]:
             # Patterns to match each format
             numcommadecdimal_pattern = re.compile(r"^\d{1,3}(?:[\.\s]?\d{3})*,\d{1,2}$")
