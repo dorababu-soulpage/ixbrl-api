@@ -100,20 +100,21 @@ class FormatValueRetriever:
         if data_type == "dei:edgarStateCountryItemType":
             return "ixt-sec:edgarprovcountryen"
 
-        if data_type == "xbrli:stringItemType":
-            return "ixt-sec:numwordsen"
-
-        if data_type == "xbrli:durationItemType":
+        if data_type == ["xbrli:durationItemType", "xbrli:stringItemType"]:
             # Patterns to match each input format
             patterns = {
-                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),  # Matches -22.3456
-                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 22.3456
+                # Matches -5.67, 5.67, -22.3456, 22.3456
+                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),
+                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 5.67, 22.3456
                 "ixt-sec:durweek": re.compile(r"^\d+$"),  # Matches 0
                 "ixt-sec:durday": re.compile(r"^\d+\.\d+$"),  # Matches 0.000001
                 "ixt-sec:durhour": re.compile(r"^\d+$"),  # Matches 1000
                 "ixt-sec:durwordsen": re.compile(
                     r"^\d+\syears?,\s\d+\smonths?$|^[A-Za-z]+\syears?,\s[A-Za-z]+\smonths?$"
                 ),  # Matches durations in words or numbers
+                "ixt-sec:numwordsen": re.compile(
+                    r"^[A-Za-z\s]+$|^(no|None)$"
+                ),  # Matches any string of words including specific "no" and "None"
             }
 
             # Check each pattern
@@ -140,9 +141,9 @@ class FormatValueRetriever:
     #         return ""
 
 
-# # Usage:
-# input_text = "4/1/2025"
-# data_type = "xbrli:dateItemType"
+# Usage:
+# input_text = "Property and Equipment-at cost"
+# data_type = "xbrli:stringItemType"
 # element = "usgap:Cash"
 # retriever = FormatValueRetriever(input_text)
 # format_value = retriever.get_format_value(element, data_type)
