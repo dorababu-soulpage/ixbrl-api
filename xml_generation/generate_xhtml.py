@@ -380,7 +380,7 @@ class XHTMLGenerator:
             period_date_str = self.formatted_to_date(period_date)
             context_id = f"AsOf{period_date_str}_{member_str}"
 
-            if context_id in self.context_list:
+            if context_id not in self.context_list:
                 # Create the root element
                 dimension_root = etree.SubElement(
                     resources, "{http://www.xbrl.org/2003/instance}context"
