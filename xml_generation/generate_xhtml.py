@@ -559,7 +559,7 @@ class XHTMLGenerator:
             namespace_format = f'xmlns:{key}="{value}"'
             html_content = html_content.replace(namespace_format, "")
         return html_content
-    
+
     def remove_left_over_apex_ids(self, soup):
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
@@ -575,7 +575,7 @@ class XHTMLGenerator:
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)
-        
+
         soup = self.remove_left_over_apex_ids(soup)
 
         # Manage entities manually
