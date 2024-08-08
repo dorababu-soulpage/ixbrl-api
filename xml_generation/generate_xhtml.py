@@ -559,6 +559,14 @@ class XHTMLGenerator:
             namespace_format = f'xmlns:{key}="{value}"'
             html_content = html_content.replace(namespace_format, "")
         return html_content
+    
+    def remove_left_over_apex_ids(self, soup):
+        # Find all tags with attributes that start with "id" and have a value starting with "apex_"
+        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+        for tag in tags:
+            # Remove the 'id' attribute
+            del tag["id"]
+        return soup
 
     def save_html_file(self, soup):
         # Extract the directory from the output file path
@@ -567,6 +575,8 @@ class XHTMLGenerator:
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)
+        
+        soup = self.remove_left_over_apex_ids(soup)
 
         # Manage entities manually
         parsed_html = html.unescape(str(soup))
@@ -778,6 +788,8 @@ class XHTMLGenerator:
         data_type = data.get("DataType")
         element: str = data.get("Element", "")
         heading = data.get("Heading")
+        precision = data.get("Precision")
+        counted_as = data.get("CountedAs")
         if heading:
             del tag["id"]
 
@@ -791,7 +803,7 @@ class XHTMLGenerator:
                 # data_type = self.get_datatype(data.get("Element"))
                 format_value = self.get_format_value(element, data_type, tag.text)
                 fact = data.get("Fact", "")
-                if fact and "N" in fact and tag.text != "-":
+                if fact and "N" in fact and tag.text == "-":
                     # name attribute
                     non_numeric_tag["name"] = element.replace("--", ":").replace(
                         "custom", self.ticker
@@ -824,7 +836,7 @@ class XHTMLGenerator:
                     unit: str = data.get("Unit", "")
                     non_numeric_tag["unitRef"] = unit
 
-                if fact and "Z" in fact:
+                if fact and "Z" in fact and "N" not in fact and tag.text == "-":
                     # name attribute
                     non_numeric_tag["name"] = element.replace("--", ":").replace(
                         "custom", self.ticker
@@ -878,16 +890,39 @@ class XHTMLGenerator:
                                 "--", ":"
                             ).replace("custom", self.ticker)
 
-                        if attribute == "decimals" and format_value != "ixt:fixed-zero":
-                            precision: str = data.get("Precision", "")
-                            non_numeric_tag["decimals"] = precision
+                        # add scale and decimals value
+                        datatypes_list = [
+                            "xbrli:monetaryItemType",
+                            "dtr-types:percentItemType",
+                            "xbrli:sharesItemType",
+                            "xbrli:integerItemType",
+                            "dtr-types:perShareItemType",
+                            "srt-types:perUnitItemType",
+                            "xbrli:decimalItemType",
+                            "dtr-types:volumeItemType",
+                            "dtr-types:areaItemType",
+                            "xbrli:pureItemType",
+                            "dtr-types:energyItemType",
+                            "dtr-types:massItemType",
+                            "dtr-types:flowItemType",
+                        ]
+                        if data_type in datatypes_list:
+                            if precision == "0" and counted_as == "0":
+                                if "N" not in fact:
+                                    non_numeric_tag["decimals"] = "0"
+                            else:
+                                if "N" not in fact:
+                                    non_numeric_tag["decimals"] = precision
+                                    non_numeric_tag["scale"] = counted_as
 
-                        if attribute == "scale" and format_value != "ixt:fixed-zero":
-                            counted_as: str = data.get("CountedAs", "")
-                            non_numeric_tag["scale"] = counted_as
+                        else:
+                            if attribute == "decimals" and "N" not in fact:
+                                non_numeric_tag["decimals"] = precision
 
-                        if attribute == "format":
+                            if attribute == "scale" and "N" not in fact:
+                                non_numeric_tag["scale"] = counted_as
 
+                        if attribute == "format" and "N" not in fact:
                             non_numeric_tag["format"] = format_value
 
                         if attribute == "id":
