@@ -106,8 +106,9 @@ class FormatValueRetriever:
         if data_type == "xbrli:durationItemType":
             # Patterns to match each input format
             patterns = {
-                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),  # Matches -22.3456
-                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 22.3456
+                # Matches -5.67, 5.67, -22.3456, 22.3456
+                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),
+                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 5.67, 22.3456
                 "ixt-sec:durweek": re.compile(r"^\d+$"),  # Matches 0
                 "ixt-sec:durday": re.compile(r"^\d+\.\d+$"),  # Matches 0.000001
                 "ixt-sec:durhour": re.compile(r"^\d+$"),  # Matches 1000
