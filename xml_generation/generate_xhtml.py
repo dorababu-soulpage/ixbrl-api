@@ -909,7 +909,10 @@ class XHTMLGenerator:
                         if data_type in datatypes_list:
                             if precision == "0" and counted_as == "0":
                                 if "N" not in fact:
-                                    non_numeric_tag["decimals"] = "0"
+                                    if data_type == "xbrli:monetaryItemType":
+                                        non_numeric_tag["decimals"] = "0"
+                                    else:
+                                        non_numeric_tag["decimals"] = "INF"
                             else:
                                 if "N" not in fact:
                                     non_numeric_tag["decimals"] = precision
