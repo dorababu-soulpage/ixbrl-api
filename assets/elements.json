@@ -189,6 +189,7 @@
     "element": "ix:nonNumeric",
     "attributes": [
       "contextRef",
+      "format",
       "name",
       "id"
     ]
