@@ -62,20 +62,22 @@ class FormatValueRetriever:
             # Patterns to match each format
             datedaymonthyear_pattern = re.compile(r"^\d{1,2}[./]\d{1,2}[./]\d{4}$")
             datemonthdayyear_pattern = re.compile(r"^\d{2}[./]\d{2}[./]\d{4}$")
-            datemonthdayyearen_pattern = re.compile(r"^[A-Za-z]+\s\d{2},\s\d{4}$")
+            # Corrected pattern
+            datemonthdayyearen_pattern = re.compile(r"^[A-Za-z]+\s\d{1,2},\s\d{4}$")
             datedaymonthyearen_pattern = re.compile(r"^\d{2}-[A-Za-z]{3}-\d{2}$")
             dateyearmonthday_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
             if datedaymonthyear_pattern.match(self.input_text):
-                return "ixt:datedaymonthyear"
-            elif datemonthdayyear_pattern.match(self.input_text):
-                return "ixt:datemonthdayyear"
-            elif datemonthdayyearen_pattern.match(self.input_text):
-                return "ixt:datemonthdayyearen"
+                return "ixt:date-day-month-year"
             elif datedaymonthyearen_pattern.match(self.input_text):
-                return "ixt:datedaymonthyearen"
+                return "ixt:date-day-month-year-en"
+
+            elif datemonthdayyear_pattern.match(self.input_text):
+                return "ixt:date-month-day-year"
+            elif datemonthdayyearen_pattern.match(self.input_text):
+                return "ixt:date-day-monthname-year-en"
             elif dateyearmonthday_pattern.match(self.input_text):
-                return "ixt:dateyearmonthday"
+                return "ixt:date-year-month-day"
 
         if data_type == "dei:edgarExchangeCodeItemType":
             return "ixt-sec:exchnameen"
@@ -142,7 +144,7 @@ class FormatValueRetriever:
 
 
 # # Usage:
-# input_text = "4/1/2025"
+# input_text = "September 8, 2024"
 # data_type = "xbrli:dateItemType"
 # element = "usgap:Cash"
 # retriever = FormatValueRetriever(input_text)
