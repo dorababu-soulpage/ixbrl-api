@@ -560,6 +560,16 @@ class XHTMLGenerator:
             html_content = html_content.replace(namespace_format, "")
         return html_content
 
+    def remove_role_attribute(self, soup):
+        # Find all elements with the 'role' attribute
+        elements_with_role = soup.find_all(attrs={"role": True})
+
+        # Remove 'role' attribute from all elements
+        for element in elements_with_role:
+            del element["role"]
+
+        return soup
+
     def remove_left_over_apex_ids(self, soup):
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
         tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
@@ -577,6 +587,7 @@ class XHTMLGenerator:
             os.makedirs(directory)
 
         soup = self.remove_left_over_apex_ids(soup)
+        soup = self.remove_role_attribute(soup)
 
         # Manage entities manually
         parsed_html = html.unescape(str(soup))
@@ -612,6 +623,7 @@ class XHTMLGenerator:
             html_content = html_content.replace("<br>", "<br/>")
 
             # replace html entities
+            html_content = html_content.replace("&", "&amp;")
             html_content = html_content.replace("☐", "&#9744;")
             html_content = html_content.replace("☑", "&#9745;")
             html_content = html_content.replace("☒", "&#9746;")
@@ -926,7 +938,8 @@ class XHTMLGenerator:
                                 non_numeric_tag["scale"] = counted_as
 
                         if attribute == "format" and "N" not in fact:
-                            non_numeric_tag["format"] = format_value
+                            if format_value:
+                                non_numeric_tag["format"] = format_value
 
                         if attribute == "id":
                             is_footnote = data.get("have_footnote")
@@ -945,13 +958,29 @@ class XHTMLGenerator:
                         if "R" in fact:
                             non_numeric_tag["sign"] = "-"
                 style = tag.get("style")
+                is_style_tag = False
                 if style:
-                    non_numeric_tag["style"] = style
+                    is_style_tag = True
+                    # non_numeric_tag["style"] = style
                 if note_section:
-                    return non_numeric_tag
+                    if is_style_tag:
+                        p = soup.new_tag("p")
+                        p["style"] = style
+                        p.append(non_numeric_tag)
+                        return p
+                    else:
+                        return non_numeric_tag
                 else:
-                    non_numeric_tag.string = tag.text
-                    return non_numeric_tag
+                    if is_style_tag:
+                        non_numeric_tag.string = tag.text
+
+                        p = soup.new_tag("p")
+                        p["style"] = style
+                        p.append(non_numeric_tag)
+                        return p
+                    else:
+                        non_numeric_tag.string = tag.text
+                        return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
 
