@@ -972,15 +972,19 @@ class XHTMLGenerator:
                         return non_numeric_tag
                 else:
                     if is_style_tag:
-                        non_numeric_tag.string = tag.text
+                        if "N" not in fact:
+                            non_numeric_tag.string = tag.text
 
                         p = soup.new_tag("p")
                         p["style"] = style
                         p.append(non_numeric_tag)
                         return p
                     else:
-                        non_numeric_tag.string = tag.text
-                        return non_numeric_tag
+                        if "N" in fact:
+                            return non_numeric_tag
+                        else:
+                            non_numeric_tag.string = tag.text
+                            return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
 
