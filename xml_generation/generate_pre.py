@@ -113,6 +113,8 @@ class PreXMLGenerator:
         initial_record = role_data[0]
 
         root_level_abstract = initial_record.get("RootLevelAbstract")
+        root_level_abstract = root_level_abstract.replace("custom", self.ticker)
+
         _pre_element_parent: str = initial_record.get("PreElementParent")
         pre_element_parent_created = False
 
@@ -149,9 +151,15 @@ class PreXMLGenerator:
 
                 label_type = record.get("PreferredLabelType")
                 preferred_label = self.get_preferred_label(label_type)
+
                 root_level_abstract = record.get("RootLevelAbstract")
+                root_level_abstract = root_level_abstract.replace("custom", self.ticker)
 
                 _pre_element_parent: str = record.get("PreElementParent")
+                _pre_element_parent: str = _pre_element_parent.replace(
+                    "custom", self.ticker
+                )
+
                 if _pre_element_parent:
                     pre_element_parent = _pre_element_parent.replace("--", "_")
                 else:
@@ -458,6 +466,9 @@ class PreXMLGenerator:
 
             if role_name:
                 _root_level_abstract: str = record.get("RootLevelAbstract")
+                _root_level_abstract: str = _root_level_abstract.replace(
+                    "custom", self.ticker
+                )
                 root_level_abstract = _root_level_abstract.replace("--", "_")
 
                 role_name_without_spaces = re.sub(r"\s+", "", role_name)
