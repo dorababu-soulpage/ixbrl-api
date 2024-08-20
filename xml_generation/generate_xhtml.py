@@ -957,34 +957,15 @@ class XHTMLGenerator:
 
                         if "R" in fact:
                             non_numeric_tag["sign"] = "-"
-                style = tag.get("style")
-                is_style_tag = False
-                if style:
-                    is_style_tag = True
-                    # non_numeric_tag["style"] = style
-                if note_section:
-                    if is_style_tag:
-                        p = soup.new_tag("p")
-                        p["style"] = style
-                        p.append(non_numeric_tag)
-                        return p
-                    else:
-                        return non_numeric_tag
-                else:
-                    if is_style_tag:
-                        if "N" not in fact:
-                            non_numeric_tag.string = tag.text
 
-                        p = soup.new_tag("p")
-                        p["style"] = style
-                        p.append(non_numeric_tag)
-                        return p
-                    else:
-                        if "N" in fact:
-                            return non_numeric_tag
-                        else:
-                            non_numeric_tag.string = tag.text
-                            return non_numeric_tag
+                style = tag.get("style")
+                if style:
+                    non_numeric_tag["style"] = style
+                if note_section:
+                    return non_numeric_tag
+                else:
+                    non_numeric_tag.string = tag.text
+                    return non_numeric_tag
 
     def generate_datatypes_tags(self, soup):
 
@@ -1028,8 +1009,20 @@ class XHTMLGenerator:
                 # font_tag = soup.find("font", id=tag_id)
                 font_tag = soup.find(id=tag_id)
 
+                if "N" in fact:
+                    datatype_tag.string = ""
+
                 if font_tag:
-                    font_tag.replace_with(datatype_tag)
+                    styles = datatype_tag.get("style", None)
+
+                    if styles is None:
+                        font_tag.replace_with(datatype_tag)
+                    else:
+                        p_tag = soup.new_tag("p")
+                        p_tag["style"] = styles
+                        del datatype_tag["style"]
+                        p_tag.append(datatype_tag)
+                        font_tag.replace_with(p_tag)
 
         return soup
 
@@ -1182,8 +1175,19 @@ class XHTMLGenerator:
             for tag in content:
                 datatype_tag.append(tag)
 
-            # Insert the new tag into the document
-            start_tag.replace_with(datatype_tag)
+            if "N" in data.get("Fact"):
+                datatype_tag.string = ""
+
+            styles = datatype_tag.get("style", None)
+            if styles is None:
+                # Insert the new tag into the document
+                start_tag.replace_with(datatype_tag)
+            else:
+                p_tag = soup.new_tag("p")
+                p_tag["style"] = styles
+                del datatype_tag["style"]
+                p_tag.append(datatype_tag)
+                start_tag.replace_with(p_tag)
 
         return soup
 
