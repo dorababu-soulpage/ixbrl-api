@@ -245,6 +245,11 @@ class XSDGenerator:
 
                     axis_members: str = record.get("Axis_Member")
                     element_name: str = record.get("Element")
+                    root_level_abstract: str = record.get("RootLevelAbstract")
+
+                    if root_level_abstract.startswith("custom"):
+                        custom_elements.append(root_level_abstract)
+
                     if element_name.startswith("custom"):
                         custom_elements.append(element_name)
 
