@@ -21,13 +21,54 @@ class XSDGenerator:
     def group_data_by_role(self):
         # Group data by RoleName using itertools.groupby
         grouped_data: dict[str, list] = {}
-        for record in self.data:
+        roles_sorted_data = self.get_roles_sorted_data()
+
+        for record in roles_sorted_data:
             role_name = record["RoleName"]
             if role_name in grouped_data.keys():
                 grouped_data[role_name].append(record)
             else:
                 grouped_data[role_name] = [record]
         return grouped_data
+
+    def get_roles_sorted_data(self):
+        document_elements = [
+            record for record in self.data if record.get("RoleType") == "document"
+        ]
+
+        statement_elements = [
+            record for record in self.data if record.get("RoleType") == "statement"
+        ]
+
+        disclosure_elements = [
+            record for record in self.data if record.get("RoleType") == "disclosure"
+        ]
+
+        level_1_elements = []
+        level_2_elements = []
+        level_3_elements = []
+        level_4_elements = []
+
+        for disclosure_element in disclosure_elements:
+            element_type: str = disclosure_element.get("Type")
+            if element_type.startswith("80"):
+                level_1_elements.append(disclosure_element)
+
+            if element_type.startswith("84"):
+                level_2_elements.append(disclosure_element)
+
+            if element_type.startswith("89"):
+                level_3_elements.append(disclosure_element)
+
+            if element_type.startswith("90"):
+                level_4_elements.append(disclosure_element)
+
+        disclosure_elements = (
+            level_1_elements + level_2_elements + level_3_elements + level_4_elements
+        )
+
+        final_data = document_elements + statement_elements + disclosure_elements
+        return final_data
 
     def create_root_element(self):
         # Create root element with necessary attributes
