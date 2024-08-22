@@ -83,7 +83,7 @@ class XHTMLGenerator:
         html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
         html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
         html_tag["xmlns:ixt"] = (
-            "http://www.xbrl.org/inlineXBRL/transformation/2020-02-12"
+            "http://www.xbrl.org/inlineXBRL/transformation/2022-02-16"
         )
         html_tag["xmlns:ixt-sec"] = (
             "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"

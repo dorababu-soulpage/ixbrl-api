@@ -1,5 +1,10 @@
 import re
 import json
+from xml_generation.constants import (
+    states_sort_list,
+    county_sort_list,
+    state_country_sort_list,
+)
 
 
 class FormatValueRetriever:
@@ -17,12 +22,12 @@ class FormatValueRetriever:
         if self.input_text == "-":
             return "ixt:fixed-zero"
 
-        # if data_type == "dei:yesNoItemType" and self.input_text in ["☐", "☑", "☒"]:
-        if data_type == "dei:yesNoItemType":
+        check_boxes = ["☐", "☑", "☒"]
+
+        if data_type == "dei:yesNoItemType" and self.input_text in check_boxes:
             return "ixt-sec:yesnoballotbox"
 
-        # if data_type == "xbrli:booleanItemType" and self.input_text in ["☐", "☑", "☒"]:
-        if data_type == "xbrli:booleanItemType":
+        if data_type == "xbrli:booleanItemType" and self.input_text in check_boxes:
             return "ixt-sec:boolballotbox"
 
         if data_type in [
@@ -52,9 +57,6 @@ class FormatValueRetriever:
             elif numdotdecimalin_pattern.match(self.input_text):
                 return "ixt:num-unit-decimal"
 
-            elif no_none.match(self.input_text):
-                return "ixt-sec:numwordsen"
-
             elif re.match(r".*", self.input_text):  # This regex matches any string
                 return "ixt:fixed-zero"
 
@@ -75,7 +77,7 @@ class FormatValueRetriever:
             elif datemonthdayyear_pattern.match(self.input_text):
                 return "ixt:date-month-day-year"
             elif datemonthdayyearen_pattern.match(self.input_text):
-                return "ixt:date-day-monthname-year-en"
+                return "ixt:date-monthname-day-year-en"
             elif dateyearmonthday_pattern.match(self.input_text):
                 return "ixt:date-year-month-day"
 
@@ -83,13 +85,12 @@ class FormatValueRetriever:
             return "ixt-sec:exchnameen"
 
         if data_type == "dei:stateOrProvinceItemType":
-            return "ixt-sec:stateprovnameen"
+            if self.input_text not in states_sort_list:
+                return "ixt-sec:stateprovnameen"
 
         if data_type == "dei:countryCodeItemType":
-            return "ixt-sec:edgarprovcountryen"
-
-        if data_type == "dei:countryCodeItemType":
-            return "ixt-sec:countrynameen"
+            if self.input_text not in county_sort_list:
+                return "ixt-sec:countrynameen"
 
         category_list = [
             "Large accelerated filer",
@@ -100,10 +101,8 @@ class FormatValueRetriever:
             return "ixt-sec:entityfilercategoryen"
 
         if data_type == "dei:edgarStateCountryItemType":
-            return "ixt-sec:edgarprovcountryen"
-
-        if data_type == "xbrli:stringItemType":
-            return "ixt-sec:numwordsen"
+            if self.input_text not in state_country_sort_list:
+                return "ixt-sec:stateprovnameen"
 
         if data_type == "xbrli:durationItemType":
             # Patterns to match each input format
@@ -117,35 +116,26 @@ class FormatValueRetriever:
                 "ixt-sec:durwordsen": re.compile(
                     r"^\d+\syears?,\s\d+\smonths?$|^[A-Za-z]+\syears?,\s[A-Za-z]+\smonths?$"
                 ),  # Matches durations in words or numbers
+                # "ixt-sec:numwordsen": re.compile(
+                #     r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)(?:[\s-](?:and[\s-])?(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)?)*\b.*$"
+                # ),  # Matches
             }
 
             # Check each pattern
             for format_code, pattern in patterns.items():
-                if pattern.match(self.input_text):
+                if pattern.match(self.input_text, re.IGNORECASE):
                     return format_code
 
-    #     else:
-    #         return self._retrieve_format_from_file(data_type)
-
-    # def _retrieve_format_from_file(self, data_type):
-
-    #     with open(self.format_file_path, "r") as json_file:
-    #         data = json.load(json_file)
-
-    #         for record in data:
-    #             if (
-    #                 record.get("Datatype 1") == data_type
-    #                 or record.get("Datatype 2") == data_type
-    #                 or record.get("Datatype 3") == data_type
-    #                 or record.get("Datatype 4") == data_type
-    #             ):
-    #                 return record.get("Format Code", "")
-    #         return ""
+        if data_type == "xbrli:durationItemType":
+            # Define the regex pattern
+            pattern = r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)(?:[\s-](?:and[\s-])?(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)?)*\b.*$"
+            if re.search(pattern, self.input_text, re.IGNORECASE):
+                return "ixt-sec:numwordsen"
 
 
 # # Usage:
-# input_text = "September 8, 2024"
-# data_type = "xbrli:dateItemType"
+# input_text = "FORTY TWO milestones"
+# data_type = "xbrli:durationItemType"
 # element = "usgap:Cash"
 # retriever = FormatValueRetriever(input_text)
 # format_value = retriever.get_format_value(element, data_type)
