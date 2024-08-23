@@ -802,8 +802,6 @@ class XHTMLGenerator:
         heading = data.get("Heading")
         precision = data.get("Precision")
         counted_as = data.get("CountedAs")
-        if heading:
-            del tag["id"]
 
         if data_type and heading is False and not element.endswith("Abstract"):
             data_type_record = self.get_datatype_data(data_type)
@@ -1026,6 +1024,39 @@ class XHTMLGenerator:
 
         return soup
 
+    def create_continuation_exclude_tags(self, soup, start_id, end_id):
+        # Find the first <p> tag with the specified ID
+        first_id_tag = soup.find("p", id=start_id)
+
+        # Find the second <p> tag with the specified ID
+        second_id_tag = soup.find("p", id=end_id)
+
+        # Find all tags, comments, and strings between the first and second IDs
+        current_tag = first_id_tag.next_sibling
+
+        output_html = ""
+
+        while current_tag and current_tag != second_id_tag:
+            if isinstance(current_tag, Comment):
+                # Include comment in the output
+                output_html += f"<!--{current_tag}-->"
+                comment = str(current_tag).strip()
+
+                if comment.startswith("Field: Page; Sequence:"):
+                    # Create the exclude tag
+                    exclude_tag = soup.new_tag("ix:exclude")
+                    # Add the comment as a string
+                    exclude_tag.append(soup.new_string(f"<!--{comment}-->"))
+                    # Add the next tag following the comment
+                    next_tag = current_tag.find_next()
+                    exclude_tag.append(next_tag.extract())
+                    # Replace the comment and next tag with the exclude tag
+                    current_tag.replace_with(exclude_tag)
+
+            current_tag = current_tag.next_sibling
+
+        return soup
+
     def ixt_continuation(self, soup: BeautifulSoup):
 
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
@@ -1043,7 +1074,8 @@ class XHTMLGenerator:
                 end_tag_ids.append(tag_id)
 
         for start_id, end_id in zip(start_tag_ids, end_tag_ids):
-            soup = self.create_continuation_tags(soup, start_id, end_id)
+            # soup = self.create_continuation_tags(soup, start_id, end_id)
+            soup = self.create_continuation_exclude_tags(soup, start_id, end_id)
 
         return soup
 
@@ -1155,6 +1187,7 @@ class XHTMLGenerator:
 
         # create new Numeric or nonNumeric tag
         datatype_tag = self.create_datatype_tag(soup, data, start_tag)
+        datatype_tag["escape"] = "true"
 
         if datatype_tag:
             datatype_tag_string = datatype_tag.text
@@ -1405,12 +1438,12 @@ class XHTMLGenerator:
                 # Convert self-closing tag to a standard tag with a closing tag
                 schema_ref_tag.string = ""
 
+            soup = self.ixt_continuation(soup)
             # update the footnote to soup object
             soup = self.foot_notes(soup)
             # created level1, level2, level3 tags
             soup = self.level_tags(soup)
             soup = self.generate_datatypes_tags(soup)
-            soup = self.ixt_continuation(soup)
 
             # finally save the html file
             self.save_html_file(soup)
