@@ -1,6 +1,6 @@
 import re
 import json
-from xml_generation.constants import (
+from .constants import (
     states_sort_list,
     county_sort_list,
     state_country_sort_list,
@@ -107,23 +107,17 @@ class FormatValueRetriever:
         if data_type == "xbrli:durationItemType":
             # Patterns to match each input format
             patterns = {
-                # Matches -5.67, 5.67, -22.3456, 22.3456
-                "ixt-sec:duryear": re.compile(r"^-?\d+\.\d+$"),
-                "ixt-sec:durmonth": re.compile(r"^\d+\.\d+$"),  # Matches 5.67, 22.3456
-                "ixt-sec:durweek": re.compile(r"^\d+$"),  # Matches 0
-                "ixt-sec:durday": re.compile(r"^\d+\.\d+$"),  # Matches 0.000001
-                "ixt-sec:durhour": re.compile(r"^\d+$"),  # Matches 1000
-                "ixt-sec:durwordsen": re.compile(
-                    r"^\d+\syears?,\s\d+\smonths?$|^[A-Za-z]+\syears?,\s[A-Za-z]+\smonths?$"
-                ),  # Matches durations in words or numbers
-                # "ixt-sec:numwordsen": re.compile(
-                #     r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)(?:[\s-](?:and[\s-])?(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)?)*\b.*$"
-                # ),  # Matches
+                "ixt-sec:durwordsen": r"^(\d+|[A-Za-z]+)\syears?,\s(\d+|[A-Za-z]+)\smonths?\b",
+                "ixt-sec:duryear": r"^\d+(\.\d+)?\s+years\b",
+                "ixt-sec:durmonth": r"^\d+(\.\d+)?\s+months\b",
+                "ixt-sec:durweek": r"^\d+(\.\d+)?\s+weeks\b",
+                "ixt-sec:durday": r"^\d+(\.\d+)?\s+days\b",
+                "ixt-sec:durhour": r"^\d+(\.\d+)?\s+hours\b",
             }
 
             # Check each pattern
             for format_code, pattern in patterns.items():
-                if pattern.match(self.input_text, re.IGNORECASE):
+                if re.match(pattern, self.input_text, re.IGNORECASE):
                     return format_code
 
         if data_type == "xbrli:durationItemType":
@@ -133,10 +127,28 @@ class FormatValueRetriever:
                 return "ixt-sec:numwordsen"
 
 
-# # Usage:
-# input_text = "FORTY TWO milestones"
-# data_type = "xbrli:durationItemType"
-# element = "usgap:Cash"
-# retriever = FormatValueRetriever(input_text)
-# format_value = retriever.get_format_value(element, data_type)
-# print(format_value)
+# # Sample strings
+# test_strings = [
+#     "5 years",
+#     "4 years",
+#     "10 years",
+#     "0.5 years",
+#     "100 years",
+#     "years",
+#     "0.5year",  # should not match
+#     "5year",  # should not match
+#     "0.5 months",  # should not match
+#     "5 weeks",  # should not match
+#     "5 hours",  # should not match
+#     "9 years, 2 months",
+#     "Five years, two months",
+# ]
+
+# for input_string in test_strings:
+#     # Usage:
+#     input_text = input_string
+#     data_type = "xbrli:durationItemType"
+#     element = "usgap:Cash"
+#     retriever = FormatValueRetriever(input_text)
+#     format_value = retriever.get_format_value(element, data_type)
+#     print(format_value)
