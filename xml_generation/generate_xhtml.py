@@ -803,15 +803,28 @@ class XHTMLGenerator:
         precision = data.get("Precision")
         counted_as = data.get("CountedAs")
 
+        if data_type == "xbrli:durationItemType":
+            next_sibling = tag.next_sibling
+            # If there's a next sibling and it's text, strip and print it
+            if next_sibling:
+                next_sibling_text = next_sibling.strip()
+                input_text = f"{tag.text} {next_sibling_text}"
+                format_value = self.get_format_value(element, data_type, input_text)
+            else:
+                input_text = f"{tag.text} years"
+                format_value = self.get_format_value(element, data_type, input_text)
+        else:
+            format_value = self.get_format_value(element, data_type, tag.text)
+
         if data_type and heading is False and not element.endswith("Abstract"):
             data_type_record = self.get_datatype_data(data_type)
             if data_type_record:
                 datatype_element = data_type_record.get("element", "")
                 datatype_attributes = data_type_record.get("attributes", "")
+
                 # Create new nonNumeric or Numeric tag
                 non_numeric_tag = soup.new_tag(datatype_element)
-                # data_type = self.get_datatype(data.get("Element"))
-                format_value = self.get_format_value(element, data_type, tag.text)
+
                 fact = data.get("Fact", "")
                 if fact and "N" in fact and tag.text == "-":
                     # name attribute
