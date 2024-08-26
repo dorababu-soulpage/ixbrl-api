@@ -317,7 +317,8 @@ class XHTMLGenerator:
             member = _member.replace("--", "_").replace("custom", self.ticker)
 
             axis_list.append(axis)
-            member_list.append(member)
+            if member not in member_list:
+                member_list.append(member)
 
         member_str = "_".join(member_list)
 
@@ -745,7 +746,8 @@ class XHTMLGenerator:
                 # axis, domain, member = group
                 _, _, _member = group
                 member = _member.replace("--", "_").replace("custom", self.ticker)
-                member_list.append(member)
+                if member not in member_list:
+                    member_list.append(member)
 
             member_str = "_".join(member_list)
 
@@ -793,6 +795,16 @@ class XHTMLGenerator:
         format_value = retriever.get_format_value(element, data_type)
         return format_value
 
+    def is_number(self, value):
+        # Remove parentheses and commas, and check if it can be converted to a float
+        try:
+            if value is not None:
+                cleaned_value = value.replace("(", "").replace(")", "").replace(",", "")
+                float(cleaned_value)
+                return True
+        except ValueError:
+            return False
+
     def create_datatype_tag(self, soup, data, tag, note_section=None):
 
         # data_type = data.get("DataType")
@@ -808,7 +820,11 @@ class XHTMLGenerator:
             # If there's a next sibling and it's text, strip and print it
             if next_sibling:
                 next_sibling_text = next_sibling.strip()
-                input_text = f"{tag.text} {next_sibling_text}"
+                if next_sibling_text:
+                    input_text = f"{tag.text} {next_sibling_text}"
+                else:
+                    input_text = f"{tag.text} years"
+
                 format_value = self.get_format_value(element, data_type, input_text)
             else:
                 input_text = f"{tag.text} years"
@@ -1007,14 +1023,17 @@ class XHTMLGenerator:
 
                 # without reverse fact
                 if "R" not in fact and "(" in tag.text:
-                    datatype_tag.string = tag.text.replace("(", "")
-                    datatype_tag["sign"] = "-"
+                    is_number = self.is_number(tag.tex)
+                    element = data.get("Element")
+                    if is_number and element != "dei--CityAreaCode":
+                        datatype_tag.string = tag.text.replace("(", "")
+                        datatype_tag["sign"] = "-"
 
-                    # Create a new NavigableString for the parenthesis
-                    parenthesis = soup.new_string("(")
+                        # Create a new NavigableString for the parenthesis
+                        parenthesis = soup.new_string("(")
 
-                    # Insert the parenthesis before the non_numeric_tag tag
-                    tag.insert_before(parenthesis)
+                        # Insert the parenthesis before the non_numeric_tag tag
+                        tag.insert_before(parenthesis)
 
                 # Replace original font tag with new Numeric or nonNumeric tag
                 # font_tag = soup.find("font", id=tag_id)
@@ -1200,9 +1219,10 @@ class XHTMLGenerator:
 
         # create new Numeric or nonNumeric tag
         datatype_tag = self.create_datatype_tag(soup, data, start_tag)
-        datatype_tag["escape"] = "true"
 
         if datatype_tag:
+            datatype_tag["escape"] = "true"
+
             datatype_tag_string = datatype_tag.text
 
             # keep the strong tag for the tagged element
