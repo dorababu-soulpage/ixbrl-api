@@ -16,7 +16,7 @@ class FormatValueRetriever:
         if element.endswith("DocumentPeriodEndDate"):
             return "ixt:date-monthname-day-year-en"
 
-        if self.input_text in ["no", "None"]:
+        if self.input_text.lower() in ["no", "none"]:
             return "ixt-sec:numwordsen"
 
         if self.input_text == "-":

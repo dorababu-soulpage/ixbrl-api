@@ -181,7 +181,6 @@ class DefXMLGenerator:
 
             # Check if all Axis_Member are empty or not
             is_dimension_role = self.check_role_is_dimension_or_not(role_data)
-            print(re.sub(r"\s+", "", role_name), is_dimension_role)
 
             if is_dimension_role:
                 role_without_spaces = re.sub(r"\s+", "", role_name)
