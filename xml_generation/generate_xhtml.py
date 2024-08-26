@@ -964,7 +964,7 @@ class XHTMLGenerator:
                             if attribute == "scale" and "N" not in fact:
                                 non_numeric_tag["scale"] = counted_as
 
-                        if attribute == "format" and "N" not in fact:
+                        if attribute == "format" and tag.text != "-":
                             if format_value:
                                 non_numeric_tag["format"] = format_value
 
@@ -1039,7 +1039,7 @@ class XHTMLGenerator:
                 # font_tag = soup.find("font", id=tag_id)
                 font_tag = soup.find(id=tag_id)
 
-                if "N" in fact:
+                if "N" in fact and tag.text == "-":
                     datatype_tag.string = ""
 
                 if font_tag:
