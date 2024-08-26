@@ -278,6 +278,7 @@ class XSDGenerator:
                     .replace(",", "")
                     .replace("-", "")
                     .replace("'", "")
+                    .replace("/", "")
                 )
 
                 role_without_spaces = re.sub(r"\s+", "", _role)

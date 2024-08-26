@@ -149,6 +149,7 @@ class CalXMLGenerator:
                         .replace(",", "")
                         .replace("-", "")
                         .replace("'", "")
+                        .replace("/", "")
                     )
 
                     # Create roleRef element and append it to role_ref_elements list.
@@ -210,10 +211,12 @@ class CalXMLGenerator:
                                     if element in calculation_parents:
                                         # element
                                         element_href = self.get_href_url(element)
-                                        element_loc = self.create_calculation_loc_element(
-                                            parent_tag=calculation_link,
-                                            label=f"loc_{element}_1",
-                                            xlink_href=f"{element_href}#{element}_1",
+                                        element_loc = (
+                                            self.create_calculation_loc_element(
+                                                parent_tag=calculation_link,
+                                                label=f"loc_{element}_1",
+                                                xlink_href=f"{element_href}#{element}",
+                                            )
                                         )
                                     else:
                                         # element

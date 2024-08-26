@@ -395,7 +395,7 @@ def generate_xml_schema_files():
     pre_generator = PreXMLGenerator(*args)
     pre_generator.generate_pre_xml()
 
-    args = data, ticker, filing_date, company_website, client_id
+    args = data, ticker, filing_date, company_website, client_id, elements_data
     def_generator = DefXMLGenerator(*args)
     def_generator.generate_def_xml()
 
