@@ -979,9 +979,17 @@ def read_images_from_folder(folder_path):
             (".png", ".jpg", ".jpeg", ".bmp", ".gif")
         ):  # Add other extensions if needed
             img_path = os.path.join(folder_path, filename)
-            img = Image.open(img_path)
             images.append((filename, img_path))
     return images
+
+
+def read_html_from_folder(folder_path):
+    html_urls = []
+    for filename in os.listdir(folder_path):
+        if filename.endswith((".htm", ".html")):  # Add other extensions if needed
+            html_path = os.path.join(folder_path, filename)
+            html_urls.append((filename, html_path))
+    return html_urls
 
 
 def upload_image_to_s3(file_path, bucket, object_name=None):

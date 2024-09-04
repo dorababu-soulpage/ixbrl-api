@@ -31,6 +31,7 @@ from utils import (
     get_client_record,
     s3_uploader,
     read_images_from_folder,
+    read_html_from_folder,
     upload_image_to_s3,
 )
 from rule_based_tagging import RuleBasedTagging
@@ -379,7 +380,7 @@ def generate_xml_schema_files():
     data = parser.process_tags(html_elements)
 
     # # write data into output.json file
-    # with open(f"{filename}.json", "w") as output:
+    # with open(f"data/{filename}.json", "w") as output:
     #     output.write(json.dumps(data))
 
     # # read json data from data.json file
@@ -497,8 +498,10 @@ def zip_upload():
         zip_ref.extractall(output_folder)
 
     uploaded_images: dict = {}
+    html_files: dict = {}
 
     images = read_images_from_folder(output_folder)
+    html_paths = read_html_from_folder(output_folder)
 
     bucket_name = config("AWS_S3_BUCKET_NAME")
     for filename, img_path in images:
@@ -511,29 +514,64 @@ def zip_upload():
 
             with open(input_html_file, "r") as html_file:
                 soup = BeautifulSoup(html_file, "html.parser")
-                img_tags = soup.find_all("img")
-                for img in img_tags:
-                    img_url = img["src"]
-                    # Assuming img_url is a relative path, construct S3 URL
-                    s3_url = uploaded_images.get(img_url)
-                    img["src"] = s3_url
+                a_tags = soup.find_all("a")
+                for a_tag in a_tags:
+                    href = a_tag.get("href", None)
+                    if href:
+                        a_href: str = a_tag["href"]
+                        html_files[input_html_file] = []
+                        if a_href.endswith((".htm", ".html")):
+                            html_files[input_html_file].append(a_href)
 
-            # Save modified HTML back
-            with open(input_html_file, "w") as modified_html:
-                modified_html.write(str(soup))
+    uploaded_htmls: dict = {}
+    input_html_files = list(html_files.keys())
 
-            try:
-                # Read the file content into memory
-                with open(input_html_file, "rb") as f:
-                    file_content = f.read()
+    if len(input_html_files) == 0:
+        for filename in os.listdir(output_folder):
+            if filename.endswith((".htm", ".html")):
+                input_html_file = os.path.join(output_folder, filename)
+                input_html_files.append(input_html_file)
 
-                # Convert the file content to BytesIO
-                file_object = io.BytesIO(file_content)
+    for filename, html_path in html_paths:
+        uploaded_url = upload_image_to_s3(html_path, bucket_name, filename)
+        uploaded_htmls[filename] = uploaded_url
 
-                html_url = s3_uploader(filename, file_object)
+    input_html_file = input_html_files[0]
+    with open(input_html_file, "r") as html_file:
+        soup = BeautifulSoup(html_file, "html.parser")
 
-            except Exception as e:
-                print(str(e))
+        img_tags = soup.find_all("img")
+        for img in img_tags:
+            img_url = img["src"]
+            # Assuming img_url is a relative path, construct S3 URL
+            s3_url = uploaded_images.get(img_url)
+            img["src"] = s3_url
+
+        a_tags = soup.find_all("a")
+        for a_tag in a_tags:
+            href = a_tag.get("href", None)
+            if href:
+                # Assuming img_url is a relative path, construct S3 URL
+                s3_url = uploaded_htmls.get(href)
+                if s3_url:
+                    a_tag["href"] = s3_url
+
+        # Save modified HTML back
+        with open(input_html_file, "w") as modified_html:
+            modified_html.write(str(soup))
+
+        try:
+            # Read the file content into memory
+            with open(input_html_file, "rb") as f:
+                file_content = f.read()
+
+            # Convert the file content to BytesIO
+            file_object = io.BytesIO(file_content)
+
+            html_url = s3_uploader(filename, file_object)
+
+        except Exception as e:
+            print(str(e))
 
     # Remove the file, zip directory
     shutil.rmtree(output_folder)
