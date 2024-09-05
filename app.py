@@ -567,7 +567,7 @@ def zip_upload():
 
             # Convert the file content to BytesIO
             file_object = io.BytesIO(file_content)
-
+            filename = os.path.basename(input_html_file)
             html_url = s3_uploader(filename, file_object)
 
         except Exception as e:

@@ -21,7 +21,7 @@ class PreXMLGenerator:
         self.grouped_data: dict[str, list] = {}
         self.elements_data = elements_data
         # main elements
-        self.elements_list: list = []
+        # self.elements_list: list = []
         self.element_occurrences: dict = {}
 
     def get_preferred_label(self, label: str):
@@ -110,6 +110,7 @@ class PreXMLGenerator:
     def generate_elements_xml(
         self, role_data, presentation_links, presentation_link, line_item, role=None
     ):
+        elements_list: list = []
         initial_record = role_data[0]
 
         root_level_abstract = initial_record.get("RootLevelAbstract")
@@ -133,10 +134,10 @@ class PreXMLGenerator:
                 )
 
                 # Add definition arc elements
-                definition_arc = self.create_presentation_arc_element(
+                presentation_arc = self.create_presentation_arc_element(
                     parent_tag=presentation_link,
                     order="1",
-                    arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                    arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
                     xlink_from=f"loc_{line_item}",
                     xlink_to=f"loc_{pre_element_parent}",
                 )
@@ -166,7 +167,7 @@ class PreXMLGenerator:
                     pre_element_parent: str = root_level_abstract
                     pre_element_parent = _pre_element_parent.replace("--", "_")
 
-                if element not in self.elements_list:
+                if element not in elements_list:
                     original_element = element
                     # main elements
                     if element.startswith("custom"):
@@ -225,7 +226,7 @@ class PreXMLGenerator:
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
 
                     # add element into elements list
-                    self.elements_list.append(original_element)
+                    elements_list.append(original_element)
 
         presentation_links.append(presentation_link)
 
@@ -243,7 +244,7 @@ class PreXMLGenerator:
             presentation_arc = self.create_presentation_arc_element(
                 parent_tag=presentation_link,
                 order=str(self.element_occurrences.get(root_level_abstract) + 1),
-                arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
                 xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
                 xlink_to=f"loc_dei_EntityCentralIndexKey",
             )
@@ -253,7 +254,7 @@ class PreXMLGenerator:
             if self.elements_data:
                 for element in self.elements_data:
                     # if element not in main elements list, add element
-                    if f"dei_{element}" not in self.elements_list:
+                    if f"dei_{element}" not in elements_list:
                         element_xlink_href = self.get_href_url(f"dei--{element}")
                         pre_element_parent_loc = self.create_presentation_loc_element(
                             parent_tag=presentation_link,
@@ -266,7 +267,7 @@ class PreXMLGenerator:
                             order=str(
                                 self.element_occurrences.get(root_level_abstract) + 1
                             ),
-                            arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                            arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
                             xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
                             xlink_to=f"loc_dei_{element}",
                         )

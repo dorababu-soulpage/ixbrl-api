@@ -65,21 +65,41 @@ class DefXMLGenerator:
             return "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd"
         if element.startswith(self.ticker):
             return f"{self.ticker}-{self.filing_date}.xsd"
+        if element.startswith("country"):
+            return "http://xbrl.sec.gov/country/2023.xsd"
+        if element.startswith("currency"):
+            return "https://xbrl.sec.gov/currency/2023/currency-2023.xsd"
+        if element.startswith("exch"):
+            return "https://xbrl.sec.gov/exch/2023/exch-2023.xsd"
+        if element.startswith("naics"):
+            return "https://xbrl.sec.gov/naics/2023/naics-2023.xsd"
+        if element.startswith("sic"):
+            return "https://xbrl.sec.gov/sic/2023/sic-2023.xsd"
+        if element.startswith("stpr"):
+            return "https://xbrl.sec.gov/stpr/2023/stpr-2023.xsd"
 
     def create_definition_arc_element(
         self, parent_tag=None, order=None, arc_role=None, xlink_from=None, xlink_to=None
     ):
+        attributes = {
+            "xlink:arcrole": arc_role,
+            "xlink:from": xlink_from,
+            "xlink:to": xlink_to,
+            "xlink:type": "arc",
+            "order": order,
+        }
+
+        if arc_role in [
+            "http://xbrl.org/int/dim/arcrole/all",
+            "http://xbrl.org/int/dim/arcrole/dimension-default",
+        ]:
+            attributes["xbrldt:contextElement"] = "segment"
+
         # Create a definitionArc element with specified attributes
         return ET.SubElement(
             parent_tag,
             "link:definitionArc",
-            attrib={
-                "xlink:arcrole": arc_role,
-                "xlink:from": xlink_from,
-                "xlink:to": xlink_to,
-                "xlink:type": "arc",
-                "order": order,
-            },
+            attrib=attributes,
         )
 
     def get_arcrole_refs_xml(self, parent):
@@ -504,7 +524,7 @@ class DefXMLGenerator:
                         parent_tag=definition_link,
                         order=str(element_occurrences.get(root_level_abstract) + 1),
                         arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                        xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
+                        xlink_from=f"loc_{line_item}".replace("--", "_"),
                         xlink_to=f"loc_dei_EntityCentralIndexKey",
                     )
                     element_occurrences[xlink_from] = (
@@ -529,9 +549,7 @@ class DefXMLGenerator:
                                         element_occurrences.get(root_level_abstract) + 1
                                     ),
                                     arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
-                                    xlink_from=f"loc_{root_level_abstract}".replace(
-                                        "--", "_"
-                                    ),
+                                    xlink_from=f"loc_{line_item}".replace("--", "_"),
                                     xlink_to=f"loc_dei_{element}",
                                 )
 
