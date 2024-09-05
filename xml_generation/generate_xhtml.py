@@ -985,6 +985,9 @@ class XHTMLGenerator:
                         if "R" in fact:
                             non_numeric_tag["sign"] = "-"
 
+                if format_value == "ixt-sec:numwordsen":
+                    non_numeric_tag["decimals"] = "0"
+
                 style = tag.get("style")
                 if style:
                     non_numeric_tag["style"] = style
