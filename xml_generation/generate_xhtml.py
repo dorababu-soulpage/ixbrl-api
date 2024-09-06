@@ -985,6 +985,9 @@ class XHTMLGenerator:
                         if "R" in fact:
                             non_numeric_tag["sign"] = "-"
 
+                if format_value == "ixt-sec:numwordsen":
+                    non_numeric_tag["decimals"] = "0"
+
                 style = tag.get("style")
                 if style:
                     non_numeric_tag["style"] = style
@@ -1011,15 +1014,15 @@ class XHTMLGenerator:
 
                 fact = data.get("Fact", "")
 
-                # with reverse fact
-                if "R" in fact and "(" in tag.text:
-                    datatype_tag.string = tag.text.replace("(", "")
+                # # with reverse fact
+                # if "R" in fact and "(" in tag.text:
+                #     datatype_tag.string = tag.text.replace("(", "")
 
-                    # Create a new NavigableString for the parenthesis
-                    parenthesis = soup.new_string("(")
+                #     # Create a new NavigableString for the parenthesis
+                #     parenthesis = soup.new_string("(")
 
-                    # Insert the parenthesis before the non_numeric_tag tag
-                    tag.insert_before(parenthesis)
+                #     # Insert the parenthesis before the non_numeric_tag tag
+                #     tag.insert_before(parenthesis)
 
                 # without reverse fact
                 if "R" not in fact and "(" in tag.text:
@@ -1034,6 +1037,15 @@ class XHTMLGenerator:
 
                         # Insert the parenthesis before the non_numeric_tag tag
                         tag.insert_before(parenthesis)
+
+                if "(" in tag.text:
+                    datatype_tag.string = tag.text.replace("(", "")
+
+                    # Create a new NavigableString for the parenthesis
+                    parenthesis = soup.new_string("(")
+
+                    # Insert the parenthesis before the non_numeric_tag tag
+                    tag.insert_before(parenthesis)
 
                 # Replace original font tag with new Numeric or nonNumeric tag
                 # font_tag = soup.find("font", id=tag_id)
