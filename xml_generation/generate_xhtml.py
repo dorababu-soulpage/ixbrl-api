@@ -1000,37 +1000,105 @@ class XHTMLGenerator:
     def generate_datatypes_tags(self, soup):
 
         # Find all tags with attributes that start with "id" and have a value starting with "apex_"
-        tags = soup.find_all(lambda tag: tag.get("id", "").startswith("apex_"))
+        tags = soup.find_all(
+            lambda tag: tag.name in ["p", "font"]
+            and tag.get("id", "").startswith("apex_")
+        )
 
         parser = HtmlTagParser()
         for tag in tags:
-            tag_id = tag.get("id", "")
-            data = parser.process_tag(tag_id)
+            # Find all tags with an id attribute
+            tag_ids = [tag["id"]] + [
+                tag["id"]
+                for tag in tag.find_all(id=True)
+                if tag["id"].startswith("apex")
+            ]
+            # handle multiple tags
+            if len(tag_ids) > 1:
+                datatype_tag_list = []
+                for index, tag_id in enumerate(tag_ids):
+                    data = parser.process_tag(tag_id)
+                    fact = data.get("Fact", "")
+                    # create new Numeric or nonNumeric tag
+                    datatype_tag = self.create_datatype_tag(soup, data, tag)
+                    # Set string only if it's not the last tag
+                    if index != len(tag_ids) - 1:
+                        datatype_tag.string = ""
 
-            # create new Numeric or nonNumeric tag
-            datatype_tag = self.create_datatype_tag(soup, data, tag)
+                    if index == len(tag_ids) - 1:
+                        if "(" in tag.text:
+                            datatype_tag.string = tag.text.replace("(", "")
 
-            if datatype_tag:
+                            # Create a new NavigableString for the parenthesis
+                            parenthesis = soup.new_string("(")
 
-                fact = data.get("Fact", "")
+                            # Insert the parenthesis before the non_numeric_tag tag
+                            tag.insert_before(parenthesis)
 
-                # # with reverse fact
-                # if "R" in fact and "(" in tag.text:
-                #     datatype_tag.string = tag.text.replace("(", "")
+                    datatype_tag_list.append(str(datatype_tag))
 
-                #     # Create a new NavigableString for the parenthesis
-                #     parenthesis = soup.new_string("(")
+                # Parse the first element to initialize the base XML
+                non_numeric_soup = BeautifulSoup(datatype_tag_list[0], "html.parser")
 
-                #     # Insert the parenthesis before the non_numeric_tag tag
-                #     tag.insert_before(parenthesis)
+                # Start with the root element
+                parent = non_numeric_soup.find()  # Find the root element
 
-                # without reverse fact
-                if "R" not in fact and "(" in tag.text:
-                    is_number = self.is_number(tag.tex)
-                    element = data.get("Element")
-                    if is_number and element != "dei--CityAreaCode":
+                # Ensure parent is valid
+                if parent is None:
+                    print("Parent is None", str(tag))
+
+                # Iterate over the remaining elements, nesting each one inside the previous
+                for data in datatype_tag_list[1:]:
+                    new_element = BeautifulSoup(data, "html.parser").find()
+
+                    # Ensure new_element is found
+                    if new_element is None:
+                        raise ValueError(f"Tag not found in {data}")
+
+                    # Append the new element as a child of the parent
+                    parent.append(new_element)
+                    parent = new_element  # The new element becomes the parent for the next iteration
+
+                tag.replace_with(non_numeric_soup)
+
+            # handle single tag
+            else:
+                tag_id = tag.get("id", "")
+                data = parser.process_tag(tag_id)
+
+                # create new Numeric or nonNumeric tag
+                datatype_tag = self.create_datatype_tag(soup, data, tag)
+
+                if datatype_tag:
+
+                    fact = data.get("Fact", "")
+
+                    # # with reverse fact
+                    # if "R" in fact and "(" in tag.text:
+                    #     datatype_tag.string = tag.text.replace("(", "")
+
+                    #     # Create a new NavigableString for the parenthesis
+                    #     parenthesis = soup.new_string("(")
+
+                    #     # Insert the parenthesis before the non_numeric_tag tag
+                    #     tag.insert_before(parenthesis)
+
+                    # without reverse fact
+                    if "R" not in fact and "(" in tag.text:
+                        is_number = self.is_number(tag.tex)
+                        element = data.get("Element")
+                        if is_number and element != "dei--CityAreaCode":
+                            datatype_tag.string = tag.text.replace("(", "")
+                            datatype_tag["sign"] = "-"
+
+                            # Create a new NavigableString for the parenthesis
+                            parenthesis = soup.new_string("(")
+
+                            # Insert the parenthesis before the non_numeric_tag tag
+                            tag.insert_before(parenthesis)
+
+                    if "(" in tag.text:
                         datatype_tag.string = tag.text.replace("(", "")
-                        datatype_tag["sign"] = "-"
 
                         # Create a new NavigableString for the parenthesis
                         parenthesis = soup.new_string("(")
@@ -1038,33 +1106,24 @@ class XHTMLGenerator:
                         # Insert the parenthesis before the non_numeric_tag tag
                         tag.insert_before(parenthesis)
 
-                if "(" in tag.text:
-                    datatype_tag.string = tag.text.replace("(", "")
+                    # Replace original font tag with new Numeric or nonNumeric tag
+                    # font_tag = soup.find("font", id=tag_id)
+                    font_tag = soup.find(id=tag_id)
 
-                    # Create a new NavigableString for the parenthesis
-                    parenthesis = soup.new_string("(")
+                    if "N" in fact and tag.text == "-":
+                        datatype_tag.string = ""
 
-                    # Insert the parenthesis before the non_numeric_tag tag
-                    tag.insert_before(parenthesis)
+                    if font_tag:
+                        styles = datatype_tag.get("style", None)
 
-                # Replace original font tag with new Numeric or nonNumeric tag
-                # font_tag = soup.find("font", id=tag_id)
-                font_tag = soup.find(id=tag_id)
-
-                if "N" in fact and tag.text == "-":
-                    datatype_tag.string = ""
-
-                if font_tag:
-                    styles = datatype_tag.get("style", None)
-
-                    if styles is None:
-                        font_tag.replace_with(datatype_tag)
-                    else:
-                        p_tag = soup.new_tag("p")
-                        p_tag["style"] = styles
-                        del datatype_tag["style"]
-                        p_tag.append(datatype_tag)
-                        font_tag.replace_with(p_tag)
+                        if styles is None:
+                            font_tag.replace_with(datatype_tag)
+                        else:
+                            p_tag = soup.new_tag("p")
+                            p_tag["style"] = styles
+                            del datatype_tag["style"]
+                            p_tag.append(datatype_tag)
+                            font_tag.replace_with(p_tag)
 
         return soup
 
