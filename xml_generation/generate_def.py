@@ -170,9 +170,6 @@ class DefXMLGenerator:
         tables_list = []
         line_items_list = []
         pre_element_parent_created = False
-        main_element_list = []
-        # main elements
-        elements_list: list = []
         # is_table_loc_created = False
 
         # Create the root linkbase element with namespaces
@@ -198,6 +195,9 @@ class DefXMLGenerator:
             axis_list = []
             members_list = []
             member_order = 1
+            main_element_list = []
+            # main elements
+            elements_list: list = []
 
             # Check if all Axis_Member are empty or not
             is_dimension_role = self.check_role_is_dimension_or_not(role_data)
@@ -209,6 +209,7 @@ class DefXMLGenerator:
                     .replace(")", "")
                     .replace(",", "")
                     .replace("-", "")
+                    .replace("–", "")
                     .replace("'", "")
                     .replace("/", "")
                 )
@@ -448,7 +449,7 @@ class DefXMLGenerator:
                         definition_arc = self.create_definition_arc_element(
                             parent_tag=definition_link,
                             order="1",
-                            arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                            arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
                             xlink_from=f"loc_{line_items_list[-1]}",
                             xlink_to=f"loc_{pre_element_parent}",
                         )
@@ -507,6 +508,9 @@ class DefXMLGenerator:
 
                     definition_links.append(definition_link)
 
+                if role == "CAPITAL STOCK (Details Narrative)":
+                    print(elements_list)
+
                 # hidden line items
                 if role_without_spaces in ["Cover", "DocumentandEntityInformation"]:
 
@@ -523,7 +527,7 @@ class DefXMLGenerator:
                     definition_arc = self.create_definition_arc_element(
                         parent_tag=definition_link,
                         order=str(element_occurrences.get(root_level_abstract) + 1),
-                        arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                        arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
                         xlink_from=f"loc_{line_item}".replace("--", "_"),
                         xlink_to=f"loc_dei_EntityCentralIndexKey",
                     )
@@ -548,7 +552,7 @@ class DefXMLGenerator:
                                     order=str(
                                         element_occurrences.get(root_level_abstract) + 1
                                     ),
-                                    arc_role="http://xbrl.org/int/dim/arcrole/parent-child",
+                                    arc_role="http://xbrl.org/int/dim/arcrole/domain-member",
                                     xlink_from=f"loc_{line_item}".replace("--", "_"),
                                     xlink_to=f"loc_dei_{element}",
                                 )

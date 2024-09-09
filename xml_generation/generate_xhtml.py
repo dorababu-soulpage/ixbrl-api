@@ -956,6 +956,9 @@ class XHTMLGenerator:
                                 if "N" not in fact:
                                     non_numeric_tag["decimals"] = precision
                                     non_numeric_tag["scale"] = counted_as
+                                    
+                            if format_value == "ixt:fixed-zero":
+                                non_numeric_tag["decimals"] = "INF"
 
                         else:
                             if attribute == "decimals" and "N" not in fact:
@@ -987,6 +990,10 @@ class XHTMLGenerator:
 
                 if format_value == "ixt-sec:numwordsen":
                     non_numeric_tag["decimals"] = "0"
+
+                # Check if the tag is specifically ix:nonNumeric
+                if non_numeric_tag.name == "ix:nonNumeric":
+                    del non_numeric_tag["decimals"]
 
                 style = tag.get("style")
                 if style:

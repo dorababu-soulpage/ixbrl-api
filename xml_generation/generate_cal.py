@@ -148,6 +148,7 @@ class CalXMLGenerator:
                         .replace(")", "")
                         .replace(",", "")
                         .replace("-", "")
+                        .replace("–", "")
                         .replace("'", "")
                         .replace("/", "")
                     )

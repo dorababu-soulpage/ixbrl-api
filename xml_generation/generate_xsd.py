@@ -277,6 +277,7 @@ class XSDGenerator:
                     .replace(")", "")
                     .replace(",", "")
                     .replace("-", "")
+                    .replace("–", "")
                     .replace("'", "")
                     .replace("/", "")
                 )
