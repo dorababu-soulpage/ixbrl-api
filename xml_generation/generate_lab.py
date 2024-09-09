@@ -332,7 +332,7 @@ class LabXMLGenerator:
                 "parent_tag": label_link,
                 "order": "1",
                 "arc_role": "http://www.xbrl.org/2003/arcrole/concept-label",
-                "xlink_from": f"loc_dei_lab_dei_EntityCentralIndexKey",
+                "xlink_from": f"loc_dei_EntityCentralIndexKey",
                 "xlink_to": f"lab_dei_EntityCentralIndexKey",
             }
             # Create presentationArc element and append it to presentation_links list.
@@ -348,7 +348,7 @@ class LabXMLGenerator:
             self.create_label_element(
                 parent_tag=label_link,
                 id=f"lab_dei_EntityCentralIndexKey_1_label_en-US",
-                xlink_label="lab_dei_EntityCentralIndexKey",
+                xlink_label="dei_EntityCentralIndexKey",
                 xlink_role=f"http://www.xbrl.org/2003/role/label",
                 label_text=hidden_label_text,
             )
@@ -386,7 +386,7 @@ class LabXMLGenerator:
                     self.create_label_element(
                         parent_tag=label_link,
                         id=f"lab_dei_{element}_1_label_en-US",
-                        xlink_label=f"lab_dei_{element}",
+                        xlink_label=f"dei_{element}",
                         xlink_role=f"http://www.xbrl.org/2003/role/label",
                         label_text=hidden_label_text,
                     )

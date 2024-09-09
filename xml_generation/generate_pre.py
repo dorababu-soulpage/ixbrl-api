@@ -485,6 +485,7 @@ class PreXMLGenerator:
                     .replace(")", "")
                     .replace(",", "")
                     .replace("-", "")
+                    .replace("–", "")
                     .replace("'", "")
                     .replace("/", "")
                 )
