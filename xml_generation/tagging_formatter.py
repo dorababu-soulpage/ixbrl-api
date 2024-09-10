@@ -108,7 +108,7 @@ class FormatValueRetriever:
             # Patterns to match each input format
             patterns = {
                 "ixt-sec:durwordsen": r"^(\d+|[A-Za-z]+)\syears?,\s(\d+|[A-Za-z]+)\smonths?\b",
-                "ixt-sec:duryear": r"^\d+(\.\d+)?\s+years\b",
+                "ixt-sec:duryear": r"^\d+(\.\d+)?\s*(to|-)?\s*\d*(\.\d+)?\s+years\b",
                 "ixt-sec:durmonth": r"^\d+(\.\d+)?\s+months\b",
                 "ixt-sec:durweek": r"^\d+(\.\d+)?\s+weeks\b",
                 "ixt-sec:durday": r"^\d+(\.\d+)?\s+days\b",
@@ -142,6 +142,7 @@ class FormatValueRetriever:
 #     "5 hours",  # should not match
 #     "9 years, 2 months",
 #     "Five years, two months",
+#     "5 to",
 # ]
 
 # for input_string in test_strings:
