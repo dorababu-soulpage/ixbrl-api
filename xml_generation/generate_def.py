@@ -508,9 +508,6 @@ class DefXMLGenerator:
 
                     definition_links.append(definition_link)
 
-                if role == "CAPITAL STOCK (Details Narrative)":
-                    print(elements_list)
-
                 # hidden line items
                 if role_without_spaces in ["Cover", "DocumentandEntityInformation"]:
 

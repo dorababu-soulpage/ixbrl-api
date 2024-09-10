@@ -822,6 +822,8 @@ class XHTMLGenerator:
                 next_sibling_text = next_sibling.strip()
                 if next_sibling_text:
                     input_text = f"{tag.text} {next_sibling_text}"
+                    if "to" in input_text:
+                        input_text = input_text.replace("to", "years")
                 else:
                     input_text = f"{tag.text} years"
 
