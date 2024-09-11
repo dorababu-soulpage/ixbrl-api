@@ -628,6 +628,7 @@ class XHTMLGenerator:
             html_content = html_content.replace("☐", "&#9744;")
             html_content = html_content.replace("☑", "&#9745;")
             html_content = html_content.replace("☒", "&#9746;")
+            html_content = html_content.replace("—", "&#8212;")
 
             # add HTML attributes in the html
             html_attributes = self.add_html_attributes()
@@ -949,6 +950,12 @@ class XHTMLGenerator:
                         ]
                         if data_type in datatypes_list:
                             if precision == "0" and counted_as == "0":
+                                if format_value == "ixt:fixed-zero":
+                                    if data_type == "xbrli:monetaryItemType":
+                                        non_numeric_tag["decimals"] = "0"
+                                    else:
+                                        non_numeric_tag["decimals"] = "INF"
+
                                 if "N" not in fact:
                                     if data_type == "xbrli:monetaryItemType":
                                         non_numeric_tag["decimals"] = "0"
@@ -958,9 +965,6 @@ class XHTMLGenerator:
                                 if "N" not in fact:
                                     non_numeric_tag["decimals"] = precision
                                     non_numeric_tag["scale"] = counted_as
-                                    
-                            if format_value == "ixt:fixed-zero":
-                                non_numeric_tag["decimals"] = "INF"
 
                         else:
                             if attribute == "decimals" and "N" not in fact:
