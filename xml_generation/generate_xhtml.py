@@ -1164,21 +1164,24 @@ class XHTMLGenerator:
                 # Include comment in the output
                 output_html += f"<!--{current_tag}-->"
                 comment = str(current_tag).strip()
-
                 if comment.startswith("Field: Page; Sequence:"):
-                    # Create the exclude tag
-                    exclude_tag = soup.new_tag("ix:exclude")
-                    # Add the comment as a string
-                    exclude_tag.append(soup.new_string(f"<!--{comment}-->"))
-                    # Add the next tag following the comment
-                    next_tag = current_tag.find_next()
-                    exclude_tag.append(next_tag.extract())
-                    # Replace the comment and next tag with the exclude tag
-                    current_tag.replace_with(exclude_tag)
-
+                    next_div_tag = current_tag.find_next("div")
+                    if next_div_tag:
+                        exclude_tag = soup.new_tag("ix:exclude")
+                        # Add the comment as a string
+                        exclude_tag.append(soup.new_string(f"<!--{comment}-->"))
+                        # Insert the <ix:exclude> tag before the original <div>
+                        next_div_tag.insert_before(exclude_tag)
+                        # Move the content of the <div> to the <ix:exclude> tag
+                        # This moves the entire tag, avoiding the circular issue
+                        exclude_tag.append(next_div_tag)
+                        current_tag.insert_after(exclude_tag)
+                        
             current_tag = current_tag.next_sibling
 
         return soup
+
+
 
     def ixt_continuation(self, soup: BeautifulSoup):
 
