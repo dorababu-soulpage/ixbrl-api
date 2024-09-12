@@ -29,6 +29,7 @@ from utils import (
     get_split_file_record,
     get_client_record,
     get_client_record,
+    get_taxonomy_record,
     s3_uploader,
     read_images_from_folder,
     read_html_from_folder,
@@ -348,6 +349,11 @@ def generate_xml_schema_files():
 
         split_file = True
 
+    taxonomy_id = record.get("taxonomyId")
+    taxonomy_data = get_taxonomy_record(taxonomy_id=taxonomy_id)
+    taxonomy_name: str = taxonomy_data.get("name", "US_GAAP_Taxonomy_2023")
+    taxonomy_year = taxonomy_name.split("_")[-1]
+
     client_id = record.get("clientId")
     client_data = get_client_record(client_id=client_id)
 
@@ -387,29 +393,53 @@ def generate_xml_schema_files():
     # with open(f"{filename}.json", "r") as file:
     #     data = json.load(file)
 
-    args = data, ticker, filing_date, company_website, client_id
+    xsd_args = data, ticker, filing_date, company_website, client_id, taxonomy_year
     # Initialize XMLGenerators and generate the pre.xml file.
-    xsd_generator = XSDGenerator(*args)
+    xsd_generator = XSDGenerator(*xsd_args)
     xsd_generator.generate_xsd_schema()
 
-    args = data, filing_date, ticker, company_website, client_id, elements_data
-    pre_generator = PreXMLGenerator(*args)
+    pre_args = (
+        data,
+        filing_date,
+        ticker,
+        company_website,
+        client_id,
+        elements_data,
+        taxonomy_year,
+    )
+    pre_generator = PreXMLGenerator(*pre_args)
     pre_generator.generate_pre_xml()
 
-    args = data, ticker, filing_date, company_website, client_id, elements_data
-    def_generator = DefXMLGenerator(*args)
+    def_args = (
+        data,
+        ticker,
+        filing_date,
+        company_website,
+        client_id,
+        elements_data,
+        taxonomy_year,
+    )
+    def_generator = DefXMLGenerator(*def_args)
     def_generator.generate_def_xml()
 
-    args = data, filing_date, ticker, company_website, client_id
-    cal_generator = CalXMLGenerator(*args)
+    cal_args = (data, filing_date, ticker, company_website, client_id, taxonomy_year)
+    cal_generator = CalXMLGenerator(*cal_args)
     cal_generator.generate_cal_xml()
 
-    args = data, filing_date, ticker, company_website, client_id, elements_data
-    lab_generator = LabXMLGenerator(*args)
+    lab_args = (
+        data,
+        filing_date,
+        ticker,
+        company_website,
+        client_id,
+        elements_data,
+        taxonomy_year,
+    )
+    lab_generator = LabXMLGenerator(*lab_args)
     lab_generator.generate_lab_xml()
 
     # generate xHTML file
-    args = (
+    xhtml_args = (
         data,
         filing_date,
         ticker,
@@ -419,8 +449,9 @@ def generate_xml_schema_files():
         filename,
         split_file,
         company_website,
+        taxonomy_year,
     )
-    xhtml_generator = XHTMLGenerator(*args)
+    xhtml_generator = XHTMLGenerator(*xhtml_args)
     xhtml_generator.generate_xhtml_file()
 
     file_path = f"data/{ticker}-{filing_date}"

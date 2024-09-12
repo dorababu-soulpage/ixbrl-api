@@ -1,4 +1,5 @@
 import re, os
+from datetime import datetime
 from itertools import groupby
 
 from xml.dom import minidom
@@ -7,7 +8,14 @@ import xml.etree.ElementTree as ET
 
 class DefXMLGenerator:
     def __init__(
-        self, data, ticker, filing_date, company_website, client_id, elements_data
+        self,
+        data,
+        ticker,
+        filing_date,
+        company_website,
+        client_id,
+        elements_data,
+        taxonomy_year,
     ):
         # Initialize the DefXMLGenerator with provided data and metadata
         self.data = data
@@ -15,6 +23,7 @@ class DefXMLGenerator:
         self.filing_date = filing_date
         self.company_website = company_website
         self.client_id = client_id
+        self.taxonomy_year = taxonomy_year
         self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}_def.xml"
         self.grouped_data = self.group_data_by_role()
         self.elements_data = elements_data
@@ -57,26 +66,35 @@ class DefXMLGenerator:
         )
 
     def get_href_url(self, element: str):
-        if element.startswith("us-gaap"):
-            return "https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd"
-        if element.startswith("dei"):
-            return "https://xbrl.sec.gov/dei/2023/dei-2023.xsd"
-        if element.startswith("srt"):
-            return "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd"
         if element.startswith(self.ticker):
             return f"{self.ticker}-{self.filing_date}.xsd"
+
         if element.startswith("country"):
-            return "http://xbrl.sec.gov/country/2023.xsd"
-        if element.startswith("currency"):
-            return "https://xbrl.sec.gov/currency/2023/currency-2023.xsd"
-        if element.startswith("exch"):
-            return "https://xbrl.sec.gov/exch/2023/exch-2023.xsd"
-        if element.startswith("naics"):
-            return "https://xbrl.sec.gov/naics/2023/naics-2023.xsd"
+            return f"http://xbrl.sec.gov/country/{self.taxonomy_year}.xsd"
+
+        if element.startswith("dei"):
+            return f"https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd"
+
         if element.startswith("sic"):
-            return "https://xbrl.sec.gov/sic/2023/sic-2023.xsd"
+            return f"https://xbrl.sec.gov/sic/{self.taxonomy_year}/sic-{self.taxonomy_year}.xsd"
+
+        if element.startswith("exch"):
+            return f"https://xbrl.sec.gov/exch/{self.taxonomy_year}/exch-{self.taxonomy_year}.xsd"
+
         if element.startswith("stpr"):
-            return "https://xbrl.sec.gov/stpr/2023/stpr-2023.xsd"
+            return f"https://xbrl.sec.gov/stpr/{self.taxonomy_year}/stpr-{self.taxonomy_year}.xsd"
+
+        if element.startswith("naics"):
+            return f"https://xbrl.sec.gov/naics/{self.taxonomy_year}/naics-{self.taxonomy_year}.xsd"
+
+        if element.startswith("srt"):
+            return f"https://xbrl.fasb.org/srt/{self.taxonomy_year}/elts/srt-{self.taxonomy_year}.xsd"
+
+        if element.startswith("currency"):
+            return f"https://xbrl.sec.gov/currency/{self.taxonomy_year}/currency-{self.taxonomy_year}.xsd"
+
+        if element.startswith("us-gaap"):
+            return f"https://xbrl.fasb.org/us-gaap/{self.taxonomy_year}/elts/us-gaap-{self.taxonomy_year}.xsd"
 
     def create_definition_arc_element(
         self, parent_tag=None, order=None, arc_role=None, xlink_from=None, xlink_to=None
@@ -578,10 +596,13 @@ class DefXMLGenerator:
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
 
+        # Get current date and time with AM/PM
+        current_datetime = datetime.now().strftime("%Y-%m-%d %I:%M %p")
+
         # Comments after the XML declaration
         comments_after_declaration = [
             "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
-            "<!-- Creation Date : -->",
+            f"<!-- Creation Date : {current_datetime} -->",
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
