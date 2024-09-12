@@ -32,6 +32,7 @@ class XHTMLGenerator:
         filename,
         split_file,
         website,
+        taxonomy_year,
     ):
         # Initialize class attributes
         self.cik = cik
@@ -42,6 +43,7 @@ class XHTMLGenerator:
         self.split_file = split_file
         self.company_website = website
         self.filing_date = filing_date
+        self.taxonomy_year = taxonomy_year
         self.output_file = f"data/{ticker}-{filing_date}/{ticker}-{filing_date}.htm"
         self.output_html = filename
         self.context_list = []
@@ -74,35 +76,37 @@ class XHTMLGenerator:
         html_tag = soup.new_tag("html")
 
         # Add attributes to the html tag
+
+        # common for every taxonomy
+        html_tag["xml:lang"] = "en-US"
         html_tag["xmlns"] = "http://www.w3.org/1999/xhtml"
-        html_tag["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+        html_tag["xmlns:utr"] = "http://www.xbrl.org/2009/utr"
+        html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
         html_tag["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
-        html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
         html_tag["xmlns:xbrldi"] = "http://xbrl.org/2006/xbrldi"
         html_tag["xmlns:xbrldt"] = "http://xbrl.org/2005/xbrldt"
-        html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
         html_tag["xmlns:ix"] = "http://www.xbrl.org/2013/inlineXBRL"
-        html_tag["xmlns:ixt"] = (
-            "http://www.xbrl.org/inlineXBRL/transformation/2022-02-16"
-        )
-        html_tag["xmlns:ixt-sec"] = (
-            "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
-        )
         html_tag["xmlns:link"] = "http://www.xbrl.org/2003/linkbase"
-        html_tag["xmlns:dei"] = "http://xbrl.sec.gov/dei/2023"
-        html_tag["xmlns:ref"] = "http://www.xbrl.org/2006/ref"
-        html_tag["xmlns:us-gaap"] = "http://fasb.org/us-gaap/2023"
-        html_tag["xmlns:us-roles"] = "http://fasb.org/us-roles/2023"
-        html_tag["xmlns:country"] = "http://xbrl.sec.gov/country/2023"
-        html_tag["xmlns:srt"] = "http://fasb.org/srt/2023"
-        html_tag[f"xmlns:{self.ticker}"] = (
-            f"http://{self.company_website}/{self.filing_date}"
-        )
-        html_tag["xml:lang"] = "en-US"
-        html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-        html_tag["xmlns:ecd"] = "http://xbrl.sec.gov/ecd/2023"
-        html_tag["xmlns:utr"] = "http://www.xbrl.org/2009/utr"
+        html_tag["xmlns:xbrli"] = "http://www.xbrl.org/2003/instance"
         html_tag["xmlns:iso4217"] = "http://www.xbrl.org/2003/iso4217"
+        html_tag["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+
+        ixt = "http://www.xbrl.org/inlineXBRL/transformation/2022-02-16"
+        html_tag["xmlns:ixt"] = ixt
+
+        ixt_sec = "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+        html_tag["xmlns:ixt-sec"] = ixt_sec
+
+        # change based on the taxonomy year
+        html_tag["xmlns:srt"] = f"http://fasb.org/srt/{self.taxonomy_year}"
+        html_tag["xmlns:dei"] = f"http://xbrl.sec.gov/dei/{self.taxonomy_year}"
+        html_tag["xmlns:ecd"] = f"http://xbrl.sec.gov/ecd/{self.taxonomy_year}"
+        html_tag["xmlns:us-gaap"] = f"http://fasb.org/us-gaap/{self.taxonomy_year}"
+        html_tag["xmlns:us-roles"] = f"http://fasb.org/us-roles/{self.taxonomy_year}"
+        html_tag["xmlns:country"] = f"http://xbrl.sec.gov/country/{self.taxonomy_year}"
+
+        company_name_filing_date = f"http://{self.company_website}/{self.filing_date}"
+        html_tag[f"xmlns:{self.ticker}"] = company_name_filing_date
 
         return str(html_tag).replace("</html>", "")
 
@@ -634,10 +638,13 @@ class XHTMLGenerator:
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
 
+            # Get current date and time with AM/PM
+            current_datetime = datetime.now().strftime("%Y-%m-%d %I:%M %p")
+
             # Create comments after the XML declaration
             comments_after_declaration = [
                 "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
-                "<!-- Creation Date : -->",
+                f"<!-- Creation Date : {current_datetime} -->",
                 "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
             ]
 

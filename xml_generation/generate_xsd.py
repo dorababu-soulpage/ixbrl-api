@@ -1,4 +1,5 @@
 import re, os
+from datetime import datetime
 from itertools import groupby
 
 from xml.dom import minidom
@@ -7,13 +8,16 @@ from utils import get_custom_element_record
 
 
 class XSDGenerator:
-    def __init__(self, data, ticker, filing_date, company_website, client_id):
+    def __init__(
+        self, data, ticker, filing_date, company_website, client_id, taxonomy_year
+    ):
         self.root = None
         self.data = data
         self.ticker = ticker
         self.filing_date = filing_date
         self.company_website = company_website
         self.client_id = client_id
+        self.taxonomy_year = taxonomy_year
         self.output_file = f"data/{self.ticker}-{self.filing_date}/{self.ticker}-{self.filing_date}.xsd"
         # self.definitions = definitions
         self.grouped_data = self.group_data_by_role()
@@ -75,72 +79,104 @@ class XSDGenerator:
         self.root = ET.Element(
             "xsd:schema",
             attrib={
+                # common for every taxonomy
                 "targetNamespace": f"http://{self.company_website}/{self.filing_date}",
                 "attributeFormDefault": "unqualified",
                 "elementFormDefault": "qualified",
-                "xmlns:dtr-types": "http://www.xbrl.org/dtr/type/2022-03-31",
-                "xmlns:country": "http://xbrl.sec.gov/country/2023",
-                "xmlns:currency": "https://xbrl.sec.gov/currency/2023/currency-2023",
-                "xmlns:exch": "https://xbrl.sec.gov/exch/2023/exch-2023",
-                "xmlns:naics": "https://xbrl.sec.gov/naics/2023/naics-2023",
-                "xmlns:sic": "https://xbrl.sec.gov/sic/2023/sic-2023",
-                "xmlns:stpr": "https://xbrl.sec.gov/stpr/2023/stpr-2023",
-                "xmlns:ecd-sub": "http://xbrl.sec.gov/ecd-sub/2023",
-                f"xmlns:{self.ticker}": f"http://{self.company_website}/{self.filing_date}",
+                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
+                "xmlns:xlink": "http://www.w3.org/1999/xlink",
                 "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
                 "xmlns:link": "http://www.xbrl.org/2003/linkbase",
-                "xmlns:dei": "http://xbrl.sec.gov/dei/2023",
-                "xmlns:xbrldt": "http://xbrl.org/2005/xbrldt",
-                "xmlns:xbrli": "http://www.xbrl.org/2003/instance",
+                "xmlns:xbrli": f"http://www.xbrl.org/2003/instance",
+                "xmlns:dtr-types": "http://www.xbrl.org/dtr/type/2022-03-31",
                 "xmlns:enum2": "http://xbrl.org/2020/extensible-enumerations-2.0",
-                "xmlns:srt": "http://fasb.org/srt/2023",
-                "xmlns:us-gaap": "http://fasb.org/us-gaap/2023",
-                "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                # change based on the taxonomy year
+                "xmlns:srt": f"http://fasb.org/srt/{self.taxonomy_year}",
+                "xmlns:dei": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
+                "xmlns:us-gaap": f"http://fasb.org/us-gaap/{self.taxonomy_year}",
+                "xmlns:country": f"http://xbrl.sec.gov/country/{self.taxonomy_year}",
+                "xmlns:ecd-sub": f"http://xbrl.sec.gov/ecd-sub/{self.taxonomy_year}",
+                "xmlns:sic": f"https://xbrl.sec.gov/sic/{self.taxonomy_year}/sic-{self.taxonomy_year}",
+                "xmlns:stpr": f"https://xbrl.sec.gov/stpr/{self.taxonomy_year}/stpr-{self.taxonomy_year}",
+                "xmlns:exch": f"https://xbrl.sec.gov/exch/{self.taxonomy_year}/exch-{self.taxonomy_year}",
+                "xmlns:naics": f"https://xbrl.sec.gov/naics/{self.taxonomy_year}/naics-{self.taxonomy_year}",
+                "xmlns:currency": f"https://xbrl.sec.gov/currency/{self.taxonomy_year}/currency-{self.taxonomy_year}",
+                f"xmlns:{self.ticker}": f"http://{self.company_website}/{self.filing_date}",
             },
         )
 
     def create_xsd_import_elements(self):
         # Create xsd:import elements and append them to the root
         xsd_imports = [
+            # common for every taxonomy
             {
-                "schemaLocation": "http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd",
                 "namespace": "http://www.xbrl.org/2003/instance",
+                "schemaLocation": "http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd",
             },
             {
-                "schemaLocation": "http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
                 "namespace": "http://www.xbrl.org/2003/linkbase",
+                "schemaLocation": "http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd",
             },
             {
-                "schemaLocation": "http://www.xbrl.org/2005/xbrldt-2005.xsd",
                 "namespace": "http://xbrl.org/2005/xbrldt",
+                "schemaLocation": "http://www.xbrl.org/2005/xbrldt-2005.xsd",
+            },
+            # change based on the taxonomy year
+            {
+                "namespace": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd",
             },
             {
-                "schemaLocation": "https://xbrl.sec.gov/dei/2023/dei-2023.xsd",
-                "namespace": "http://xbrl.sec.gov/dei/2023",
+                "namespace": f"http://xbrl.org/2020/extensible-enumerations-2.0",
+                "schemaLocation": f"https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd",
             },
             {
-                "schemaLocation": "https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd",
-                "namespace": "http://xbrl.org/2020/extensible-enumerations-2.0",
+                "namespace": f"http://xbrl.sec.gov/ecd-sub/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/ecd/{self.taxonomy_year}/ecd-sub-{self.taxonomy_year}.xsd",
             },
             {
-                "schemaLocation": "https://xbrl.sec.gov/ecd/2023/ecd-sub-2023.xsd",
-                "namespace": "http://xbrl.sec.gov/ecd-sub/2023",
+                "namespace": f"http://www.xbrl.org/dtr/type/2022-03-31",
+                "schemaLocation": f"https://www.xbrl.org/dtr/type/2022-03-31/types.xsd",
             },
             {
-                "schemaLocation": "https://www.xbrl.org/dtr/type/2022-03-31/types.xsd",
-                "namespace": "http://www.xbrl.org/dtr/type/2022-03-31",
+                "namespace": f"http://fasb.org/us-gaap/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.fasb.org/us-gaap/{self.taxonomy_year}/elts/us-gaap-{self.taxonomy_year}.xsd",
             },
             {
-                "schemaLocation": "https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd",
-                "namespace": "http://fasb.org/us-gaap/2023",
+                "namespace": f"http://xbrl.sec.gov/country/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/country/{self.taxonomy_year}/country-{self.taxonomy_year}.xsd",
             },
             {
-                "schemaLocation": "https://xbrl.sec.gov/country/2023/country-2023.xsd",
-                "namespace": "http://xbrl.sec.gov/country/2023",
+                "namespace": f"http://fasb.org/srt/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.fasb.org/srt/{self.taxonomy_year}/elts/srt-{self.taxonomy_year}.xsd",
             },
             {
-                "schemaLocation": "https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd",
-                "namespace": "http://fasb.org/srt/2023",
+                "namespace": f"http://xbrl.sec.gov/ecd/{self.taxonomy_year}",
+                "schemaLocation": f" https://xbrl.sec.gov/ecd/{self.taxonomy_year}/ecd-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
+                "schemaLocation": f" https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f"http://xbrl.sec.gov/stpr/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/stpr/{self.taxonomy_year}/stpr-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f" http://xbrl.sec.gov/exch/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/exch/{self.taxonomy_year}/exch-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f"http://xbrl.sec.gov/currency/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/currency/{self.taxonomy_year}/currency-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f"http://xbrl.sec.gov/naics/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/naics/{self.taxonomy_year}/naics-{self.taxonomy_year}.xsd",
+            },
+            {
+                "namespace": f"http://xbrl.sec.gov/sic/{self.taxonomy_year}",
+                "schemaLocation": f"https://xbrl.sec.gov/sic/{self.taxonomy_year}/sic-{self.taxonomy_year}.xsd",
             },
         ]
 
@@ -373,10 +409,13 @@ class XSDGenerator:
         # Create an XML declaration
         xml_declaration = '<?xml version="1.0" encoding="US-ASCII"?>\n'
 
+        # Get current date and time with AM/PM
+        current_datetime = datetime.now().strftime("%Y-%m-%d %I:%M %p")
+
         # Create comments after the XML declaration
         comments_after_declaration = [
             "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
-            "<!-- Creation Date : -->",
+            f"<!-- Creation Date : {current_datetime} -->",
             "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
         ]
 
