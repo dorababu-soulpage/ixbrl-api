@@ -1006,6 +1006,12 @@ class XHTMLGenerator:
                 if format_value == "ixt-sec:numwordsen":
                     non_numeric_tag["decimals"] = "0"
 
+                if format_value == "ixt:fixed-zero":
+                    del non_numeric_tag["sign"]
+
+                if non_numeric_tag.get("xs:nil") == "true":
+                    del non_numeric_tag["sign"]
+
                 # Check if the tag is specifically ix:nonNumeric
                 if non_numeric_tag.name == "ix:nonNumeric":
                     del non_numeric_tag["decimals"]
@@ -1131,6 +1137,7 @@ class XHTMLGenerator:
 
                         # Create a new NavigableString for the parenthesis
                         parenthesis = soup.new_string("(")
+                        datatype_tag["sign"] = "-"
 
                         # Insert the parenthesis before the non_numeric_tag tag
                         tag.insert_before(parenthesis)
