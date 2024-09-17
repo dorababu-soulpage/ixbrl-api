@@ -123,16 +123,8 @@ class XSDGenerator:
             },
             # change based on the taxonomy year
             {
-                "namespace": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
-                "schemaLocation": f"https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd",
-            },
-            {
                 "namespace": f"http://xbrl.org/2020/extensible-enumerations-2.0",
                 "schemaLocation": f"https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd",
-            },
-            {
-                "namespace": f"http://xbrl.sec.gov/ecd-sub/{self.taxonomy_year}",
-                "schemaLocation": f"https://xbrl.sec.gov/ecd/{self.taxonomy_year}/ecd-sub-{self.taxonomy_year}.xsd",
             },
             {
                 "namespace": f"http://www.xbrl.org/dtr/type/2022-03-31",
