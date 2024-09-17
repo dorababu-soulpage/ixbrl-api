@@ -832,6 +832,8 @@ class XHTMLGenerator:
                     input_text = f"{tag.text} {next_sibling_text}"
                     if "to" in input_text:
                         input_text = input_text.replace("to", "years")
+                    if "-" in input_text:
+                        input_text = input_text.replace("-", "years")
                 else:
                     input_text = f"{tag.text} years"
 
@@ -1008,6 +1010,13 @@ class XHTMLGenerator:
                 if non_numeric_tag.name == "ix:nonNumeric":
                     del non_numeric_tag["decimals"]
 
+                # Check if the tag has xs:nil="true" and the 'decimals' attribute
+                if non_numeric_tag.get("xs:nil") == "true" and non_numeric_tag.has_attr(
+                    "decimals"
+                ):
+                    # Remove the 'decimals' attribute
+                    del non_numeric_tag["decimals"]
+
                 style = tag.get("style")
                 if style:
                     non_numeric_tag["style"] = style
@@ -1176,12 +1185,10 @@ class XHTMLGenerator:
                         # This moves the entire tag, avoiding the circular issue
                         exclude_tag.append(next_div_tag)
                         current_tag.insert_after(exclude_tag)
-                        
+
             current_tag = current_tag.next_sibling
 
         return soup
-
-
 
     def ixt_continuation(self, soup: BeautifulSoup):
 
