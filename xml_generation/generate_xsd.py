@@ -155,7 +155,7 @@ class XSDGenerator:
                 "schemaLocation": f"https://xbrl.sec.gov/stpr/{self.taxonomy_year}/stpr-{self.taxonomy_year}.xsd",
             },
             {
-                "namespace": f" http://xbrl.sec.gov/exch/{self.taxonomy_year}",
+                "namespace": f"http://xbrl.sec.gov/exch/{self.taxonomy_year}",
                 "schemaLocation": f"https://xbrl.sec.gov/exch/{self.taxonomy_year}/exch-{self.taxonomy_year}.xsd",
             },
             {
