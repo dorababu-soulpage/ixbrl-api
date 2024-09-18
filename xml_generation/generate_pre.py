@@ -131,6 +131,7 @@ class PreXMLGenerator:
         elements_list: list = []
         element_occurrences: dict = {}
         initial_record = role_data[0]
+        period_start_Label_list: list = []
 
         root_level_abstract = initial_record.get("RootLevelAbstract")
         root_level_abstract = root_level_abstract.replace("custom", self.ticker)
@@ -241,6 +242,11 @@ class PreXMLGenerator:
                             "preferred_label": preferred_label,
                         }
 
+                    if label_type == "periodStartLabel":
+                        label_url = "http://www.xbrl.org/2003/role/periodStartLabel"
+                        arc_args["preferred_label"] = label_url
+                        period_start_Label_list.append(element)
+
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
 
@@ -248,6 +254,28 @@ class PreXMLGenerator:
                     elements_list.append(original_element)
 
         presentation_links.append(presentation_link)
+
+        # add periodEndLabel
+        for period_start_Label in period_start_Label_list:
+            # Common arguments for create_presentation_arc_element
+            element_loc = self.create_presentation_loc_element(
+                parent_tag=presentation_link,
+                label=f"loc_{period_start_Label}_2",
+                xlink_href=f"{href_url}#{period_start_Label}",
+            )
+
+            arc_args = {
+                "parent_tag": presentation_link,
+                "order": str(element_occurrences.get(xlink_from)+1),
+                "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
+                "xlink_from": f"loc_{xlink_from}".replace("--", "_"),
+                "xlink_to": f"loc_{period_start_Label}_2",
+                "preferred_label": "http://www.xbrl.org/2003/role/periodEndLabel",
+            }
+
+            # Create presentationArc element and append it to presentation_links list.
+            presentation_arc = self.create_presentation_arc_element(**arc_args)
+            element_occurrences[xlink_from] = element_occurrences[xlink_from] + 1
 
         # add elements data into pre.xml next to the main elements
         if role in ["Cover", "DocumentandEntityInformation"]:
