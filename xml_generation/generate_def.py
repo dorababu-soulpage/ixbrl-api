@@ -421,30 +421,30 @@ class DefXMLGenerator:
 
                                 dimension_records_list.append(dimension_record)
 
-                                if member not in members_list:
-                                    # member
-                                    member_xlink_href = self.get_href_url(member)
-                                    member_loc = self.create_definition_loc_element(
-                                        parent_tag=definition_link,
-                                        label=f"loc_{member}",
-                                        xlink_href=f"{member_xlink_href}#{member}",
-                                    )
+                            if member not in members_list:
+                                # member
+                                member_xlink_href = self.get_href_url(member)
+                                member_loc = self.create_definition_loc_element(
+                                    parent_tag=definition_link,
+                                    label=f"loc_{member}",
+                                    xlink_href=f"{member_xlink_href}#{member}",
+                                )
 
-                                    # Common arguments for create_presentation_arc_element
-                                    arc_args = {
-                                        "parent_tag": definition_link,
-                                        "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
-                                        "xlink_from": f"loc_{domain}",
-                                        "xlink_to": f"loc_{member}",
-                                        "order": str(member_order),
-                                    }
+                                # Common arguments for create_presentation_arc_element
+                                arc_args = {
+                                    "parent_tag": definition_link,
+                                    "arc_role": "http://xbrl.org/int/dim/arcrole/domain-member",
+                                    "xlink_from": f"loc_{domain}",
+                                    "xlink_to": f"loc_{member}",
+                                    "order": str(member_order),
+                                }
 
-                                    # Add definition arc elements
-                                    definition_arc = self.create_definition_arc_element(
-                                        **arc_args
-                                    )
-                                    members_list.append(member)
-                                    member_order += 1
+                                # Add definition arc elements
+                                definition_arc = self.create_definition_arc_element(
+                                    **arc_args
+                                )
+                                members_list.append(member)
+                                member_order += 1
 
                             # add dimension record
                             main_element_list.append(record)

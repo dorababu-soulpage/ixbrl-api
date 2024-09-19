@@ -98,6 +98,7 @@
     "datatype": "dtr-types:perShareItemType",
     "element": "ix:nonFraction",
     "attributes": [
+      "format",
       "contextRef",
       "unitRef",
       "decimals",
