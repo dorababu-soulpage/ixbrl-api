@@ -39,11 +39,12 @@ class FormatValueRetriever:
             "dtr-types:energyItemType",
             "dtr-types:massItemType",
             "dtr-types:flowItemType",
+            "dtr-types:perShareItemType",
         ]:
             # Patterns to match each format
             numcommadecdimal_pattern = re.compile(r"^\d{1,3}(?:[\.\s]?\d{3})*,\d{1,2}$")
-            numdotdecimal_pattern = re.compile(
-                r"^\d{1,3}(?:[,\s]?\d{3})*(?:\.\d{1,2})?$"
+            numdotdecimal_pattern = numdotdecimal_pattern = re.compile(
+                r"^\d{1,3}(?:[,\s]?\d{3})*(?:\.\d+)?$"
             )
             numdotdecimalin_pattern = re.compile(
                 r"^\d{1,2}(?:[,\s]?\d{2})*(?:\.\d{1,2})?$"
