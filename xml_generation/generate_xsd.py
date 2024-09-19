@@ -95,7 +95,7 @@ class XSDGenerator:
                 "xmlns:dei": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
                 "xmlns:us-gaap": f"http://fasb.org/us-gaap/{self.taxonomy_year}",
                 "xmlns:country": f"http://xbrl.sec.gov/country/{self.taxonomy_year}",
-                "xmlns:ecd-sub": f"http://xbrl.sec.gov/ecd-sub/{self.taxonomy_year}",
+                "xmlns:ecd": f"http://xbrl.sec.gov/ecd/{self.taxonomy_year}",
                 "xmlns:sic": f"https://xbrl.sec.gov/sic/{self.taxonomy_year}/sic-{self.taxonomy_year}",
                 "xmlns:stpr": f"https://xbrl.sec.gov/stpr/{self.taxonomy_year}/stpr-{self.taxonomy_year}",
                 "xmlns:exch": f"https://xbrl.sec.gov/exch/{self.taxonomy_year}/exch-{self.taxonomy_year}",
