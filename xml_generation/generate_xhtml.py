@@ -627,6 +627,8 @@ class XHTMLGenerator:
             html_content = html_content.replace("unitref", "unitRef")
             html_content = html_content.replace("contextref", "contextRef")
             html_content = html_content.replace("nonfraction", "nonFraction")
+            html_content = html_content.replace("nonnumeric", "nonNumeric")
+            
 
             html_content = html_content.replace("<font", "<span")
             html_content = html_content.replace("</font", "</span")
