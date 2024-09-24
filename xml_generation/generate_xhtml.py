@@ -623,6 +623,13 @@ class XHTMLGenerator:
                 '<meta content="text/html" http-equiv="Content-Type">',
                 '<meta content="text/html" http-equiv="Content-Type"/>',
             )
+
+            html_content = html_content.replace("unitref", "unitRef")
+            html_content = html_content.replace("contextref", "contextRef")
+            html_content = html_content.replace("nonfraction", "nonFraction")
+            html_content = html_content.replace("nonnumeric", "nonNumeric")
+            
+
             html_content = html_content.replace("<font", "<span")
             html_content = html_content.replace("</font", "</span")
             html_content = html_content.replace("<br>", "<br/>")
