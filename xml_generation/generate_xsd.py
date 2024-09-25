@@ -144,11 +144,11 @@ class XSDGenerator:
             },
             {
                 "namespace": f"http://xbrl.sec.gov/ecd/{self.taxonomy_year}",
-                "schemaLocation": f" https://xbrl.sec.gov/ecd/{self.taxonomy_year}/ecd-{self.taxonomy_year}.xsd",
+                "schemaLocation": f"https://xbrl.sec.gov/ecd/{self.taxonomy_year}/ecd-{self.taxonomy_year}.xsd",
             },
             {
                 "namespace": f"http://xbrl.sec.gov/dei/{self.taxonomy_year}",
-                "schemaLocation": f" https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd",
+                "schemaLocation": f"https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd",
             },
             {
                 "namespace": f"http://xbrl.sec.gov/stpr/{self.taxonomy_year}",

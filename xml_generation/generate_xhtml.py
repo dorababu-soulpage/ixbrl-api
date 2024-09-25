@@ -628,7 +628,6 @@ class XHTMLGenerator:
             html_content = html_content.replace("contextref", "contextRef")
             html_content = html_content.replace("nonfraction", "nonFraction")
             html_content = html_content.replace("nonnumeric", "nonNumeric")
-            
 
             html_content = html_content.replace("<font", "<span")
             html_content = html_content.replace("</font", "</span")
@@ -639,6 +638,7 @@ class XHTMLGenerator:
             html_content = html_content.replace("☐", "&#9744;")
             html_content = html_content.replace("☑", "&#9745;")
             html_content = html_content.replace("☒", "&#9746;")
+            html_content = html_content.replace("- ", "&#8211;")
             html_content = html_content.replace("—", "&#8212;")
 
             # add HTML attributes in the html
