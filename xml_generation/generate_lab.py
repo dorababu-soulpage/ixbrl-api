@@ -296,7 +296,8 @@ class LabXMLGenerator:
                         element_value: dict = get_taxonomy_values(name)
                         if element_value:
                             label_text = main_element.get("preferred_label", "")
-
+                        else:
+                            label_text = main_element.get("preferred_label", "")
                 if label_created is False:
                     # create label
                     self.create_label_element(
