@@ -594,12 +594,18 @@ class XHTMLGenerator:
         soup = self.remove_left_over_apex_ids(soup)
         soup = self.remove_role_attribute(soup)
 
-        # Manage entities manually
+        # Find all <a> tags and modify the name attribute to href
+        for a_tag in soup.find_all("a"):
+            if "name" in a_tag and not a_tag.get("href"):
+                a_tag["href"] = f"#{a_tag['name']}"
+                del a_tag["name"]
+
+        # Manage entities manually_
         parsed_html = html.unescape(str(soup))
 
         # output_html_file = self.get_filename()
         # Update the output file with the new soup data
-        with open(f"{directory}/{self.output_html}.htm", "wb") as out_file:
+        with open(self.output_file, "wb") as out_file:
             # html_content: str = soup.prettify()
             html_content: str = parsed_html
 
@@ -983,6 +989,10 @@ class XHTMLGenerator:
                                 if "N" not in fact:
                                     non_numeric_tag["decimals"] = precision
                                     non_numeric_tag["scale"] = counted_as
+
+                            if precision == "0":
+                                if data_type == "dtr-types:percentItemType":
+                                    non_numeric_tag["decimals"] = "INF"
 
                         else:
                             if attribute == "decimals" and "N" not in fact:

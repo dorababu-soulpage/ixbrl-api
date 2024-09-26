@@ -125,7 +125,13 @@ class PreXMLGenerator:
         return ET.SubElement(parent_tag, "link:presentationArc", attrib=attrib)
 
     def generate_elements_xml(
-        self, role_data, presentation_links, presentation_link, line_item, role=None
+        self,
+        role_data,
+        presentation_links,
+        presentation_link,
+        line_item,
+        role=None,
+        dimension_role=False,
     ):
         elements_list: list = []
         element_occurrences: dict = {}
@@ -208,7 +214,10 @@ class PreXMLGenerator:
                     if pre_element_parent:
                         xlink_from = pre_element_parent
                     else:
-                        xlink_from = root_level_abstract
+                        if dimension_role:
+                            xlink_from = line_item
+                        else:
+                            xlink_from = root_level_abstract
 
                     # calculate xlink from element element occurrence
                     if xlink_from not in element_occurrences:
@@ -478,7 +487,12 @@ class PreXMLGenerator:
 
         # generate mail element xml
         self.generate_elements_xml(
-            role_data, presentation_links, presentation_link, line_item, role=role
+            role_data,
+            presentation_links,
+            presentation_link,
+            line_item,
+            role=role,
+            dimension_role=True,
         )
 
     def check_role_is_dimension_or_not(self, role_data):

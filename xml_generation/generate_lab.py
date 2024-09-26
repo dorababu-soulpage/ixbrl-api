@@ -298,6 +298,10 @@ class LabXMLGenerator:
                             label_text = label_data.get(label_type)
                         else:
                             label_text = label_data.get(label_type)
+
+                # remove double in label text
+                label_text = " ".join(label_text.split())
+
                 if label_created is False:
                     # create label
                     self.create_label_element(
