@@ -841,6 +841,8 @@ class XHTMLGenerator:
                         input_text = input_text.replace("to", "years")
                     if "-" in input_text:
                         input_text = input_text.replace("-", "years")
+                    if "year" in input_text:
+                        input_text = f"{tag.text} years"
                 else:
                     input_text = f"{tag.text} years"
 
@@ -1107,6 +1109,7 @@ class XHTMLGenerator:
             else:
                 tag_id = tag.get("id", "")
                 data = parser.process_tag(tag_id)
+                data_type = data.get("DataType", "")
 
                 # create new Numeric or nonNumeric tag
                 datatype_tag = self.create_datatype_tag(soup, data, tag)
@@ -1155,6 +1158,9 @@ class XHTMLGenerator:
 
                     if "N" in fact and tag.text == "-":
                         datatype_tag.string = ""
+
+                    if data_type == "xbrli:stringItemType":
+                        del datatype_tag["sign"]
 
                     if font_tag:
                         styles = datatype_tag.get("style", None)

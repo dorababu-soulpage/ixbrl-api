@@ -173,22 +173,19 @@ class LabXMLGenerator:
 
     def update_element_data(self, element, label_type, preferred_label=None):
         element_record = self.find_element(self.element_data, element)
-        if not element_record:
-            element_dict = {
-                "element": element,
-                "label_types": [label_type],
-                "main_element": True,
-                "preferred_label": (
-                    preferred_label
-                    if preferred_label
-                    else self.get_preferred_label(element)
-                ),
-            }
-            self.element_data.append(element_dict)
-        else:
-            label_types: list = element_record.get("label_types")
-            if label_type not in label_types:
-                label_types.append(label_type)
+        if preferred_label:
+            if not element_record:
+                element_dict = {
+                    "element": element,
+                    "label_types": [{label_type: preferred_label}],
+                    "main_element": True,
+                }
+                self.element_data.append(element_dict)
+            else:
+                label_types: list = element_record.get("label_types")
+                new_label = {label_type: preferred_label}
+                if new_label not in label_types:
+                    label_types.append(new_label)
 
     def get_element_and_types(self):
         for record in self.data:
@@ -274,7 +271,10 @@ class LabXMLGenerator:
 
             label_types: list = main_element.get("label_types")
             label_created = False
-            for index, label_type in enumerate(label_types, start=1):
+            for index, label_data in enumerate(label_types, start=1):
+
+                # Optimized code using `next()` to get the first key
+                label_type = next(iter(label_data))
 
                 label_text = ""
                 documentation = ""
@@ -295,9 +295,9 @@ class LabXMLGenerator:
                         _, name = element.split("_")
                         element_value: dict = get_taxonomy_values(name)
                         if element_value:
-                            label_text = main_element.get("preferred_label", "")
+                            label_text = label_data.get(label_type)
                         else:
-                            label_text = main_element.get("preferred_label", "")
+                            label_text = label_data.get(label_type)
                 if label_created is False:
                     # create label
                     self.create_label_element(
