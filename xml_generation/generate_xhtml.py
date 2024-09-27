@@ -646,7 +646,9 @@ class XHTMLGenerator:
             html_content = html_content.replace("☒", "&#9746;")
             html_content = html_content.replace("- ", "&#8211;")
             html_content = html_content.replace("—", "&#8212;")
-
+            
+            html_content = html_content.replace("<!DOCTYPE html>","<?xml version='1.0' encoding='ASCII'?>")
+            
             # add HTML attributes in the html
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
