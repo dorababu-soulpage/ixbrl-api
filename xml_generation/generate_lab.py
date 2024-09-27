@@ -232,6 +232,7 @@ class LabXMLGenerator:
 
         elements_types: Dict[str, list] = {}
         main_elements_list = []
+        label_text_list: list = []
 
         label_link = ET.SubElement(
             linkbase_element,
@@ -298,16 +299,22 @@ class LabXMLGenerator:
                             label_text = label_data.get(label_type)
                         else:
                             label_text = label_data.get(label_type)
+
+                # remove double in label text
+                label_text = " ".join(label_text.split())
+
                 if label_created is False:
-                    # create label
-                    self.create_label_element(
-                        parent_tag=label_link,
-                        id=f"lab_{element}_1_label_en-US",
-                        xlink_label=element,
-                        xlink_role=f"http://www.xbrl.org/2003/role/label",
-                        label_text=label_text,
-                    )
-                    label_created = True
+                    if label_text not in label_text_list:
+                        # create label
+                        self.create_label_element(
+                            parent_tag=label_link,
+                            id=f"lab_{element}_1_label_en-US",
+                            xlink_label=element,
+                            xlink_role=f"http://www.xbrl.org/2003/role/label",
+                            label_text=label_text,
+                        )
+                        label_created = True
+                        label_text_list.append(label_text)
 
                     if documentation:
                         # documentation entry

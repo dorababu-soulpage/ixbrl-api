@@ -19,7 +19,7 @@ class FormatValueRetriever:
         if self.input_text.lower() in ["no", "none"]:
             return "ixt-sec:numwordsen"
 
-        if self.input_text == "-":
+        if self.input_text in ["-", "—"]:
             return "ixt:fixed-zero"
 
         check_boxes = ["☐", "☑", "☒"]
@@ -58,8 +58,8 @@ class FormatValueRetriever:
             elif numdotdecimalin_pattern.match(self.input_text):
                 return "ixt:num-unit-decimal"
 
-            elif re.match(r".*", self.input_text):  # This regex matches any string
-                return "ixt:fixed-zero"
+            # elif re.match(r".*", self.input_text):  # This regex matches any string
+            #     return "ixt:fixed-zero"
 
         if data_type in ["xbrli:dateItemType", "xbrli:gMonthDayItemType"]:
             # Patterns to match each format
