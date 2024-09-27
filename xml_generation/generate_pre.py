@@ -342,7 +342,8 @@ class PreXMLGenerator:
         dimension_records_list = []
         axis_list = []
         members_list = []
-        member_order = 1
+        element_occurrences: dict = {}
+
         # iterate through dimension records
         for index, record in enumerate(dimension_records):
             _table = record.get("Table")
@@ -393,6 +394,18 @@ class PreXMLGenerator:
                 dimension_record = (axis, domain)
                 if dimension_record not in dimension_records_list:
                     if axis not in axis_list:
+
+                        # calculate table, axis from  element occurrence
+                        if table not in element_occurrences:
+                            element_occurrences[table] = 1
+                        else:
+                            element_occurrences[table] = element_occurrences[table] + 1
+
+                        if axis not in element_occurrences:
+                            element_occurrences[axis] = 1
+                        else:
+                            element_occurrences[axis] = element_occurrences[axis] + 1
+
                         # axis location
                         axis_xlink_href = self.get_href_url(axis)
                         axis_loc = self.create_presentation_loc_element(
@@ -404,7 +417,7 @@ class PreXMLGenerator:
                         # Common arguments for create_presentation_arc_element
                         arc_args = {
                             "parent_tag": presentation_link,
-                            "order": "1",
+                            "order": str(element_occurrences.get(table)),
                             "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                             "xlink_from": f"loc_{table}",
                             "xlink_to": f"loc_{axis}",
@@ -426,7 +439,7 @@ class PreXMLGenerator:
                         # Common arguments for create_presentation_arc_element
                         arc_args = {
                             "parent_tag": presentation_link,
-                            "order": "1",
+                            "order": str(element_occurrences.get(axis)),
                             "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                             "xlink_from": f"loc_{axis}",
                             "xlink_to": f"loc_{domain}",
@@ -441,6 +454,13 @@ class PreXMLGenerator:
                     dimension_records_list.append(dimension_record)
 
                 if member not in members_list:
+
+                    # calculate domain from element occurrence
+                    if domain not in element_occurrences:
+                        element_occurrences[domain] = 1
+                    else:
+                        element_occurrences[domain] = element_occurrences[domain] + 1
+
                     # member location
                     member_xlink_href = self.get_href_url(member)
                     member_loc = self.create_presentation_loc_element(
@@ -452,7 +472,7 @@ class PreXMLGenerator:
                     # Common arguments for create_presentation_arc_element
                     arc_args = {
                         "parent_tag": presentation_link,
-                        "order": str(member_order),
+                        "order": str(element_occurrences.get(domain)),
                         "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                         "xlink_from": f"loc_{domain}",
                         "xlink_to": f"loc_{member}",
@@ -461,7 +481,6 @@ class PreXMLGenerator:
                     # Create presentationArc element and append it to presentation_links list.
                     presentation_arc = self.create_presentation_arc_element(**arc_args)
                     members_list.append(member)
-                    member_order += 1
 
             # add line item only for last item
             if index == len(dimension_records) - 1:
@@ -476,7 +495,7 @@ class PreXMLGenerator:
                 # Common arguments for create_presentation_arc_element
                 arc_args = {
                     "parent_tag": presentation_link,
-                    "order": "2",
+                    "order": str(element_occurrences.get(table) + 1),
                     "arc_role": "http://www.xbrl.org/2003/arcrole/parent-child",
                     "xlink_from": f"loc_{table}",
                     "xlink_to": f"loc_{line_item}",
