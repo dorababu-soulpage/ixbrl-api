@@ -232,12 +232,22 @@ class CalXMLGenerator:
                             calculation_parent_href = self.get_href_url(
                                 calculation_parent
                             )
-                            calculation_parent_loc = self.create_calculation_loc_element(
-                                parent_tag=calculation_link,
-                                # label=f"loc_{calculation_parent}_{role_index}",
-                                label=f"loc_{calculation_parent}",
-                                xlink_href=f"{calculation_parent_href}#{calculation_parent}",
-                            )
+
+                            if calculation_parent in cal_parent_Children:
+                                calculation_parent_loc = self.create_calculation_loc_element(
+                                    parent_tag=calculation_link,
+                                    # label=f"loc_{calculation_parent}_{role_index}",
+                                    label=f"loc_{calculation_parent}_1",
+                                    xlink_href=f"{calculation_parent_href}#{calculation_parent}",
+                                )
+                            else:
+                                calculation_parent_loc = self.create_calculation_loc_element(
+                                    parent_tag=calculation_link,
+                                    # label=f"loc_{calculation_parent}_{role_index}",
+                                    label=f"loc_{calculation_parent}",
+                                    xlink_href=f"{calculation_parent_href}#{calculation_parent}",
+                                )
+
                             # loop all cal parent children and create loc, and arc elements
                             children_index = 1
                             for index, record in enumerate(children, start=1):
@@ -270,7 +280,10 @@ class CalXMLGenerator:
                                         )
 
                                     # xlink_from = f"{calculation_parent}_{parent_index}"
-                                    xlink_from = f"{calculation_parent}"
+                                    if calculation_parent in cal_parent_Children:
+                                        xlink_from = f"{calculation_parent}_1"
+                                    else:
+                                        xlink_from = f"{calculation_parent}"
 
                                     # calculate xlink from element element occurrence
                                     if xlink_from not in element_occurrences:
