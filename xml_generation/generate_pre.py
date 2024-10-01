@@ -298,14 +298,12 @@ class PreXMLGenerator:
             # Add definition arc elements
             presentation_arc = self.create_presentation_arc_element(
                 parent_tag=presentation_link,
-                order=str(element_occurrences.get(root_level_abstract) + 1),
+                order=str(element_occurrences.get(xlink_from) + 1),
                 arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
-                xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
+                xlink_from=f"loc_{xlink_from}".replace("--", "_"),
                 xlink_to=f"loc_dei_EntityCentralIndexKey",
             )
-            element_occurrences[xlink_from] = (
-                element_occurrences[root_level_abstract] + 1
-            )
+            element_occurrences[xlink_from] = element_occurrences[xlink_from] + 1
             if self.elements_data:
                 for element in self.elements_data:
                     # if element not in main elements list, add element
@@ -319,14 +317,14 @@ class PreXMLGenerator:
                         # Add definition arc elements
                         presentation_arc = self.create_presentation_arc_element(
                             parent_tag=presentation_link,
-                            order=str(element_occurrences.get(root_level_abstract) + 1),
+                            order=str(element_occurrences.get(xlink_from) + 1),
                             arc_role="http://www.xbrl.org/2003/arcrole/parent-child",
-                            xlink_from=f"loc_{root_level_abstract}".replace("--", "_"),
+                            xlink_from=f"loc_{xlink_from}".replace("--", "_"),
                             xlink_to=f"loc_dei_{element}",
                         )
 
                         element_occurrences[xlink_from] = (
-                            element_occurrences[root_level_abstract] + 1
+                            element_occurrences[xlink_from] + 1
                         )
 
     def generate_dimension_xml(
