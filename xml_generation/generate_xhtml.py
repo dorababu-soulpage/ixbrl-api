@@ -596,7 +596,7 @@ class XHTMLGenerator:
 
         # Find all <a> tags and modify the name attribute to href
         for a_tag in soup.find_all("a"):
-            if "name" in a_tag and not a_tag.get("href"):
+            if a_tag.has_attr("name") and not a_tag.has_attr("href"):
                 a_tag["href"] = f"#{a_tag['name']}"
                 del a_tag["name"]
 
@@ -645,10 +645,11 @@ class XHTMLGenerator:
             html_content = html_content.replace("☑", "&#9745;")
             html_content = html_content.replace("☒", "&#9746;")
             html_content = html_content.replace("- ", "&#8211;")
+            html_content = html_content.replace("–", "&#8211;")
             html_content = html_content.replace("—", "&#8212;")
-            
-            html_content = html_content.replace("<!DOCTYPE html>","<?xml version='1.0' encoding='ASCII'?>")
-            
+
+            html_content = html_content.replace("<!DOCTYPE html>", "")
+
             # add HTML attributes in the html
             html_attributes = self.add_html_attributes()
             html_content = html_content.replace("<html>", html_attributes)
@@ -658,6 +659,7 @@ class XHTMLGenerator:
 
             # Create comments after the XML declaration
             comments_after_declaration = [
+                '<?xml version="1.0" encoding="utf-8"?>',
                 "<!-- APEX iXBRL XBRL Schema Document - https://apexcovantage.com -->",
                 f"<!-- Creation Date : {current_datetime} -->",
                 "<!-- Copyright (c) Apex CoVantage All Rights Reserved. -->",
