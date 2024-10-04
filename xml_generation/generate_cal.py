@@ -226,7 +226,9 @@ class CalXMLGenerator:
                         if cal_parent:
 
                             _calculation_parent = cal_parent
-                            calculation_parent = _calculation_parent.replace("--", "_")
+                            calculation_parent = _calculation_parent.replace(
+                                "--", "_"
+                            ).replace("custom", self.ticker)
 
                             # calculation parent
                             calculation_parent_href = self.get_href_url(

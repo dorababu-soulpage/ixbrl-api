@@ -648,6 +648,19 @@ class XHTMLGenerator:
             html_content = html_content.replace("–", "&#8211;")
             html_content = html_content.replace("—", "&#8212;")
 
+            # Non-breaking space
+            html_content = html_content.replace("\u00A0", "&#160;")
+            # Right single quotation mark (’)
+            html_content = html_content.replace("\u2019", "&#8217;")
+            # Section sign (§)
+            html_content = html_content.replace("\u00A7", "&#167;")
+            # Right double quotation mark (”)
+            html_content = html_content.replace("\u201D", "&#8221;")
+            # Left double quotation mark (“)
+            html_content = html_content.replace("\u201C", "&#8220;")
+            # Bullet point (•)
+            html_content = html_content.replace("\u25CF", "&#8226;")
+
             html_content = html_content.replace("<!DOCTYPE html>", "")
 
             # add HTML attributes in the html

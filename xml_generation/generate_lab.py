@@ -460,6 +460,11 @@ class LabXMLGenerator:
 
         reparsed = minidom.parseString(xml_data)
         pretty_xml_as_string = reparsed.toprettyxml(indent="  ")
+        # Right single quotation mark (’)
+        pretty_xml_as_string = pretty_xml_as_string.replace("\u2019", "&#8217;")
+        # En dash (–)
+        pretty_xml_as_string = pretty_xml_as_string.replace("\u2013", "&#8211;")
+
         # Write the pretty-printed XML to a file
 
         with open(self.output_file, "w") as file:
