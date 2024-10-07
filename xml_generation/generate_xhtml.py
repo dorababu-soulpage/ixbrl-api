@@ -1380,11 +1380,32 @@ class XHTMLGenerator:
                 parent_tag = target_element.parent
                 if parent_tag.name == "strong":
                     strong_tag = soup.new_tag("strong")
+                    strong_tag.string = datatype_tag.string
                     datatype_tag.string = ""
-                    strong_tag.string = datatype_tag_string
-                    datatype_tag.append(strong_tag)
+
+                    styles = datatype_tag.get("style", None)
+                    if styles:
+                        p_tag = soup.new_tag("p")
+                        p_tag["style"] = styles
+                        del datatype_tag["style"]
+                        p_tag.append(strong_tag)
+                        datatype_tag.append(p_tag)
+                    else:
+                        # If no styles, append strong_tag directly to datatype_tag
+                        datatype_tag.append(strong_tag)
                 else:
-                    datatype_tag.string = datatype_tag_string
+                    # datatype_tag.string = datatype_tag_string
+                    datatype_tag.string = ""
+
+                    styles = datatype_tag.get("style", None)
+                    if styles:
+                        p_tag = soup.new_tag("p")
+                        p_tag.string = datatype_tag_string
+                        p_tag["style"] = styles
+                        del datatype_tag["style"]
+                        datatype_tag.append(p_tag)
+                    else:
+                        datatype_tag.string = datatype_tag_string
 
             for tag in content:
                 datatype_tag.append(tag)
@@ -1392,16 +1413,18 @@ class XHTMLGenerator:
             if "N" in data.get("Fact"):
                 datatype_tag.string = ""
 
-            styles = datatype_tag.get("style", None)
-            if styles is None:
-                # Insert the new tag into the document
-                start_tag.replace_with(datatype_tag)
-            else:
-                p_tag = soup.new_tag("p")
-                p_tag["style"] = styles
-                del datatype_tag["style"]
-                p_tag.append(datatype_tag)
-                start_tag.replace_with(p_tag)
+            start_tag.replace_with(datatype_tag)
+
+            # styles = datatype_tag.get("style", None)
+            # if styles is None:
+            #     # Insert the new tag into the document
+            #     start_tag.replace_with(datatype_tag)
+            # else:
+            #     p_tag = soup.new_tag("p")
+            #     p_tag["style"] = styles
+            #     del datatype_tag["style"]
+            #     p_tag.append(datatype_tag)
+            #     start_tag.replace_with(p_tag)
 
         return soup
 
