@@ -211,8 +211,15 @@ class LabXMLGenerator:
                     if item:
                         items = item.split("__")
                         for item in items:
-                            # item = item.replace("--", "_")
-                            self.update_element_data(item, "label")
+                            # Split the string using '--' as the delimiter
+                            _, label = item.split("--")
+                            element_value: dict = get_taxonomy_values(label)
+                            if element_value:
+                                preferred_label = element_value.get("label")
+                            else:
+                                preferred_label = record.get("PreferredLabel", "")
+
+                            self.update_element_data(item, "label", preferred_label)
 
         return self.element_data
 
@@ -242,7 +249,9 @@ class LabXMLGenerator:
                 "xlink:type": "extended",
             },
         )
+
         main_elements_data = self.get_element_and_types()
+
         for main_element in main_elements_data:
             original_element = main_element
             element: str = main_element.get("element")
