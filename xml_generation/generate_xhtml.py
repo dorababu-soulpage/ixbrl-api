@@ -1538,20 +1538,25 @@ class XHTMLGenerator:
 
         # Create the 'ix:references' element
         references = etree.SubElement(
-            root, "{http://www.xbrl.org/2013/inlineXBRL}references"
-        )
-
-        # Create the root element with the namespace map
-        references = etree.SubElement(
-            references,
-            "{http://www.xbrl.org/2013/inlineXBRL}references",
+            root, "{http://www.xbrl.org/2013/inlineXBRL}references",
             nsmap={
                 "ix": namespace.get("ix"),
                 "link": namespace.get("link"),
                 "xlink": namespace.get("xlink"),
             },
         )
-        references.set("{http://www.w3.org/XML/1998/namespace}lang", "en-US")
+
+        # # Create the root element with the namespace map
+        # references = etree.SubElement(
+        #     references,
+        #     "{http://www.xbrl.org/2013/inlineXBRL}references",
+        #     nsmap={
+        #         "ix": namespace.get("ix"),
+        #         "link": namespace.get("link"),
+        #         "xlink": namespace.get("xlink"),
+        #     },
+        # )
+        # references.set("{http://www.w3.org/XML/1998/namespace}lang", "en-US")
 
         # Create the schemaRef element
         schema_ref = etree.SubElement(
