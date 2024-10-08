@@ -660,6 +660,14 @@ class XHTMLGenerator:
             html_content = html_content.replace("\u201C", "&#8220;")
             # Bullet point (•)
             html_content = html_content.replace("\u25CF", "&#8226;")
+            # Left single quotation mark (‘)
+            html_content = html_content.replace("\u2018", "&#8216;")
+            # Registered trademark symbol (®)
+            html_content = html_content.replace("\u00AE", "&#174;")
+            # Trademark symbol (™)
+            html_content = html_content.replace("\u2122", "&#8482;")
+            # Middle dot (·)
+            html_content = html_content.replace("\u00B7", "&#183;")
 
             html_content = html_content.replace("<!DOCTYPE html>", "")
 
