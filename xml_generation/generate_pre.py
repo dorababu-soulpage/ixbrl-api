@@ -286,7 +286,11 @@ class PreXMLGenerator:
             element_occurrences[xlink_from] = element_occurrences[xlink_from] + 1
 
         # add elements data into pre.xml next to the main elements
-        if role in ["Cover", "DocumentandEntityInformation"]:
+        if role in [
+            "Cover",
+            "DocumentEntityInformation",
+            "DocumentandEntityInformation",
+        ]:
             # hidden line items
             # EntityCentralIndexKey
             element_xlink_href = self.get_href_url(f"dei--EntityCentralIndexKey")
