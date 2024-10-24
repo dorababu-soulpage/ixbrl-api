@@ -601,7 +601,7 @@ class XHTMLGenerator:
                 del a_tag["name"]
 
         # Manage entities manually_
-        parsed_html = html.unescape(str(soup))
+        parsed_html = html.unescape(str(soup.prettify()))
 
         # output_html_file = self.get_filename()
         # Update the output file with the new soup data
@@ -670,6 +670,11 @@ class XHTMLGenerator:
             html_content = html_content.replace("\u00B7", "&#183;")
 
             html_content = html_content.replace("<!DOCTYPE html>", "")
+            html_content = html_content.replace('data-autotag="true"', "")
+            html_content = html_content.replace(
+                "<u>", '<span style="text-decoration: underline">'
+            )
+            html_content = html_content.replace("</u>", "</span>")
 
             # add HTML attributes in the html
             html_attributes = self.add_html_attributes()
@@ -1538,7 +1543,8 @@ class XHTMLGenerator:
 
         # Create the 'ix:references' element
         references = etree.SubElement(
-            root, "{http://www.xbrl.org/2013/inlineXBRL}references",
+            root,
+            "{http://www.xbrl.org/2013/inlineXBRL}references",
             nsmap={
                 "ix": namespace.get("ix"),
                 "link": namespace.get("link"),
