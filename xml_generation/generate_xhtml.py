@@ -601,7 +601,7 @@ class XHTMLGenerator:
                 del a_tag["name"]
 
         # Manage entities manually_
-        parsed_html = html.unescape(str(soup.prettify()))
+        parsed_html = html.unescape(str(soup))
 
         # output_html_file = self.get_filename()
         # Update the output file with the new soup data
