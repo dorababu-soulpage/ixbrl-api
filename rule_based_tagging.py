@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import requests
 import re, io, uuid
 import pandas as pd
@@ -51,6 +53,20 @@ class RuleBasedTagging:
         records = df.to_dict(orient="records")
 
         return records
+    
+    def alphanumeric_string(self, length=16):
+
+        # Define character sets
+        letters = string.ascii_letters
+        alphanumeric = string.ascii_letters + string.digits
+
+        # Generate the first character from letters and the rest from alphanumeric
+        first_char = random.choice(letters)
+        remaining_chars = "".join(
+            random.choice(alphanumeric) for _ in range(length - 1)
+        )
+
+        return first_char + remaining_chars
 
     def clean_cell_text(self, cell):
         return re.sub(r"\s+", " ", cell.get_text(strip=True).replace("\n", "").strip())
@@ -216,8 +232,9 @@ class RuleBasedTagging:
                                     td.string = ""
                                     for tag in td.find_all():
                                         tag.decompose()
-
-                                    formatted_string = f'<font id="apex_90N_e{tag}_{uuid.uuid4().hex}" data-autotag="true">{inner_html}</font>'
+                                        
+                                    unique_id = self.alphanumeric_string()
+                                    formatted_string = f'<font id="apex_90N_e{tag}_{unique_id}" data-autotag="true">{inner_html}</font>'
 
                                     # Replace the contents of the td element with the new HTML content
                                     td.append(
