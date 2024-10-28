@@ -1014,7 +1014,7 @@ def read_html_from_folder(folder_path):
     return html_urls
 
 
-def upload_image_to_s3(file_path, bucket, object_name=None):
+def upload_image_to_s3(file_path, bucket, object_name: str = None):
     """Upload a file to an S3 bucket and return the URL"""
     access_key = config("AWS_S3_ACCESS_KEY_ID")
     secret_key = config("AWS_S3_SECRET_ACCESS_KEY")
@@ -1031,12 +1031,20 @@ def upload_image_to_s3(file_path, bucket, object_name=None):
     if object_name is None:
         object_name = os.path.basename(file_path)
 
+    if object_name.endswith(("htm", "html")):
+        content_type = "text/html"
+        content_disposition = "inline"
+    else:
+        content_type = "application/octet-stream"
+        content_disposition = "attachment"
+
     try:
         s3.Bucket(bucket).put_object(
             Key=object_name,
             Body=open(file_path, "rb"),
             ACL="public-read",
-            ContentType="application/octet-stream",
+            ContentType=content_type,
+            ContentDisposition=content_disposition,
         )
     except Exception as e:
         print(f"Error uploading {file_path}: {e}")
