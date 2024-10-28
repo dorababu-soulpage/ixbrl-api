@@ -78,7 +78,7 @@ class CalXMLGenerator:
             return f"{self.ticker}-{self.filing_date}.xsd"
 
         if element.startswith("country"):
-            return f"http://xbrl.sec.gov/country/{self.taxonomy_year}.xsd"
+            return f"https://xbrl.sec.gov/country/{self.taxonomy_year}.xsd"
 
         if element.startswith("dei"):
             return f"https://xbrl.sec.gov/dei/{self.taxonomy_year}/dei-{self.taxonomy_year}.xsd"
