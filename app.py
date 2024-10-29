@@ -598,8 +598,11 @@ def zip_upload():
 
             # Convert the file content to BytesIO
             file_object = io.BytesIO(file_content)
-            filename = os.path.basename(input_html_file)
-            html_url = s3_uploader(filename, file_object)
+            # filename = os.path.basename(input_html_file)
+            # Extract the file extension
+            _, file_ext = os.path.splitext(filename)
+            output_filename = f"{output_folder}{file_ext}"
+            html_url = s3_uploader(output_filename, file_object)
 
         except Exception as e:
             print(str(e))
