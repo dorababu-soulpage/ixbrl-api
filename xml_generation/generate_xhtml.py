@@ -899,7 +899,7 @@ class XHTMLGenerator:
                 non_numeric_tag = soup.new_tag(datatype_element)
 
                 fact = data.get("Fact", "")
-                if fact and "N" in fact and tag.text == "-":
+                if fact and "N" in fact and tag.text == "-" or tag.text == "–":
                     # name attribute
                     non_numeric_tag["name"] = element.replace("--", ":").replace(
                         "custom", self.ticker
