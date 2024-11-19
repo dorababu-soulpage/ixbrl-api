@@ -680,6 +680,43 @@ def upload_file():
         return jsonify({"error": "An error occurred while uploading the file"}), 500
 
 
+@app.route("/api/buffer-to-html", methods=["POST"])
+def buffer_to_html():
+    try:
+        # Get the HTML data and key from the request
+        payload = request.get_json()
+        # Get the HTML data from the request body
+        html_data = payload.get("html_data")
+        key = payload.get("key")
+
+        if not key:
+            return jsonify({"msg": "Missing key parameter"}), 400
+
+        # Ensure the file extension is '.html'
+        if not key.endswith(("htm", ".html")):
+            key = f"{key}.htm"
+
+        # Define the full file path
+        file_path = os.path.join(MEDIA_FOLDER, key)
+
+        # Save the HTML data to a file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(html_data)
+
+        # Generate and return the URL for accessing the file
+        file_url = url_for(
+            "static", filename=os.path.join("media", key), _external=True
+        )
+
+        return (
+            jsonify({"msg": "HTML data saved successfully", "url": file_url}),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"msg": "Error", "error": str(e)}), 400
+
+
 if __name__ == "__main__":
     port = config("PORT")
     app.run(host="0.0.0.0", port=port, debug=True)
