@@ -22,7 +22,7 @@ from xml_generation.generate_lab import LabXMLGenerator
 from xml_generation.generate_xhtml import XHTMLGenerator
 
 # from auto_tagging.tagging import auto_tagging
-from flask import Flask, request, render_template, url_for
+from flask import Flask, request, render_template, url_for, jsonify
 from utils import (
     extract_html_elements,
     get_db_record,
@@ -34,10 +34,24 @@ from utils import (
     read_images_from_folder,
     read_html_from_folder,
     upload_image_to_s3,
+    local_uploader,
+    upload_file_locally,
+    local_zip_uploader,
 )
 from rule_based_tagging import RuleBasedTagging
 
 app = Flask(__name__, static_folder="static/", static_url_path="/")
+
+
+# Set the upload folder and allowed extensions
+UPLOAD_FOLDER = "media"
+MEDIA_FOLDER = f"static/{UPLOAD_FOLDER}"
+
+app.config["UPLOAD_FOLDER"] = MEDIA_FOLDER
+
+# Ensure the upload directory exists
+os.makedirs(MEDIA_FOLDER, exist_ok=True)
+
 
 storage_dir = "data"
 base_dir = Path().absolute()
@@ -286,11 +300,17 @@ def ixbrl_viewer_file_generation(file):
 
     # Get the filename
     filename = path.name
-    ixbrl_package_url = upload_zip_to_s3(filename, zip_file_path)
 
-    # Remove the file, zip directory
-    shutil.rmtree(file)
-    os.remove(zip_file_path)
+    file_storage = config("FILE_STORAGE")
+    if file_storage == "AWS":
+        ixbrl_package_url = upload_zip_to_s3(filename, zip_file_path)
+        # Call local_zip_uploader instead of upload_zip_to_s3
+
+        # Remove the file, zip directory
+        # shutil.rmtree(file)
+        os.remove(zip_file_path)
+    else:
+        ixbrl_package_url = local_zip_uploader(filename, zip_file_path, MEDIA_FOLDER)
 
     return ixbrl_package_url, xbrl_url
 
@@ -534,10 +554,18 @@ def zip_upload():
     images = read_images_from_folder(output_folder)
     html_paths = read_html_from_folder(output_folder)
 
-    bucket_name = config("AWS_S3_BUCKET_NAME")
-    for filename, img_path in images:
-        uploaded_url = upload_image_to_s3(img_path, bucket_name, filename)
-        uploaded_images[filename] = uploaded_url
+    file_storage = config("FILE_STORAGE")
+
+    if file_storage == "AWS":
+        bucket_name = config("AWS_S3_BUCKET_NAME")
+        for filename, img_path in images:
+            uploaded_url = upload_image_to_s3(img_path, bucket_name, filename)
+            uploaded_images[filename] = uploaded_url
+    else:
+        for filename, img_path in images:
+            with open(img_path, "rb") as img_file:
+                uploaded_url = upload_file_locally(img_file, MEDIA_FOLDER, filename)
+                uploaded_images[filename] = uploaded_url
 
     for filename in os.listdir(output_folder):
         if filename.endswith((".htm", ".html")):
@@ -563,9 +591,15 @@ def zip_upload():
                 input_html_file = os.path.join(output_folder, filename)
                 input_html_files.append(input_html_file)
 
-    for filename, html_path in html_paths:
-        uploaded_url = upload_image_to_s3(html_path, bucket_name, filename)
-        uploaded_htmls[filename] = uploaded_url
+    if file_storage == "AWS":
+        for filename, html_path in html_paths:
+            uploaded_url = upload_image_to_s3(html_path, bucket_name, filename)
+            uploaded_htmls[filename] = uploaded_url
+    else:
+        for filename, html_path in html_paths:
+            with open(html_path, "rb") as html_file:
+                uploaded_url = upload_file_locally(html_file, MEDIA_FOLDER, filename)
+                uploaded_htmls[filename] = uploaded_url
 
     input_html_file = input_html_files[0]
     with open(input_html_file, "r") as html_file:
@@ -602,7 +636,11 @@ def zip_upload():
             # Extract the file extension
             _, file_ext = os.path.splitext(filename)
             output_filename = f"{output_folder}{file_ext}"
-            html_url = s3_uploader(output_filename, file_object)
+
+            if file_storage == "AWS":
+                html_url = s3_uploader(output_filename, file_object)
+            else:
+                html_url = local_uploader(output_filename, file_object)
 
         except Exception as e:
             print(str(e))
@@ -612,6 +650,34 @@ def zip_upload():
     # os.remove(zip_file_path)
 
     return {"url": html_url}
+
+
+@app.route("/api/local-upload", methods=["POST"])
+def upload_file():
+    # Check if the 'file' key is in the request
+    if "file" not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files["file"]
+
+    # If the user does not select a file
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        # Save the file
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+        file.save(file_path)
+
+        # Generate the full URL for the uploaded file
+        file_url = f"{request.host_url}{UPLOAD_FOLDER}/{file.filename}"
+
+        return (
+            jsonify({"success": "File uploaded successfully", "file_url": file_url}),
+            201,
+        )
+    except Exception as e:
+        return jsonify({"error": "An error occurred while uploading the file"}), 500
 
 
 if __name__ == "__main__":
