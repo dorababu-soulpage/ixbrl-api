@@ -307,7 +307,7 @@ def ixbrl_viewer_file_generation(file):
         # Call local_zip_uploader instead of upload_zip_to_s3
 
         # Remove the file, zip directory
-        # shutil.rmtree(file)
+        shutil.rmtree(file)
         os.remove(zip_file_path)
     else:
         ixbrl_package_url = local_zip_uploader(filename, zip_file_path, MEDIA_FOLDER)
