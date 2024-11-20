@@ -5,7 +5,14 @@ import requests
 import re, io, uuid
 import pandas as pd
 from bs4 import BeautifulSoup
-from utils import s3_uploader, get_db_record, update_db_record, get_element_record
+from decouple import config
+from utils import (
+    s3_uploader,
+    get_db_record,
+    update_db_record,
+    get_element_record,
+    local_uploader,
+)
 
 
 class RuleBasedTagging:
@@ -53,7 +60,7 @@ class RuleBasedTagging:
         records = df.to_dict(orient="records")
 
         return records
-    
+
     def alphanumeric_string(self, length=16):
 
         # Define character sets
@@ -232,7 +239,7 @@ class RuleBasedTagging:
                                     td.string = ""
                                     for tag in td.find_all():
                                         tag.decompose()
-                                        
+
                                     unique_id = self.alphanumeric_string()
                                     formatted_string = f'<font id="apex_90N_e{tag}_{unique_id}" data-autotag="true">{inner_html}</font>'
 
@@ -288,7 +295,13 @@ class RuleBasedTagging:
         )
         # Assuming s3_uploader is a function to upload the file to S3
         # Replace this with your actual S3 upload implementation
-        url = s3_uploader(new_file_name, html_bytes)
+        file_storage = config("FILE_STORAGE")
+
+        if file_storage == "AWS":
+            url = s3_uploader(new_file_name, html_bytes)
+        else:
+            url = local_uploader(new_file_name, html_bytes)
+
         update_db_record(self.file_id, {"url": url, "inAutoTaggingProcess": False})
         print(f"{url} updated successfully in database")
 
