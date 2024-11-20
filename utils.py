@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 import boto3
 from PIL import Image
@@ -17,6 +18,9 @@ from lxml import etree
 # import xml.etree.ElementTree as etree
 from constants import namespace
 from datetime import datetime
+
+from flask import url_for
+from werkzeug.utils import secure_filename
 
 
 def read_json_file(file_path, key, filename=None):
@@ -1051,3 +1055,73 @@ def upload_image_to_s3(file_path, bucket, object_name: str = None):
         return None
 
     return f"https://{bucket}.s3.amazonaws.com/{object_name}"
+
+
+def upload_file_locally(file, upload_folder, filename):
+    """Save a file locally and return its URL"""
+    # Ensure the upload folder exists
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    # Determine the path where the file will be saved
+    file_path = os.path.join(upload_folder, filename)
+
+    try:
+        # Save the file locally by writing to the destination path
+        with open(file_path, "wb") as dest_file:
+            dest_file.write(file.read())
+    except Exception as e:
+        print(f"Error saving file {filename}: {e}")
+        return None
+
+    # Generate URL for the saved file
+    file_url = url_for(
+        "static", filename=os.path.join("media", filename), _external=True
+    )
+    return file_url
+
+
+def local_uploader(name, body, upload_folder="static/media"):
+    """
+    Saves a file locally and returns the URL.
+
+    Parameters:
+    - name: The name to store the file as (including extension).
+    - body: BytesIO object representing the content of the file.
+    - upload_folder: The local directory to save files.
+
+    Returns:
+    - The URL of the saved file.
+    """
+    # Ensure the upload folder exists
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    # Secure the filename and determine the file path
+    filename = secure_filename(name)
+    file_path = os.path.join(upload_folder, filename)
+
+    # Write the file content from BytesIO to disk
+    with open(file_path, "wb") as file:
+        file.write(body.getvalue())
+
+    # Generate and return the URL for accessing the file
+    return url_for("static", filename=os.path.join("media", filename), _external=True)
+
+
+def local_zip_uploader(name, zip_file, upload_directory):
+    """This function is used to upload the zip file locally to a specified directory and return the local file path."""
+    try:
+
+        # Define the full path for the uploaded zip file
+        local_file_path = os.path.join(upload_directory, name)
+
+        # Move the zip file to the upload directory
+        shutil.move(zip_file, local_file_path)
+
+        # Generate and return the URL for accessing the file
+        return url_for("static", filename=os.path.join("media", name), _external=True)
+
+    except Exception as e:
+        print(f"Error uploading zip file locally: {e}")
+        return None
